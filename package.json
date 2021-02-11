@@ -27,7 +27,8 @@
     "build:watch": "tsc -w -p tsconfig.release.json",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "jest --coverage",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "db:migrate": "knex migrate:latest --cwd src/db"
   },
   "dependencies": {
     "@arpinum/config": "^2.1.2",
@@ -36,6 +37,7 @@
     "knex": "^0.21.17",
     "lodash": "^4.17.20",
     "pg": "^8.5.1",
+    "ts-node": "^9.1.1",
     "tslib": "~2.0.3",
     "tslog": "^3.1.1"
   },
