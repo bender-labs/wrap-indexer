@@ -1,0 +1,8 @@
+import { Logger } from 'tslog';
+import { Config } from '../configuration';
+
+export function createLogger(configuration: Config): Logger {
+  return new Logger({ name: "MainLogger", type: configuration.log.format });
+}
+
+

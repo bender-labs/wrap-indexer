@@ -1,32 +1,20 @@
-/**
- * Some predefined delays (in milliseconds).
- */
-export enum Delays {
-  Short = 500,
-  Medium = 2000,
-  Long = 5000,
-}
+import {loadConfiguration} from './configuration';
+import {createLogger} from './tools/logger';
+import {createDbClient} from './tools/dbClient';
+import {createEthereumProvider} from './tools/ethereumNetworkProvider';
+import {EthereumWrapIndexer} from './domain/ethereumWrapIndexer';
 
-/**
- * Returns a Promise<string> that resolves after given time.
- *
- * @param {string} name - A name.
- * @param {number=} [delay=Delays.Medium] - Number of milliseconds to delay resolution of the Promise.
- * @returns {Promise<string>}
- */
-function delayedHello(
-  name: string,
-  delay: number = Delays.Medium,
-): Promise<string> {
-  return new Promise((resolve: (value?: string) => void) =>
-    setTimeout(() => resolve(`Hello, ${name}`), delay),
-  );
-}
+const configuration = loadConfiguration();
+const logger = createLogger(configuration);
+const dbClient = createDbClient(configuration);
+const ethereumProvider = createEthereumProvider(configuration);
+const ethereumWrapIndexer = new EthereumWrapIndexer(configuration.ethereum.wrapContractAddress, ethereumProvider, dbClient);
 
-// Below are examples of using ESLint errors suppression
-// Here it is suppressing missing return type definitions for greeter function
+(async function main(){
+  logger.info('Indexer started');
+  await ethereumWrapIndexer.index();
+}())
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function greeter(name: string) {
-  return await delayedHello(name, Delays.Long);
-}
+
+
+

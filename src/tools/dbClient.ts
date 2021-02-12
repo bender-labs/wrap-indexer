@@ -1,6 +1,7 @@
 import * as Knex from 'knex'
+import { Config } from '../configuration';
 
-export function createKnexConfiguration(configuration: any) : Knex.Config {
+export function createKnexConfiguration(configuration: Config) : Knex.Config {
   return {
     client: 'pg',
     connection: {
@@ -13,6 +14,6 @@ export function createKnexConfiguration(configuration: any) : Knex.Config {
   };
 }
 
-export function createDbClient(configuration: any) {
-  return Knex(createKnexConfiguration({ configuration }));
+export function createDbClient(configuration: Config) : Knex {
+  return Knex(createKnexConfiguration(configuration));
 }

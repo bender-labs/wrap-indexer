@@ -1,6 +1,6 @@
 import Knex from 'knex'
 
-export async function up (knex: Knex) {
+export async function up (knex: Knex): Promise<void> {
   await knex.schema.createTable('erc20_wraps', table => {
     table.string('source');
     table.string('token');
@@ -23,7 +23,7 @@ export async function up (knex: Knex) {
   });
 }
 
-export async function down (knex: Knex) {
+export async function down (knex: Knex): Promise<void> {
   await knex.schema.dropTable('erc20_wraps');
   await knex.schema.dropTable('erc721_wraps');
 }
