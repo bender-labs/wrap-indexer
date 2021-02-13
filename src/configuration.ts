@@ -28,7 +28,7 @@ export function loadConfiguration(): Config {
       },
       wrapContractAddress: {
         env: 'ETHEREUM_WRAP_CONTRACT_ADDRESS',
-        default: '0x9A0bfC0Aa91B58Ae07E2fFdfAb29904B7513a917'
+        default: '0x352488cAaDf763Acaa41fB05E4b5B3a45647C8D5'
       }
     },
     log: {
