@@ -19,6 +19,10 @@ export class ERC20WrapAsked {
     this.source = source;
   }
 
+  table(): string {
+    return 'erc20_wraps';
+  }
+
   source: string;
   token: string;
   amount: number;
@@ -47,6 +51,10 @@ export class ERC721WrapAsked {
     this.source = source;
   }
 
+  table(): string {
+    return 'erc721_wraps';
+  }
+
   source: string;
   token: string;
   tokenId: number;
@@ -59,7 +67,7 @@ export class ERC721WrapAsked {
 export function buildERCEvent(log: ethers.providers.Log, iface: ethers.utils.Interface): ERC20WrapAsked | ERC721WrapAsked {
   const logDescription = iface.parseLog(log);
   if (logDescription.name === ERC20WrapAsked.name) {
-    return new ERC20WrapAsked(logDescription.args['user'], logDescription.args['token'], logDescription.args['amount'], logDescription.args['tezosDestinationAddress'], log.transactionHash, log.blockHash, log.logIndex);
+    return new ERC20WrapAsked(logDescription.args['user'], logDescription.args['token'], logDescription.args['amount'].toString(), logDescription.args['tezosDestinationAddress'], log.transactionHash, log.blockHash, log.logIndex);
   }
-  return new ERC721WrapAsked(logDescription.args['user'], logDescription.args['token'], logDescription.args['tokenId'], logDescription.args['tezosDestinationAddress'], log.transactionHash, log.blockHash, log.logIndex);
+  return new ERC721WrapAsked(logDescription.args['user'], logDescription.args['token'], logDescription.args['tokenId'].toString(), logDescription.args['tezosDestinationAddress'], log.transactionHash, log.blockHash, log.logIndex);
 }

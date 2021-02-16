@@ -1,4 +1,5 @@
 import * as Knex from 'knex'
+import * as knexStringcase from 'knex-stringcase';
 import { Config } from '../configuration';
 
 export function createKnexConfiguration(configuration: Config) : Knex.Config {
@@ -15,5 +16,5 @@ export function createKnexConfiguration(configuration: Config) : Knex.Config {
 }
 
 export function createDbClient(configuration: Config) : Knex {
-  return Knex(createKnexConfiguration(configuration));
+  return Knex(knexStringcase(createKnexConfiguration(configuration)));
 }
