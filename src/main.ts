@@ -9,6 +9,7 @@ import { SignatureIndexer } from './domain/signatures/SignatureIndexer';
 import { createIpfsClient } from './tools/ipfsClient';
 import { EthereumQuorumIndexer } from './domain/ethereum/EthereumQuorumIndexer';
 import { httpServer } from './web/Server';
+import { SignaturePinningService } from './domain/signatures/SignaturePinningService';
 
 const configuration = loadConfiguration();
 const ethereumConfiguration = configuration.ethereum.networks[configuration.ethereum.currentNetwork];
@@ -22,6 +23,8 @@ const ethereumWrapIndexer = new EthereumWrapIndexer(logger, ethereumConfiguratio
 const tezosQuorumIndexer = new TezosQuorumIndexer(logger, tezosConfiguration, tezosToolkit, dbClient);
 const ethereumQuorumIndexer = new EthereumQuorumIndexer(logger, ethereumConfiguration, ethereumProvider, dbClient);
 const signatureIndexer = new SignatureIndexer(logger, ipfsClient, dbClient);
+const signaturePinningService = new SignaturePinningService(logger, ipfsClient, dbClient);
+
 const app = httpServer(logger, configuration);
 app.listen(3000, () => {
   logger.info('Express server started on port: ' + 3000);
@@ -33,9 +36,9 @@ app.listen(3000, () => {
     ethereumWrapIndexer.index(),
     tezosQuorumIndexer.index(),
     ethereumQuorumIndexer.index(),
-    signatureIndexer.index()
+    signatureIndexer.index(),
+    signaturePinningService.index()
   ]);
-  await dbClient.destroy();
 }());
 
 

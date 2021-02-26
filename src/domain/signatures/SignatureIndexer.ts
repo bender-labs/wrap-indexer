@@ -41,7 +41,8 @@ export class SignatureIndexer {
       do {
         const result = await this._resolveDag(current);
         if (result != null) {
-          await parseSignature(signer, current.toString(), result.value).save(this._dbClient, transaction);
+          const signature = parseSignature(signer, current.toString(), result.value);
+          await signature.save(this._dbClient, transaction);
         }
         current = result && result.value.parent ? '/ipfs/' + result.value.parent : null;
       } while (current);
