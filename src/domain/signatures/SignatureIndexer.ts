@@ -3,14 +3,15 @@ import Knex from 'knex';
 import { Signer } from '../tezos/QuorumStorage';
 import { IpfsClient } from '../../tools/ipfsClient';
 import { parseSignature } from './Signature';
+import { AppState } from '../AppState';
 
 export class SignatureIndexer {
   constructor(logger: Logger, ipfsClient: IpfsClient, dbClient: Knex) {
     this._logger = logger;
     this._ipfsClient = ipfsClient;
     this._dbClient = dbClient;
+    this._appState = new AppState(this._dbClient);
   }
-
 
   async index(): Promise<void> {
     this._logger.info(`Indexing signatures`);
@@ -31,16 +32,18 @@ export class SignatureIndexer {
   }
 
   private async _indexSigner(signer: Signer, transaction: Knex.Transaction): Promise<void> {
-    // get and save top signature to only index new stuff
     let cid = await this._resolveIpnsPath('/ipns/' + signer.ipnsKey);
-    if (cid != null) {
+    const lastIndexedSignature = await this._appState.getLastIndexedSignature(signer.ipnsKey);
+    if (cid != lastIndexedSignature) {
+      let current = cid;
       do {
-        const result = await this._resolveDag(cid);
+        const result = await this._resolveDag(current);
         if (result != null) {
-          await parseSignature(signer, cid.toString(), result.value).save(this._dbClient, transaction);
+          await parseSignature(signer, current.toString(), result.value).save(this._dbClient, transaction);
         }
-        cid = result && result.value.parent ? '/ipfs/' + result.value.parent : null;
-      } while (cid);
+        current = result && result.value.parent ? '/ipfs/' + result.value.parent : null;
+      } while (current);
+      await this._appState.setLastIndexedSignature(signer.ipnsKey, cid.toString(), transaction);
     }
   }
 
@@ -66,5 +69,5 @@ export class SignatureIndexer {
   private _logger: Logger;
   private _ipfsClient: IpfsClient;
   private _dbClient: Knex;
-
+  private _appState: AppState;
 }

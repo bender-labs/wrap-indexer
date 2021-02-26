@@ -20,6 +20,15 @@ export class AppState {
     await this._setValue({key: 'erc_wrap_last_indexed_block', value: block.toString()}, transaction);
   }
 
+  async getLastIndexedSignature(ipnsKey: string): Promise<string | null> {
+    const item = await this._getValue(`${ipnsKey}_signature_last_indexed`);
+    return item ? item.value : null;
+  }
+
+  async setLastIndexedSignature(ipnsKey: string, signature: string, transaction: Knex.Transaction): Promise<void> {
+    await this._setValue({key: `${ipnsKey}_signature_last_indexed`, value: signature}, transaction);
+  }
+
   async _getValue(key: string): Promise<AppStateItem | null> {
     return this._dbClient('app_state').where({ key }).first();
   }
