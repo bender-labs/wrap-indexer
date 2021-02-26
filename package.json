@@ -34,11 +34,15 @@
   "dependencies": {
     "@arpinum/config": "^2.1.2",
     "@taquito/taquito": "^8.0.4-beta.0",
+    "@types/express": "^4.17.11",
     "ethers": "^5.0.30",
+    "express": "^4.17.1",
+    "helmet": "^4.4.1",
     "ipfs-http-client": "^49.0.2",
     "knex": "^0.21.17",
     "knex-stringcase": "^1.4.5",
     "lodash": "^4.17.20",
+    "morgan": "^1.10.0",
     "pg": "^8.5.1",
     "tslib": "~2.0.3",
     "tslog": "^3.1.1"

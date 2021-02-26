@@ -37,7 +37,7 @@ export class EthereumWrapIndexer {
     }
   }
 
-  private async _addEvents(rawLogs: ethers.providers.Log[], transaction) {
+  private async _addEvents(rawLogs: ethers.providers.Log[], transaction: Knex.Transaction) {
     const domainObjects = rawLogs.map(log => parseERCLog(log, EthereumWrapIndexer.wrapInterface));
     for (const domainObject of domainObjects) {
       await domainObject.save(this._dbClient, transaction);
@@ -73,7 +73,7 @@ export class EthereumWrapIndexer {
   private _dbClient: Knex;
   private _ethereumConfig: EthereumConfig;
   private _appState: AppState;
+  private _logger: Logger;
   static readonly wrapTopics: string[] = [id('ERC20WrapAsked(address,address,uint256,string)'), id('ERC721WrapAsked(address,address,uint256,string)')];
-  _logger: Logger;
   static readonly wrapInterface: ethers.utils.Interface = new ethers.utils.Interface(['event ERC20WrapAsked(address user, address token, uint256 amount, string tezosDestinationAddress)', 'event ERC721WrapAsked(address user, address token, uint256 tokenId, string tezosDestinationAddress)']);
 }

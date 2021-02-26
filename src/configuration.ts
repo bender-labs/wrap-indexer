@@ -39,6 +39,9 @@ export interface Config {
     port: number,
     database: string;
   };
+  node: {
+    environment: string
+  };
 }
 
 export function loadConfiguration(): Config {
@@ -118,6 +121,12 @@ export function loadConfiguration(): Config {
         env: 'POSTGRES_DB_NAME',
         default: 'indexer',
       },
+    },
+    node: {
+      environment: {
+        env: 'NODE_ENV',
+        default: 'development'
+      }
     }
   });
 }
