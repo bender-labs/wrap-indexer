@@ -1,6 +1,6 @@
 import { Logger } from 'tslog';
 import Knex from 'knex';
-import { Signer } from '../tezos/QuorumStorage';
+import { TezosSigner } from '../tezos/QuorumStorage';
 import { IpfsClient } from '../../tools/ipfsClient';
 import { parseSignature } from './Signature';
 import { AppState } from '../AppState';
@@ -15,8 +15,9 @@ export class SignatureIndexer {
 
   async index(): Promise<void> {
     this._logger.info(`Indexing signatures`);
-    const signers: Signer[] = await this._dbClient.table('tezos_quorum_signers').where({ active: true });
+    const signers: TezosSigner[] = await this._dbClient.table('tezos_quorum_signers').where({ active: true });
     for (const signer of signers) {
+      this._logger.info(`Indexing signatures of ${signer.ipnsKey}`);
       let transaction;
       try {
         transaction = await this._dbClient.transaction();
@@ -31,8 +32,9 @@ export class SignatureIndexer {
     }
   }
 
-  private async _indexSigner(signer: Signer, transaction: Knex.Transaction): Promise<void> {
-    let cid = await this._resolveIpnsPath('/ipns/' + signer.ipnsKey);
+  private async _indexSigner(signer: TezosSigner, transaction: Knex.Transaction): Promise<void> {
+    //todo manage resolve timeout
+    const cid = await this._resolveIpnsPath('/ipns/' + signer.ipnsKey);
     const lastIndexedSignature = await this._appState.getLastIndexedSignature(signer.ipnsKey);
     if (cid != lastIndexedSignature) {
       let current = cid;

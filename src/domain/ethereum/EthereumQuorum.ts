@@ -1,8 +1,7 @@
 import Knex from 'knex';
-import { TezosSigner } from './QuorumStorage';
 
-export class TezosQuorum {
-  constructor(admin: string, threshold: number, signers: TezosSigner[]) {
+export class EthereumQuorum {
+  constructor(admin: string, threshold: number, signers: string[]) {
     this.threshold = threshold;
     this.admin = admin;
     this.signers = signers;
@@ -17,7 +16,7 @@ export class TezosQuorum {
   }
 
   async _saveQuorum(dbClient: Knex, transaction: Knex.Transaction): Promise<void> {
-    await dbClient('tezos_quorum')
+    await dbClient('ethereum_quorum')
       .transacting(transaction)
       .insert({ admin: this.admin, threshold: this.threshold })
       .onConflict('admin' as never)
@@ -25,21 +24,21 @@ export class TezosQuorum {
   }
 
   async _disableOtherSigners(dbClient: Knex, transaction: Knex.Transaction): Promise<void> {
-    await dbClient('tezos_quorum_signers')
+    await dbClient('ethereum_quorum_signers')
       .transacting(transaction)
       .update({ active: false })
-      .whereNotIn('public_key', this.signers.map<string>(s => s.publicKey));
+      .whereNotIn('address', this.signers);
   }
 
-  async _saveSigner(signer: TezosSigner, dbClient: Knex, transaction: Knex.Transaction): Promise<void> {
-    await dbClient('tezos_quorum_signers')
+  async _saveSigner(signer: string, dbClient: Knex, transaction: Knex.Transaction): Promise<void> {
+    await dbClient('ethereum_quorum_signers')
       .transacting(transaction)
-      .insert({ ipnsKey: signer.ipnsKey, publicKey: signer.publicKey, active: true })
-      .onConflict('ipns_key' as never)
+      .insert({ address: signer, active: true })
+      .onConflict('address' as never)
       .merge({ active: true });
   }
 
   admin: string;
   threshold: number;
-  signers: TezosSigner[];
+  signers: string[];
 }

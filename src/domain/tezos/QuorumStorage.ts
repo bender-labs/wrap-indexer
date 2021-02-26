@@ -7,13 +7,13 @@ export interface QuorumStorage {
   threshold: BigNumber
 }
 
-export interface Signer {
+export interface TezosSigner {
   ipnsKey: string,
   publicKey: string
 }
 
-export function extractSigners(storage: QuorumStorage): Signer[] {
-  const signers: Signer[] = [];
+export function extractSigners(storage: QuorumStorage): TezosSigner[] {
+  const signers: TezosSigner[] = [];
   storage.signers.forEach((val: string, key: string) => {
     signers.push({ ipnsKey: key, publicKey: val});
   });

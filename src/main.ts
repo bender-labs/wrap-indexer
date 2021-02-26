@@ -7,6 +7,7 @@ import { TezosQuorumIndexer } from './domain/tezos/TezosQuorumIndexer';
 import { createTezosToolkit } from './tools/tezos/tezosToolkitProvider';
 import { SignatureIndexer } from './domain/signatures/SignatureIndexer';
 import { createIpfsClient } from './tools/ipfsClient';
+import { EthereumQuorumIndexer } from './domain/ethereum/EthereumQuorumIndexer';
 
 const configuration = loadConfiguration();
 const ethereumConfiguration = configuration.ethereum.networks[configuration.ethereum.currentNetwork];
@@ -17,13 +18,15 @@ const ethereumProvider = createEthereumProvider(ethereumConfiguration);
 const tezosToolkit = createTezosToolkit(tezosConfiguration);
 const ipfsClient = createIpfsClient(configuration);
 const ethereumWrapIndexer = new EthereumWrapIndexer(logger, ethereumConfiguration, ethereumProvider, dbClient);
-const tezosOwnerIndexer = new TezosQuorumIndexer(logger, tezosConfiguration, tezosToolkit, dbClient);
+const tezosQuorumIndexer = new TezosQuorumIndexer(logger, tezosConfiguration, tezosToolkit, dbClient);
+const ethereumQuorumIndexer = new EthereumQuorumIndexer(logger, ethereumConfiguration, ethereumProvider, dbClient);
 const signatureIndexer = new SignatureIndexer(logger, ipfsClient, dbClient);
 
 (async function main(){
   logger.info('Indexer started');
   await ethereumWrapIndexer.index();
-  await tezosOwnerIndexer.index();
+  await tezosQuorumIndexer.index();
+  await ethereumQuorumIndexer.index();
   await signatureIndexer.index();
   await dbClient.destroy();
 }());

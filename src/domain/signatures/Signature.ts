@@ -1,5 +1,5 @@
 import Knex from 'knex';
-import { Signer } from '../tezos/QuorumStorage';
+import { TezosSigner } from '../tezos/QuorumStorage';
 
 export abstract class Signature {
   protected constructor(
@@ -137,7 +137,7 @@ export class Erc721UnwrapSignature extends Signature {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
-export function parseSignature(signer: Signer, cid: string, value: any): Signature {
+export function parseSignature(signer: TezosSigner, cid: string, value: any): Signature {
   if (value.type === 'Erc20MintingSigned') {
     return new Erc20MintingSignature(
       signer.ipnsKey,
