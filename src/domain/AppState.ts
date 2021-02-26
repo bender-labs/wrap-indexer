@@ -11,11 +11,20 @@ export class AppState {
     this._dbClient = dbClient;
   }
 
-  async getValue(key: string): Promise<AppStateItem | null> {
+  async getErcWrapLastIndexedBlock(): Promise<number | null> {
+    const item = await this._getValue('erc_wrap_last_indexed_block');
+    return item ? +item.value : null;
+  }
+
+  async setErcWrapLastIndexedBlock(block: number, transaction: Knex.Transaction): Promise<void> {
+    await this._setValue({key: 'erc_wrap_last_indexed_block', value: block.toString()}, transaction);
+  }
+
+  async _getValue(key: string): Promise<AppStateItem | null> {
     return this._dbClient('app_state').where({ key }).first();
   }
 
-  async setValue(item: AppStateItem, transaction: Knex.Transaction): Promise<void> {
+  async _setValue(item: AppStateItem, transaction: Knex.Transaction): Promise<void> {
     await this._dbClient('app_state')
       .transacting(transaction)
       .insert(item)

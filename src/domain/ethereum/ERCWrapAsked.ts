@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import Knex from 'knex';
 
 export class ERC20WrapAsked {
   constructor(
@@ -19,8 +20,8 @@ export class ERC20WrapAsked {
     this.source = source;
   }
 
-  table(): string {
-    return 'erc20_wraps';
+  async save(dbClient: Knex, transaction: Knex.Transaction): Promise<void> {
+    await dbClient('erc20_wraps').transacting(transaction).insert(this);
   }
 
   source: string;
@@ -51,8 +52,8 @@ export class ERC721WrapAsked {
     this.source = source;
   }
 
-  table(): string {
-    return 'erc721_wraps';
+  async save(dbClient: Knex, transaction: Knex.Transaction): Promise<void> {
+    await dbClient('erc721_wraps').transacting(transaction).insert(this);
   }
 
   source: string;
@@ -64,7 +65,7 @@ export class ERC721WrapAsked {
   logIndex: number;
 }
 
-export function buildERCEvent(log: ethers.providers.Log, iface: ethers.utils.Interface): ERC20WrapAsked | ERC721WrapAsked {
+export function parseERCLog(log: ethers.providers.Log, iface: ethers.utils.Interface): ERC20WrapAsked | ERC721WrapAsked {
   const logDescription = iface.parseLog(log);
   if (logDescription.name === ERC20WrapAsked.name) {
     return new ERC20WrapAsked(logDescription.args['user'], logDescription.args['token'], logDescription.args['amount'].toString(), logDescription.args['tezosDestinationAddress'], log.transactionHash, log.blockHash, log.logIndex);

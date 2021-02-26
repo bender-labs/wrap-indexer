@@ -2,7 +2,8 @@ import { Logger } from 'tslog';
 import { TezosConfig } from '../../configuration';
 import { TezosToolkit } from '@taquito/taquito';
 import Knex from 'knex';
-import { extractSigners, QuorumStorage, Signer } from './QuorumStorage';
+import { extractSigners, QuorumStorage } from './QuorumStorage';
+import { TezosQuorum } from './TezosQuorum';
 
 export class TezosQuorumIndexer {
 
@@ -15,13 +16,13 @@ export class TezosQuorumIndexer {
 
   async index(): Promise<void> {
     this._logger.info(`Indexing tezos quorum`);
-    const contract = await this._tezosToolkit.contract.at(this._tezosConfiguration.quorumContractAddress)
-    const storage = await contract.storage<QuorumStorage>();
     let transaction;
     try {
+      const contract = await this._tezosToolkit.contract.at(this._tezosConfiguration.quorumContractAddress)
+      const storage = await contract.storage<QuorumStorage>();
       transaction = await this._dbClient.transaction();
-      await this._updateQuorum(storage, transaction);
-      await this._updateSigners(storage, transaction);
+      const tezosQuorum = await TezosQuorumIndexer._buildQuorum(storage);
+      await tezosQuorum.save(this._dbClient, transaction);
       await transaction.commit();
     } catch (e) {
       this._logger.error(`Can't process quorum ${e.message}`)
@@ -31,35 +32,13 @@ export class TezosQuorumIndexer {
     }
   }
 
-  private async _updateQuorum(storage: QuorumStorage, transaction: Knex.Transaction): Promise<void> {
-    await this._dbClient('tezos_quorum')
-      .transacting(transaction)
-      .insert({ admin: storage.admin, threshold: storage.threshold.toNumber() })
-      .onConflict('admin' as never)
-      .merge({ threshold: storage.threshold.toNumber() });
-  }
-
-  private async _updateSigners(storage: QuorumStorage, transaction: Knex.Transaction): Promise<void> {
+  private static async _buildQuorum(storage: QuorumStorage): Promise<TezosQuorum> {
+    const tezosQuorum = new TezosQuorum(storage.admin, storage.threshold.toNumber());
     const signers = extractSigners(storage);
-    await this._disableOtherSigners(signers, transaction);
-    await this._createOrUpdateSigners(signers, transaction);
-  }
-
-  private async _disableOtherSigners(signers: Signer[], transaction: Knex.Transaction): Promise<void> {
-    await this._dbClient('tezos_quorum_signers')
-      .transacting(transaction)
-      .update({ active: false })
-      .whereNotIn('public_key', [signers.map<string>(signer => signer.publicKey)]);
-  }
-
-  private async _createOrUpdateSigners(signers: Signer[], transaction: Knex.Transaction): Promise<void> {
     for (const signer of signers) {
-      await this._dbClient('tezos_quorum_signers')
-        .transacting(transaction)
-        .insert({ ipnsKey: signer.ipnsKey, publicKey: signer.publicKey, active: true })
-        .onConflict('ipns_key' as never)
-        .merge({ active: true });
+      tezosQuorum.addSigner(signer);
     }
+    return tezosQuorum;
   }
 
   private _logger: Logger;

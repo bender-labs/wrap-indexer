@@ -2,7 +2,7 @@ import Knex from 'knex';
 import * as _ from 'lodash';
 import { ethers } from 'ethers';
 import { id } from 'ethers/lib/utils';
-import { buildERCEvent } from './ERCWrapAsked';
+import { parseERCLog } from './ERCWrapAsked';
 import { EthereumConfig } from '../../configuration';
 import { Logger } from 'tslog';
 import { AppState } from '../AppState';
@@ -38,19 +38,19 @@ export class EthereumWrapIndexer {
   }
 
   private async _addEvents(rawLogs: ethers.providers.Log[], transaction) {
-    const domainObjects = rawLogs.map(log => buildERCEvent(log, EthereumWrapIndexer.wrapInterface));
+    const domainObjects = rawLogs.map(log => parseERCLog(log, EthereumWrapIndexer.wrapInterface));
     for (const domainObject of domainObjects) {
-      await this._dbClient(domainObject.table()).transacting(transaction).insert(domainObject);
+      await domainObject.save(this._dbClient, transaction);
     }
   }
 
   private async _getFirstBlockToIndex(): Promise<number> {
-    const result = await this._appState.getValue('ercWraps');
-    return result ? (+(result.value) + 1) : this._ethereumConfig.firstBlockToIndex;
+    const lastIndexedBlock = await this._appState.getErcWrapLastIndexedBlock();
+    return lastIndexedBlock ? lastIndexedBlock + 1 : this._ethereumConfig.firstBlockToIndex;
   }
 
   private async _setLastIndexedBlock(block: number, transaction: Knex.Transaction): Promise<void> {
-    await this._appState.setValue({key: 'ercWraps', value: block.toString()}, transaction);
+    await this._appState.setErcWrapLastIndexedBlock(block, transaction);
   }
 
   private async _getLogs(fromBlock: number): Promise<ethers.providers.Log[]> {

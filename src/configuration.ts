@@ -26,14 +26,17 @@ export interface Config {
       [key: string]: TezosConfig
     }
   }
+  ipfs: {
+    nodeUrl: string
+  }
   log: {
     format: LogType
   };
   postgres: {
-    username: string;
-    password: string;
-    host: string;
-    port: number;
+    username: string,
+    password: string,
+    host: string,
+    port: number,
     database: string;
   };
 }
@@ -72,13 +75,19 @@ export function loadConfiguration(): Config {
         delphinet: {
           rpc: {
             env: 'TEZOS_RPC',
-            default: 'https://testnet-tezos.giganode.io'
+            default: 'https://rpc.tzkt.io/edo2net'
           },
           quorumContractAddress: {
             env: 'TEZOS_QUORUM_CONTRACT',
-            default: 'KT19LqU5Veae5JgbRXKcDZ3oo9UfR1KMdxkE'
+            default: 'KT1Kc58SaARN63AMdoNfd8U2Y4mnQggwJHHR'
           }
         }
+      }
+    },
+    ipfs: {
+      nodeUrl: {
+        env: 'IPFS_NODE',
+        default: 'http://localhost:5001'
       }
     },
     log: {
