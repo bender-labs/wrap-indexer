@@ -1,8 +1,8 @@
 import { Logger } from 'tslog';
 import Knex from 'knex';
-import { TezosSigner } from '../tezos/QuorumStorage';
 import { IpfsClient } from '../../tools/ipfsClient';
 import { AppState } from '../AppState';
+import { TezosSigner } from '../tezos/TezosSigner';
 
 export class SignaturePinningService {
   constructor(logger: Logger, ipfsClient: IpfsClient, dbClient: Knex) {

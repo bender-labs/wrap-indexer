@@ -1,5 +1,5 @@
 import Knex from 'knex';
-import { TezosSigner } from '../tezos/QuorumStorage';
+import { TezosSigner } from '../tezos/TezosSigner';
 
 export abstract class Signature {
   protected constructor(

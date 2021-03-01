@@ -10,6 +10,7 @@ import { TezosQuorumIndexer } from './domain/tezos/TezosQuorumIndexer';
 import { EthereumQuorumIndexer } from './domain/ethereum/EthereumQuorumIndexer';
 import { SignatureIndexer } from './domain/signatures/SignatureIndexer';
 import { SignaturePinningService } from './domain/signatures/SignaturePinningService';
+import { TezosUnwrapIndexer } from './domain/tezos/TezosUnwrapIndexer';
 
 const configuration = loadConfiguration();
 const ethereumConfiguration = configuration.ethereum.networks[configuration.ethereum.currentNetwork];
@@ -24,6 +25,7 @@ const tezosQuorumIndexer = new TezosQuorumIndexer(logger, tezosConfiguration, bc
 const ethereumQuorumIndexer = new EthereumQuorumIndexer(logger, ethereumConfiguration, ethereumProvider, dbClient);
 const signatureIndexer = new SignatureIndexer(logger, ipfsClient, dbClient);
 const signaturePinningService = new SignaturePinningService(logger, ipfsClient, dbClient);
+const tezosUnwrapIndexer = new TezosUnwrapIndexer(logger, tezosConfiguration, bcd, dbClient);
 
 const app = httpServer(logger, configuration);
 app.listen(3000, () => {
@@ -37,7 +39,8 @@ app.listen(3000, () => {
     tezosQuorumIndexer.index(),
     ethereumQuorumIndexer.index(),
     signatureIndexer.index(),
-    signaturePinningService.index()
+    signaturePinningService.index(),
+    tezosUnwrapIndexer.index()
   ]);
 }());
 

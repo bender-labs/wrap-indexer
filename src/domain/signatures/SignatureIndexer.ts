@@ -1,9 +1,9 @@
 import { Logger } from 'tslog';
 import Knex from 'knex';
-import { TezosSigner } from '../tezos/QuorumStorage';
 import { IpfsClient } from '../../tools/ipfsClient';
 import { parseSignature } from './Signature';
 import { AppState } from '../AppState';
+import { TezosSigner } from '../tezos/TezosSigner';
 
 export class SignatureIndexer {
   constructor(logger: Logger, ipfsClient: IpfsClient, dbClient: Knex) {
@@ -36,7 +36,7 @@ export class SignatureIndexer {
     //todo manage resolve timeout
     const cid = await this._resolveIpnsPath('/ipns/' + signer.ipnsKey);
     const lastIndexedSignature = await this._appState.getLastIndexedSignature(signer.ipnsKey);
-    if (cid != lastIndexedSignature) {
+    if (cid != null && cid != lastIndexedSignature) {
       let current = cid;
       do {
         const result = await this._resolveDag(current);

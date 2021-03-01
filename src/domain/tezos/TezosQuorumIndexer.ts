@@ -2,7 +2,7 @@ import { Logger } from 'tslog';
 import { TezosConfig } from '../../configuration';
 import Knex from 'knex';
 import { BcdProvider } from '../../tools/tezos/bcdProvider';
-import { extractQuorum } from './QuorumStorage';
+import { extractQuorum } from './TezosQuorum';
 
 export class TezosQuorumIndexer {
 
@@ -32,6 +32,5 @@ export class TezosQuorumIndexer {
   private _logger: Logger;
   private _tezosConfiguration: TezosConfig;
   private _bcd: BcdProvider;
-  // @ts-ignore
   private _dbClient: Knex;
 }

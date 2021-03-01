@@ -1,5 +1,6 @@
 import Knex from 'knex';
-import { TezosSigner } from './QuorumStorage';
+import { MichelineNode } from '../../tools/tezos/bcdProvider';
+import { TezosSigner } from './TezosSigner';
 
 export class TezosQuorum {
   constructor(admin: string, threshold: number, signers: TezosSigner[]) {
@@ -42,4 +43,11 @@ export class TezosQuorum {
   admin: string;
   threshold: number;
   signers: TezosSigner[];
+}
+
+export function extractQuorum(storage: MichelineNode): TezosQuorum {
+  const admin = storage.children.find(c => c.name == 'admin').value as string;
+  const threshold = storage.children.find(c => c.name == 'threshold').value as number;
+  const signers = storage.children.find(c => c.name == 'signers').children.map(c => ({ipnsKey: c.name, publicKey: c.value as string}));
+  return new TezosQuorum(admin, threshold, signers);
 }

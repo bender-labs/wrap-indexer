@@ -1,11 +1,32 @@
 import axios from 'axios';
 
-export type Storage = {
+export type MichelineNode = {
   prim: string,
   type: string,
   name?: string,
   value?: string | number,
-  children?: Array<Storage>
+  children?: Array<MichelineNode>
+}
+
+export type Operation = {
+  level: number,
+  counter: number,
+  parameters: MichelineNode,
+  timestamp: Date,
+  id: string,
+  protocol: string,
+  hash: string,
+  source: string,
+  destination: string,
+  status: string,
+  entrypoint: string,
+  internal: boolean,
+  mempool: boolean
+}
+
+export type Operations = {
+  operations: Array<Operation>,
+  last_id: string
 }
 
 export class BcdProvider {
@@ -13,14 +34,13 @@ export class BcdProvider {
     this._tezosNetwork = tezosNetwork;
   }
 
-  async getContractOperations(contractAddress: string, entrypoints: string[]) {
-    const response = await axios.get(`${BcdProvider.BCD_URL}/v1/contract/${this._tezosNetwork}/${contractAddress}/operations\\?entrypoints\\=${entrypoints.join(',')}`);
-    console.log(response);
-    return response;
+  async getContractOperations(contractAddress: string, entrypoints: string[], lastId?: string): Promise<Operations> {
+    const response = await axios.get<Operations>(`${BcdProvider.BCD_URL}/v1/contract/${this._tezosNetwork}/${contractAddress}/operations\\?entrypoints\\=${entrypoints.join(',')}${lastId ? '&last_id=' + lastId : ''}`);
+    return {last_id: response.data.last_id, operations: response.data.operations.filter(o => entrypoints.includes(o.entrypoint))};
   }
 
-  async getStorage(contractAddress: string): Promise<Storage> {
-    const response = await axios.get<Storage>(`${BcdProvider.BCD_URL}/v1/contract/${this._tezosNetwork}/${contractAddress}/storage`);
+  async getStorage(contractAddress: string): Promise<MichelineNode> {
+    const response = await axios.get<MichelineNode>(`${BcdProvider.BCD_URL}/v1/contract/${this._tezosNetwork}/${contractAddress}/storage`);
     return response.data;
   }
 
