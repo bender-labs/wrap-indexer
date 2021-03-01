@@ -1,16 +1,15 @@
 import { Logger } from 'tslog';
 import { TezosConfig } from '../../configuration';
-import { TezosToolkit } from '@taquito/taquito';
 import Knex from 'knex';
-import { extractSigners, QuorumStorage } from './QuorumStorage';
-import { TezosQuorum } from './TezosQuorum';
+import { BcdProvider } from '../../tools/tezos/bcdProvider';
+import { extractQuorum } from './QuorumStorage';
 
 export class TezosQuorumIndexer {
 
-  constructor(logger: Logger, tezosConfiguration: TezosConfig, tezosToolkit: TezosToolkit, dbClient: Knex) {
+  constructor(logger: Logger, tezosConfiguration: TezosConfig, bcd: BcdProvider, dbClient: Knex) {
     this._logger = logger;
     this._tezosConfiguration = tezosConfiguration;
-    this._tezosToolkit = tezosToolkit;
+    this._bcd = bcd;
     this._dbClient = dbClient;
   }
 
@@ -18,10 +17,9 @@ export class TezosQuorumIndexer {
     this._logger.info(`Indexing tezos quorum`);
     let transaction;
     try {
-      const contract = await this._tezosToolkit.contract.at(this._tezosConfiguration.quorumContractAddress)
-      const storage = await contract.storage<QuorumStorage>();
+      const storage = await this._bcd.getStorage(this._tezosConfiguration.quorumContractAddress);
+      const tezosQuorum = extractQuorum(storage);
       transaction = await this._dbClient.transaction();
-      const tezosQuorum = await new TezosQuorum(storage.admin, storage.threshold.toNumber(), extractSigners(storage));
       await tezosQuorum.save(this._dbClient, transaction);
       await transaction.commit();
     } catch (e) {
@@ -33,6 +31,7 @@ export class TezosQuorumIndexer {
   }
   private _logger: Logger;
   private _tezosConfiguration: TezosConfig;
-  private _tezosToolkit: TezosToolkit;
+  private _bcd: BcdProvider;
+  // @ts-ignore
   private _dbClient: Knex;
 }

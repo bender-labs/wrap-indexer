@@ -2,18 +2,18 @@ import { loadConfiguration as load } from '@arpinum/config';
 
 type LogType = "json" | "pretty" | "hidden";
 
-export interface EthereumConfig {
+export type EthereumConfig = {
   wrapContractAddress: string;
   rpc: string;
   firstBlockToIndex: number;
 }
 
-export interface TezosConfig {
-  rpc: string;
+export type TezosConfig = {
   quorumContractAddress: string;
+  minterContractAddress: string;
 }
 
-export interface Config {
+export type Config = {
   ethereum: {
     currentNetwork: string,
     networks: {
@@ -72,17 +72,17 @@ export function loadConfiguration(): Config {
     tezos: {
       currentNetwork: {
         env: 'TEZOS_NETWORK',
-        default: 'delphinet'
+        default: 'edo2net'
       },
       networks: {
-        delphinet: {
-          rpc: {
-            env: 'TEZOS_RPC',
-            default: 'https://rpc.tzkt.io/edo2net'
-          },
+        edo2net: {
           quorumContractAddress: {
             env: 'TEZOS_QUORUM_CONTRACT',
             default: 'KT1Kc58SaARN63AMdoNfd8U2Y4mnQggwJHHR'
+          },
+          minterContractAddress: {
+            env: 'TEZOS_MINTER_CONTRACT',
+            default: 'KT1Hd1hiG1PhZ7xRi1HUVoAXM7i7Pzta8EHW'
           }
         }
       }

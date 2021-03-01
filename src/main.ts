@@ -1,14 +1,14 @@
 import { loadConfiguration } from './configuration';
 import { createLogger } from './tools/logger';
+import { createBcd } from './tools/tezos/bcdProvider';
+import { httpServer } from './web/Server';
 import { createDbClient } from './tools/dbClient';
 import { createEthereumProvider } from './tools/ethereum/ethereumNetworkProvider';
+import { createIpfsClient } from './tools/ipfsClient';
 import { EthereumWrapIndexer } from './domain/ethereum/EthereumWrapIndexer';
 import { TezosQuorumIndexer } from './domain/tezos/TezosQuorumIndexer';
-import { createTezosToolkit } from './tools/tezos/tezosToolkitProvider';
-import { SignatureIndexer } from './domain/signatures/SignatureIndexer';
-import { createIpfsClient } from './tools/ipfsClient';
 import { EthereumQuorumIndexer } from './domain/ethereum/EthereumQuorumIndexer';
-import { httpServer } from './web/Server';
+import { SignatureIndexer } from './domain/signatures/SignatureIndexer';
 import { SignaturePinningService } from './domain/signatures/SignaturePinningService';
 
 const configuration = loadConfiguration();
@@ -17,10 +17,10 @@ const tezosConfiguration = configuration.tezos.networks[configuration.tezos.curr
 const logger = createLogger(configuration);
 const dbClient = createDbClient(configuration);
 const ethereumProvider = createEthereumProvider(ethereumConfiguration);
-const tezosToolkit = createTezosToolkit(tezosConfiguration);
+const bcd = createBcd(configuration.tezos.currentNetwork);
 const ipfsClient = createIpfsClient(configuration);
 const ethereumWrapIndexer = new EthereumWrapIndexer(logger, ethereumConfiguration, ethereumProvider, dbClient);
-const tezosQuorumIndexer = new TezosQuorumIndexer(logger, tezosConfiguration, tezosToolkit, dbClient);
+const tezosQuorumIndexer = new TezosQuorumIndexer(logger, tezosConfiguration, bcd, dbClient);
 const ethereumQuorumIndexer = new EthereumQuorumIndexer(logger, ethereumConfiguration, ethereumProvider, dbClient);
 const signatureIndexer = new SignatureIndexer(logger, ipfsClient, dbClient);
 const signaturePinningService = new SignaturePinningService(logger, ipfsClient, dbClient);
