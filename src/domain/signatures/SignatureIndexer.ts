@@ -33,7 +33,6 @@ export class SignatureIndexer {
   }
 
   private async _indexSigner(signer: TezosSigner, transaction: Knex.Transaction): Promise<void> {
-    //todo manage resolve timeout
     const cid = await this._resolveIpnsPath('/ipns/' + signer.ipnsKey);
     const lastIndexedSignature = await this._appState.getLastIndexedSignature(signer.ipnsKey);
     if (cid != null && cid != lastIndexedSignature) {
@@ -45,14 +44,14 @@ export class SignatureIndexer {
           await signature.save(this._dbClient, transaction);
         }
         current = result && result.value.parent ? '/ipfs/' + result.value.parent : null;
-      } while (current);
+      } while (current && current != lastIndexedSignature);
       await this._appState.setLastIndexedSignature(signer.ipnsKey, cid.toString(), transaction);
     }
   }
 
   private async _resolveIpnsPath(path: string): Promise<string | null> {
     try {
-      return await this._ipfsClient.resolve(path);
+      return await this._ipfsClient.resolve(path, {timeout: 30 * 1000});
     } catch (e) {
       this._logger.warn(`Can't resolve ipns path ${path}: ${e.message}`);
       return null;

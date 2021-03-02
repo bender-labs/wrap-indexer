@@ -1,8 +1,12 @@
 import * as IPFS from 'ipfs-http-client';
 import { Config } from '../configuration';
 
+export type IpfsResolveOptions = {
+  timeout: number
+}
+
 export interface IpfsClient {
-  resolve(value: string): Promise<string>;
+  resolve(value: string, options: IpfsResolveOptions): Promise<string>;
   dag: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     get(value: string): Promise<any>
