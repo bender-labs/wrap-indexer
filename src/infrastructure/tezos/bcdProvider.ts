@@ -1,32 +1,42 @@
 import axios from 'axios';
 
 export type MichelineNode = {
-  prim: string,
-  type: string,
-  name?: string,
-  value?: string | number,
-  children?: Array<MichelineNode>
+  prim: string;
+  type: string;
+  name?: string;
+  value?: string | number;
+  children?: Array<MichelineNode>;
 }
 
 export type Operation = {
-  level: number,
-  counter: number,
-  parameters: MichelineNode,
-  timestamp: Date,
-  id: string,
-  protocol: string,
-  hash: string,
-  source: string,
-  destination: string,
-  status: string,
-  entrypoint: string,
-  internal: boolean,
-  mempool: boolean
+  level: number;
+  counter: number;
+  parameters: MichelineNode;
+  timestamp: Date;
+  id: string;
+  protocol: string;
+  hash: string;
+  source: string;
+  destination: string;
+  status: string;
+  entrypoint: string;
+  internal: boolean;
+  mempool: boolean;
 }
 
 export type Operations = {
-  operations: Array<Operation>,
-  last_id: string
+  operations: Array<Operation>;
+  last_id: string;
+}
+
+export type BigMapKey = {
+  data: {
+    key: MichelineNode;
+    value: MichelineNode;
+    key_hash: string;
+    key_string: string;
+    count: number;
+  }
 }
 
 export class BcdProvider {
@@ -47,8 +57,14 @@ export class BcdProvider {
     return response.data;
   }
 
+  async getBigMapKey(bigmapId: number, key: string): Promise<BigMapKey[]> {
+    console.log(`${BcdProvider.BCD_URL}/v1/bigmap/${this._tezosNetwork}/${bigmapId}/keys?q=${encodeURI(key)}`);
+    const response = await axios.get<BigMapKey[]>(`${BcdProvider.BCD_URL}/v1/bigmap/${this._tezosNetwork}/${bigmapId}/keys?q=${encodeURI(key)}`);
+    return response.data;
+  }
+
   private _tezosNetwork: string;
-  static readonly BCD_URL = 'https://api.better-call.dev';
+  private static readonly BCD_URL = 'https://api.better-call.dev';
 }
 
 export function createBcd(tezosNetwork: string): BcdProvider {

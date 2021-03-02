@@ -12,6 +12,7 @@ import { SignatureIndexer } from './indexer/signatures/SignatureIndexer';
 import { SignaturePinningService } from './indexer/signatures/SignaturePinningService';
 import { TezosInitialUnwrapIndexer } from './indexer/tezos/TezosInitialUnwrapIndexer';
 import { EthereumFinalizedUnwrapIndexer } from './indexer/ethereum/EthereumFinalizedUnwrapIndexer';
+import { TezosFinalizedWrapIndexer } from './indexer/tezos/TezosFinalizedWrapIndexer';
 
 const configuration = loadConfiguration();
 const ethereumConfiguration = configuration.ethereum.networks[configuration.ethereum.currentNetwork];
@@ -28,6 +29,7 @@ const signatureIndexer = new SignatureIndexer(logger, ipfsClient, dbClient);
 const signaturePinningService = new SignaturePinningService(logger, ipfsClient, dbClient);
 const tezosUnwrapIndexer = new TezosInitialUnwrapIndexer(logger, tezosConfiguration, bcd, dbClient);
 const ethereumFinalizedUnwrapIndexer = new EthereumFinalizedUnwrapIndexer(logger, ethereumConfiguration, ethereumProvider, dbClient);
+const tezosFinalizedWrapIndexer = new TezosFinalizedWrapIndexer(logger, tezosConfiguration, bcd, dbClient);
 
 const app = httpServer(logger, configuration);
 app.listen(3000, () => {
@@ -44,6 +46,7 @@ app.listen(3000, () => {
     signaturePinningService.index(),
     tezosUnwrapIndexer.index(),
     ethereumFinalizedUnwrapIndexer.index(),
+    tezosFinalizedWrapIndexer.index(),
   ]);
 }());
 
