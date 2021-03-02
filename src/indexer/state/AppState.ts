@@ -1,6 +1,6 @@
 import Knex from 'knex';
 
-export interface AppStateItem {
+interface AppStateItem {
   key: string,
   value: string
 }
@@ -17,7 +17,7 @@ export class AppState {
   }
 
   async setErcWrapLastIndexedBlock(block: number, transaction: Knex.Transaction): Promise<void> {
-    await this._setValue({key: 'erc_wrap_last_indexed_block', value: block.toString()}, transaction);
+    await this._setValue({ key: 'erc_wrap_last_indexed_block', value: block.toString() }, transaction);
   }
 
   async getErcUnwrapLastOperationId(): Promise<string | null> {
@@ -26,7 +26,7 @@ export class AppState {
   }
 
   async setErcUnwrapLastOperationId(lastId: string, transaction: Knex.Transaction): Promise<void> {
-    await this._setValue({key: 'erc_unwrap_last_operation_id', value: lastId}, transaction);
+    await this._setValue({ key: 'erc_unwrap_last_operation_id', value: lastId }, transaction);
   }
 
   async getLastIndexedSignature(ipnsKey: string): Promise<string | null> {
@@ -35,15 +35,15 @@ export class AppState {
   }
 
   async setLastIndexedSignature(ipnsKey: string, signature: string, transaction: Knex.Transaction): Promise<void> {
-    await this._setValue({key: `${ipnsKey}_signature_last_indexed`, value: signature}, transaction);
+    await this._setValue({ key: `${ipnsKey}_signature_last_indexed`, value: signature }, transaction);
   }
 
   async _getValue(key: string): Promise<AppStateItem | null> {
-    return this._dbClient('app_state').where({ key }).first();
+    return this._dbClient.table<AppStateItem>('app_state').where({ key }).first();
   }
 
   async _setValue(item: AppStateItem, transaction: Knex.Transaction): Promise<void> {
-    await this._dbClient('app_state')
+    await this._dbClient.table<AppStateItem>('app_state')
       .transacting(transaction)
       .insert(item)
       .onConflict('key' as never)

@@ -1,8 +1,8 @@
-import * as Knex from 'knex'
+import * as Knex from 'knex';
 import * as knexStringcase from 'knex-stringcase';
 import { Config } from '../configuration';
 
-export function createKnexConfiguration(configuration: Config) : Knex.Config {
+export function createKnexConfiguration(configuration: Config): Knex.Config {
   return {
     client: 'pg',
     connection: {
@@ -10,11 +10,11 @@ export function createKnexConfiguration(configuration: Config) : Knex.Config {
       port: configuration.postgres.port,
       user: configuration.postgres.username,
       password: configuration.postgres.password,
-      database: configuration.postgres.database
-    }
+      database: configuration.postgres.database,
+    },
   };
 }
 
-export function createDbClient(configuration: Config) : Knex {
+export function createDbClient(configuration: Config): Knex {
   return Knex(knexStringcase(createKnexConfiguration(configuration)));
 }

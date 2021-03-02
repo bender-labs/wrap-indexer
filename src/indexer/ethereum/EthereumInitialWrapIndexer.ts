@@ -2,12 +2,13 @@ import Knex from 'knex';
 import * as _ from 'lodash';
 import { ethers } from 'ethers';
 import { id } from 'ethers/lib/utils';
-import { parseERCLog } from './ERCWrapAsked';
+import { ERC20Wrap, ERC721Wrap } from '../../domain/ERCWrap';
 import { EthereumConfig } from '../../configuration';
 import { Logger } from 'tslog';
-import { AppState } from '../AppState';
+import { AppState } from '../state/AppState';
+import { ErcWrapDAO } from '../../dao/ErcWrapDAO';
 
-export class EthereumWrapIndexer {
+export class EthereumInitialWrapIndexer {
   constructor(logger: Logger, ethereumConfig: EthereumConfig, ethereumProvider: ethers.providers.Provider, dbClient: Knex) {
     this._logger = logger;
     this._ethereumConfig = ethereumConfig;
@@ -17,7 +18,7 @@ export class EthereumWrapIndexer {
   }
 
   async index(): Promise<void> {
-    const firstBlock = await this._getFirstBlockToIndex()
+    const firstBlock = await this._getFirstBlockToIndex();
     this._logger.info(`Indexing new wrap events from block ${firstBlock}`);
     const rawLogs = await this._getLogs(firstBlock);
     this._logger.info(`${rawLogs.length} wrap events to index`);
@@ -29,7 +30,7 @@ export class EthereumWrapIndexer {
         await this._setLastIndexedBlock(_.maxBy(rawLogs, log => log.blockNumber).blockNumber, transaction);
         await transaction.commit();
       } catch (e) {
-        this._logger.error(`Can't process wrap events ${e.message}`)
+        this._logger.error(`Can't process wrap events ${e.message}`);
         if (transaction) {
           transaction.rollback();
         }
@@ -38,9 +39,11 @@ export class EthereumWrapIndexer {
   }
 
   private async _addEvents(rawLogs: ethers.providers.Log[], transaction: Knex.Transaction) {
-    const domainObjects = rawLogs.map(log => parseERCLog(log, EthereumWrapIndexer.wrapInterface));
-    for (const domainObject of domainObjects) {
-      await domainObject.save(this._dbClient, transaction);
+    const wraps = rawLogs.map(log => EthereumInitialWrapIndexer._parseERCLog(log));
+    for (const wrap of wraps) {
+      if (wrap) {
+        await new ErcWrapDAO(this._dbClient).save(wrap, transaction);
+      }
     }
   }
 
@@ -64,9 +67,37 @@ export class EthereumWrapIndexer {
       fromBlock: fromBlock,
       toBlock: 'latest',
       topics: [
-        EthereumWrapIndexer.wrapTopics,
+        EthereumInitialWrapIndexer.wrapTopics,
       ],
     };
+  }
+
+  private static _parseERCLog(log: ethers.providers.Log): ERC20Wrap | ERC721Wrap | null {
+    const logDescription = EthereumInitialWrapIndexer.wrapInterface.parseLog(log);
+    if (logDescription.name === 'ERC20WrapAsked') {
+      return {
+        source: logDescription.args['user'],
+        token: logDescription.args['token'],
+        amount: logDescription.args['amount'].toString(),
+        tezosDestination: logDescription.args['tezosDestinationAddress'],
+        transactionHash: log.transactionHash,
+        blockHash: log.blockHash,
+        logIndex: log.logIndex,
+        status: 'asked',
+      };
+    } else if (logDescription.name === 'ERC721WrapAsked') {
+      return {
+        source: logDescription.args['user'],
+        token: logDescription.args['token'],
+        tokenId: logDescription.args['tokenId'].toString(),
+        tezosDestination: logDescription.args['tezosDestinationAddress'],
+        transactionHash: log.transactionHash,
+        blockHash: log.blockHash,
+        logIndex: log.logIndex,
+        status: 'asked',
+      };
+    }
+    return null;
   }
 
   private _ethereumProvider: ethers.providers.Provider;
@@ -74,6 +105,6 @@ export class EthereumWrapIndexer {
   private _ethereumConfig: EthereumConfig;
   private _appState: AppState;
   private _logger: Logger;
-  static readonly wrapTopics: string[] = [id('ERC20WrapAsked(address,address,uint256,string)'), id('ERC721WrapAsked(address,address,uint256,string)')];
-  static readonly wrapInterface: ethers.utils.Interface = new ethers.utils.Interface(['event ERC20WrapAsked(address user, address token, uint256 amount, string tezosDestinationAddress)', 'event ERC721WrapAsked(address user, address token, uint256 tokenId, string tezosDestinationAddress)']);
+  private static readonly wrapTopics: string[] = [id('ERC20WrapAsked(address,address,uint256,string)'), id('ERC721WrapAsked(address,address,uint256,string)')];
+  private static readonly wrapInterface: ethers.utils.Interface = new ethers.utils.Interface(['event ERC20WrapAsked(address user, address token, uint256 amount, string tezosDestinationAddress)', 'event ERC721WrapAsked(address user, address token, uint256 tokenId, string tezosDestinationAddress)']);
 }

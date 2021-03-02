@@ -1,6 +1,6 @@
-import Knex from 'knex'
+import Knex from 'knex';
 
-export async function up (knex: Knex): Promise<void> {
+export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('erc20_wraps', table => {
     table.string('source');
     table.string('token');
@@ -9,6 +9,7 @@ export async function up (knex: Knex): Promise<void> {
     table.string('transaction_hash');
     table.string('block_hash');
     table.bigInteger('log_index');
+    table.string('status');
     table.primary(['block_hash', 'log_index']);
   });
   await knex.schema.createTable('erc721_wraps', table => {
@@ -19,11 +20,12 @@ export async function up (knex: Knex): Promise<void> {
     table.string('transaction_hash');
     table.string('block_hash');
     table.bigInteger('log_index');
+    table.string('status');
     table.primary(['block_hash', 'log_index']);
   });
 }
 
-export async function down (knex: Knex): Promise<void> {
+export async function down(knex: Knex): Promise<void> {
   await knex.schema.dropTable('erc20_wraps');
   await knex.schema.dropTable('erc721_wraps');
 }

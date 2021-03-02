@@ -8,9 +8,9 @@ import { Config } from '../configuration';
 export function httpServer(logger: Logger, configuration: Config): Express {
   const app = express();
   app.use(express.json());
-  app.use(express.urlencoded({extended: true}));
+  app.use(express.urlencoded({ extended: true }));
   app.use((req: Request, res: Response, next: NextFunction) => {
-    logger.info(`${req.method} ${req.url} ${res.statusCode}`)
+    logger.info(`${req.method} ${req.url} ${res.statusCode}`);
     next();
   });
   if (configuration.node.environment === 'production') {

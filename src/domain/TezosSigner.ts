@@ -1,4 +1,5 @@
 export type TezosSigner = {
   ipnsKey: string,
-  publicKey: string
+  publicKey: string,
+  active: boolean
 }

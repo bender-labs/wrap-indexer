@@ -1,6 +1,6 @@
-import Knex from 'knex'
+import Knex from 'knex';
 
-export async function up (knex: Knex): Promise<void> {
+export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('tezos_quorum', table => {
     table.string('admin').primary();
     table.integer('threshold');
@@ -12,7 +12,7 @@ export async function up (knex: Knex): Promise<void> {
   });
 }
 
-export async function down (knex: Knex): Promise<void> {
+export async function down(knex: Knex): Promise<void> {
   await knex.schema.dropTable('tezos_quorum');
   await knex.schema.dropTable('tezos_quorum_signers');
 }

@@ -36,7 +36,10 @@ export class BcdProvider {
 
   async getContractOperations(contractAddress: string, entrypoints: string[], lastId?: string): Promise<Operations> {
     const response = await axios.get<Operations>(`${BcdProvider.BCD_URL}/v1/contract/${this._tezosNetwork}/${contractAddress}/operations\\?entrypoints\\=${entrypoints.join(',')}${lastId ? '&last_id=' + lastId : ''}`);
-    return {last_id: response.data.last_id, operations: response.data.operations.filter(o => entrypoints.includes(o.entrypoint))};
+    return {
+      last_id: response.data.last_id,
+      operations: response.data.operations.filter(o => entrypoints.includes(o.entrypoint)),
+    };
   }
 
   async getStorage(contractAddress: string): Promise<MichelineNode> {

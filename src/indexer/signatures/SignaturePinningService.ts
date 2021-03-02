@@ -1,8 +1,9 @@
 import { Logger } from 'tslog';
 import Knex from 'knex';
-import { IpfsClient } from '../../tools/ipfsClient';
-import { AppState } from '../AppState';
-import { TezosSigner } from '../tezos/TezosSigner';
+import { IpfsClient } from '../../infrastructure/ipfsClient';
+import { AppState } from '../state/AppState';
+import { TezosSigner } from '../../domain/TezosSigner';
+import { TezosQuorumDao } from '../../dao/TezosQuorumDao';
 
 export class SignaturePinningService {
   constructor(logger: Logger, ipfsClient: IpfsClient, dbClient: Knex) {
@@ -14,13 +15,13 @@ export class SignaturePinningService {
 
   async index(): Promise<void> {
     this._logger.info(`Pinning signatures`);
-    const signers: TezosSigner[] = await this._dbClient.table('tezos_quorum_signers').where({ active: true });
+    const signers = await new TezosQuorumDao(this._dbClient).getActiveSigners();
     for (const signer of signers) {
       this._logger.info(`Pinning signatures of ${signer.ipnsKey}`);
       try {
         await this._pinSignatureOf(signer);
       } catch (e) {
-        this._logger.error(`Can't pin signatures ${e.message}`);
+        this._logger.error(`Can't pin signatures of ${signer.ipnsKey} ${e.message}`);
       }
     }
   }
@@ -31,6 +32,7 @@ export class SignaturePinningService {
       await this._ipfsClient.pin.add(cid);
     }
   }
+
   private _logger: Logger;
   private _ipfsClient: IpfsClient;
   private _dbClient: Knex;

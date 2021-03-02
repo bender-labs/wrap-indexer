@@ -7,6 +7,7 @@ export type IpfsResolveOptions = {
 
 export interface IpfsClient {
   resolve(value: string, options: IpfsResolveOptions): Promise<string>;
+
   dag: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     get(value: string): Promise<any>
@@ -18,5 +19,5 @@ export interface IpfsClient {
 }
 
 export function createIpfsClient(configuration: Config): IpfsClient {
-  return IPFS({url: configuration.ipfs.nodeUrl});
+  return IPFS({ url: configuration.ipfs.nodeUrl });
 }

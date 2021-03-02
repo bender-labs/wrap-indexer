@@ -1,6 +1,6 @@
-import Knex from 'knex'
+import Knex from 'knex';
 
-export async function up (knex: Knex): Promise<void> {
+export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('signatures', table => {
     table.string('signer');
     table.string('cid').primary();
@@ -14,10 +14,10 @@ export async function up (knex: Knex): Promise<void> {
     table.string('transaction_hash');
     table.string('operation_id');
     table.string('block_hash');
-    table.integer('log_index')
+    table.integer('log_index');
   });
 }
 
-export async function down (knex: Knex): Promise<void> {
+export async function down(knex: Knex): Promise<void> {
   await knex.schema.dropTable('signatures');
 }

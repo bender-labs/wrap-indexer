@@ -1,4 +1,4 @@
-import { loadConfiguration} from '../configuration';
-import {createKnexConfiguration} from '../tools/dbClient';
+import { loadConfiguration } from '../configuration';
+import { createKnexConfiguration } from '../infrastructure/dbClient';
 
 module.exports = createKnexConfiguration(loadConfiguration());

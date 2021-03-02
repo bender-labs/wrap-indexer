@@ -1,16 +1,17 @@
 import { loadConfiguration } from './configuration';
-import { createLogger } from './tools/logger';
-import { createBcd } from './tools/tezos/bcdProvider';
+import { createLogger } from './infrastructure/logger';
+import { createBcd } from './infrastructure/tezos/bcdProvider';
 import { httpServer } from './web/Server';
-import { createDbClient } from './tools/dbClient';
-import { createEthereumProvider } from './tools/ethereum/ethereumNetworkProvider';
-import { createIpfsClient } from './tools/ipfsClient';
-import { EthereumWrapIndexer } from './domain/ethereum/EthereumWrapIndexer';
-import { TezosQuorumIndexer } from './domain/tezos/TezosQuorumIndexer';
-import { EthereumQuorumIndexer } from './domain/ethereum/EthereumQuorumIndexer';
-import { SignatureIndexer } from './domain/signatures/SignatureIndexer';
-import { SignaturePinningService } from './domain/signatures/SignaturePinningService';
-import { TezosUnwrapIndexer } from './domain/tezos/TezosUnwrapIndexer';
+import { createDbClient } from './infrastructure/dbClient';
+import { createEthereumProvider } from './infrastructure/ethereum/ethereumNetworkProvider';
+import { createIpfsClient } from './infrastructure/ipfsClient';
+import { EthereumInitialWrapIndexer } from './indexer/ethereum/EthereumInitialWrapIndexer';
+import { TezosQuorumIndexer } from './indexer/tezos/TezosQuorumIndexer';
+import { EthereumQuorumIndexer } from './indexer/ethereum/EthereumQuorumIndexer';
+import { SignatureIndexer } from './indexer/signatures/SignatureIndexer';
+import { SignaturePinningService } from './indexer/signatures/SignaturePinningService';
+import { TezosInitialUnwrapIndexer } from './indexer/tezos/TezosInitialUnwrapIndexer';
+import { EthereumFinalizedUnwrapIndexer } from './indexer/ethereum/EthereumFinalizedUnwrapIndexer';
 
 const configuration = loadConfiguration();
 const ethereumConfiguration = configuration.ethereum.networks[configuration.ethereum.currentNetwork];
@@ -20,12 +21,13 @@ const dbClient = createDbClient(configuration);
 const ethereumProvider = createEthereumProvider(ethereumConfiguration);
 const bcd = createBcd(configuration.tezos.currentNetwork);
 const ipfsClient = createIpfsClient(configuration);
-const ethereumWrapIndexer = new EthereumWrapIndexer(logger, ethereumConfiguration, ethereumProvider, dbClient);
+const ethereumWrapIndexer = new EthereumInitialWrapIndexer(logger, ethereumConfiguration, ethereumProvider, dbClient);
 const tezosQuorumIndexer = new TezosQuorumIndexer(logger, tezosConfiguration, bcd, dbClient);
 const ethereumQuorumIndexer = new EthereumQuorumIndexer(logger, ethereumConfiguration, ethereumProvider, dbClient);
 const signatureIndexer = new SignatureIndexer(logger, ipfsClient, dbClient);
 const signaturePinningService = new SignaturePinningService(logger, ipfsClient, dbClient);
-const tezosUnwrapIndexer = new TezosUnwrapIndexer(logger, tezosConfiguration, bcd, dbClient);
+const tezosUnwrapIndexer = new TezosInitialUnwrapIndexer(logger, tezosConfiguration, bcd, dbClient);
+const ethereumFinalizedUnwrapIndexer = new EthereumFinalizedUnwrapIndexer(logger, ethereumConfiguration, ethereumProvider, dbClient);
 
 const app = httpServer(logger, configuration);
 app.listen(3000, () => {
@@ -40,7 +42,8 @@ app.listen(3000, () => {
     ethereumQuorumIndexer.index(),
     signatureIndexer.index(),
     signaturePinningService.index(),
-    tezosUnwrapIndexer.index()
+    tezosUnwrapIndexer.index(),
+    ethereumFinalizedUnwrapIndexer.index(),
   ]);
 }());
 

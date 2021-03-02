@@ -1,11 +1,12 @@
 import { Logger } from 'tslog';
 import { TezosConfig } from '../../configuration';
 import Knex from 'knex';
-import { BcdProvider, Operation, Operations } from '../../tools/tezos/bcdProvider';
-import { AppState } from '../AppState';
-import { parseERCUnwrap } from './ERCUnwrapAsked';
+import { BcdProvider, Operation, Operations } from '../../infrastructure/tezos/bcdProvider';
+import { AppState } from '../state/AppState';
+import { ERC20Unwrap, ERC721Unwrap } from '../../domain/ERCUnwrap';
+import { ErcUnwrapDAO } from '../../dao/ErcUnwrapDAO';
 
-export class TezosUnwrapIndexer {
+export class TezosInitialUnwrapIndexer {
 
   constructor(logger: Logger, tezosConfiguration: TezosConfig, bcd: BcdProvider, dbClient: Knex) {
     this._logger = logger;
@@ -42,7 +43,10 @@ export class TezosUnwrapIndexer {
         this._tezosConfiguration.minterContractAddress,
         ['unwrap_erc20', 'unwrap_erc721'],
         lastProcessedOperationId);
-    return { last_id: operations.last_id, operations: operations.operations.filter(o => o.status == 'applied' && !o.mempool) };
+    return {
+      last_id: operations.last_id,
+      operations: operations.operations.filter(o => o.status == 'applied' && !o.mempool),
+    };
   }
 
   private async _addOperations(operationsToProcess: Operation[], transaction: Knex.Transaction): Promise<void> {
@@ -50,14 +54,40 @@ export class TezosUnwrapIndexer {
       let operationId = `${operation.hash}/${operation.counter}`;
       if (operation.internal) {
         // TODO get nonce of internal operation
-        operationId += `/${0}`
+        operationId += `/${0}`;
       }
-      const unwrap = parseERCUnwrap(operation, operationId);
+      const unwrap = this._parseERCUnwrap(operation, operationId);
       if (unwrap) {
-        await unwrap.save(this._dbClient, transaction);
+        await new ErcUnwrapDAO(this._dbClient).save(unwrap, transaction);
       }
     }
   }
+
+  private _parseERCUnwrap(operation: Operation, operationId: string): ERC20Unwrap | ERC721Unwrap | null {
+    if (operation.entrypoint === 'unwrap_erc20') {
+      return {
+        id: operation.id,
+        source: operation.source,
+        token: operation.parameters.children.find(c => c.name == 'erc_20').value as string,
+        amount: operation.parameters.children.find(c => c.name == 'amount').value as number,
+        ethereumDestination: operation.parameters.children.find(c => c.name == 'destination').value as string,
+        operationId,
+        status: 'asked',
+      };
+    } else if (operation.entrypoint === 'unwrap_erc721') {
+      return {
+        id: operation.id,
+        source: operation.source,
+        token: operation.parameters.children.find(c => c.name == 'erc_721').value as string,
+        tokenId: operation.parameters.children.find(c => c.name == 'token_id').value as number,
+        ethereumDestination: operation.parameters.children.find(c => c.name == 'destination').value as string,
+        operationId,
+        status: 'asked',
+      };
+    }
+    return null;
+  }
+
 
   private _logger: Logger;
   private _tezosConfiguration: TezosConfig;
