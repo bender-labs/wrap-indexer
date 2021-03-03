@@ -11,7 +11,7 @@ import { SignatureDao } from '../../dao/SignatureDao';
 import { TezosQuorumDao } from '../../dao/TezosQuorumDao';
 
 export class SignatureIndexer {
-  constructor(logger: Logger, ipfsClient: IpfsClient, dbClient: Knex) {
+  constructor({logger, ipfsClient, dbClient}: {logger: Logger, ipfsClient: IpfsClient, dbClient: Knex}) {
     this._logger = logger;
     this._ipfsClient = ipfsClient;
     this._dbClient = dbClient;

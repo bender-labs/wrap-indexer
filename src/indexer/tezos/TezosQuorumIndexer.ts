@@ -7,7 +7,7 @@ import { TezosQuorumDao } from '../../dao/TezosQuorumDao';
 
 export class TezosQuorumIndexer {
 
-  constructor(logger: Logger, tezosConfiguration: TezosConfig, bcd: BcdProvider, dbClient: Knex) {
+  constructor({logger, tezosConfiguration, bcd, dbClient}:{logger: Logger, tezosConfiguration: TezosConfig, bcd: BcdProvider, dbClient: Knex}) {
     this._logger = logger;
     this._tezosConfiguration = tezosConfiguration;
     this._bcd = bcd;

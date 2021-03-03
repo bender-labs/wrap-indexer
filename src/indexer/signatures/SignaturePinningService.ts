@@ -6,7 +6,7 @@ import { TezosSigner } from '../../domain/TezosSigner';
 import { TezosQuorumDao } from '../../dao/TezosQuorumDao';
 
 export class SignaturePinningService {
-  constructor(logger: Logger, ipfsClient: IpfsClient, dbClient: Knex) {
+  constructor({logger, ipfsClient, dbClient}: {logger: Logger, ipfsClient: IpfsClient, dbClient: Knex}) {
     this._logger = logger;
     this._ipfsClient = ipfsClient;
     this._dbClient = dbClient;
