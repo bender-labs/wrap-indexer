@@ -58,8 +58,12 @@ export class BcdProvider {
   }
 
   async getBigMapKey(bigmapId: number, key: string): Promise<BigMapKey[]> {
-    console.log(`${BcdProvider.BCD_URL}/v1/bigmap/${this._tezosNetwork}/${bigmapId}/keys?q=${encodeURI(key)}`);
     const response = await axios.get<BigMapKey[]>(`${BcdProvider.BCD_URL}/v1/bigmap/${this._tezosNetwork}/${bigmapId}/keys?q=${encodeURI(key)}`);
+    return response.data;
+  }
+
+  async getBigMapContent(bigmapId: number): Promise<BigMapKey[]> {
+    const response = await axios.get<BigMapKey[]>(`${BcdProvider.BCD_URL}/v1/bigmap/${this._tezosNetwork}/${bigmapId}/keys`);
     return response.data;
   }
 

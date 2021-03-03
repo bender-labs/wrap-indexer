@@ -30,7 +30,7 @@ export class EthereumFinalizedUnwrapIndexer {
     }
   }
 
-  async _updateUnwrapState(unwrap: ERC20Unwrap | ERC721Unwrap, contract: ethers.Contract): Promise<void> {
+  private async _updateUnwrapState(unwrap: ERC20Unwrap | ERC721Unwrap, contract: ethers.Contract): Promise<void> {
     let transaction;
     try {
       const processed = await contract.isTezosOperationProcessed(unwrap.operationId);
