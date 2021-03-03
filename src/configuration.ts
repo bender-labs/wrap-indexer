@@ -16,32 +16,35 @@ export type TezosConfig = {
 
 export type Config = {
   ethereum: {
-    currentNetwork: string,
+    currentNetwork: string;
     networks: {
-      [key: string]: EthereumConfig
+      [key: string]: EthereumConfig;
     }
   };
   tezos: {
-    currentNetwork: string,
+    currentNetwork: string;
     networks: {
-      [key: string]: TezosConfig
+      [key: string]: TezosConfig;
     }
-  }
+  };
   ipfs: {
-    nodeUrl: string
-  }
+    nodeUrl: string;
+  };
   log: {
-    format: LogType
+    format: LogType;
   };
   postgres: {
-    username: string,
-    password: string,
-    host: string,
-    port: number,
+    username: string;
+    password: string;
+    host: string;
+    port: number;
     database: string;
   };
+  http: {
+    port: number;
+  };
   node: {
-    environment: string
+    environment: string;
   };
 }
 
@@ -126,6 +129,13 @@ export function loadConfiguration(): Config {
         env: 'POSTGRES_DB_NAME',
         default: 'indexer',
       },
+    },
+    http: {
+      port: {
+        env: 'HTTP_PORT',
+        type: 'integer',
+        default: 3000
+      }
     },
     node: {
       environment: {

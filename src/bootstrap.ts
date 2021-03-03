@@ -14,6 +14,7 @@ export type Dependencies = {
   ethereumProvider: ethers.providers.Provider;
   bcd: BcdProvider;
   ipfsClient: IpfsClient;
+  configuration: Config;
   ethereumConfiguration: EthereumConfig;
   tezosConfiguration: TezosConfig;
 }
@@ -30,6 +31,7 @@ export function bootstrap(configuration: Config, ethereumConfiguration: Ethereum
     ethereumProvider,
     bcd,
     ipfsClient,
+    configuration,
     ethereumConfiguration,
     tezosConfiguration
   }

@@ -1,6 +1,13 @@
 import { Router } from 'express';
-import ExampleRouter from './Example';
+import WrapsRouter from './WrapsRouter';
+import UnwrapsRouter from './UnwrapsRouter';
+import { Dependencies } from '../../bootstrap';
 
-const router = Router();
-router.use('/example', ExampleRouter);
-export default router;
+function build(dependencies: Dependencies): Router {
+  const router = Router();
+  router.use('/wraps', WrapsRouter(dependencies));
+  router.use('/unwraps', UnwrapsRouter(dependencies));
+  return router;
+}
+
+export default build;

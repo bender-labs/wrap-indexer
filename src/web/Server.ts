@@ -2,10 +2,10 @@ import helmet from 'helmet';
 import * as express from 'express';
 import { Express, NextFunction, Request, Response } from 'express';
 import BaseRouter from './routes/Router';
-import { Logger } from 'tslog';
-import { Config } from '../configuration';
+import { Dependencies } from '../bootstrap';
 
-export function httpServer(logger: Logger, configuration: Config): Express {
+export function httpServer(dependencies: Dependencies): Express {
+  const {logger, configuration} = dependencies;
   const app = express();
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
@@ -16,7 +16,7 @@ export function httpServer(logger: Logger, configuration: Config): Express {
   if (configuration.node.environment === 'production') {
     app.use(helmet());
   }
-  app.use('/v1', BaseRouter);
+  app.use('/v1', BaseRouter(dependencies));
   return app;
 }
 

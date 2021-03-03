@@ -10,9 +10,8 @@ const dependencies = bootstrap(configuration, ethereumConfiguration, tezosConfig
 
 scheduleJobs(dependencies).start();
 
-const app = httpServer(dependencies.logger, configuration);
-app.listen(3000, () => {
-  dependencies.logger.info('Express server started on port: ' + 3000);
+httpServer(dependencies).listen(configuration.http.port, () => {
+  dependencies.logger.info(`Express server started on port: ${configuration.http.port}`);
 });
 
 
