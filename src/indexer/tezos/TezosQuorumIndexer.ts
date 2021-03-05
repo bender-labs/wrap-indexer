@@ -4,6 +4,7 @@ import Knex from 'knex';
 import { BcdProvider, MichelineNode } from '../../infrastructure/tezos/bcdProvider';
 import { TezosQuorum } from '../../domain/TezosQuorum';
 import { TezosQuorumDao } from '../../dao/TezosQuorumDao';
+import { Dependencies } from '../../bootstrap';
 
 export class TezosQuorumIndexer {
 
@@ -12,7 +13,7 @@ export class TezosQuorumIndexer {
                 tezosConfiguration,
                 bcd,
                 dbClient,
-              }: { logger: Logger, tezosConfiguration: TezosConfig, bcd: BcdProvider, dbClient: Knex }) {
+              }: Dependencies) {
     this._logger = logger;
     this._tezosConfiguration = tezosConfiguration;
     this._bcd = bcd;

@@ -8,6 +8,7 @@ import { EthereumFinalizedUnwrapIndexer } from './indexer/ethereum/EthereumFinal
 import { SignatureIndexer } from './indexer/signatures/SignatureIndexer';
 import { EthereumQuorumIndexer } from './indexer/ethereum/EthereumQuorumIndexer';
 import { TezosInitialUnwrapIndexer } from './indexer/tezos/TezosInitialUnwrapIndexer';
+import { TokensIndexer } from './indexer/tokens/TokensIndexer';
 
 const every2Minutes = '*/2 * * * *';
 const every10Minutes = '*/10 * * * *';
@@ -22,6 +23,7 @@ export function scheduleJobs(dependencies: Dependencies): Crontab {
   crontab.register(() => new TezosFinalizedWrapIndexer(dependencies).index(), every2Minutes);
   crontab.register(() => new TezosQuorumIndexer(dependencies).index(), every10Minutes);
   crontab.register(() => new EthereumQuorumIndexer(dependencies).index(), every10Minutes);
+  crontab.register(() => new TokensIndexer(dependencies).index(), every10Minutes);
   crontab.register(() => new SignaturePinningService(dependencies).index(), every30Minutes);
   return crontab;
 }

@@ -7,6 +7,7 @@ import { EthereumConfig } from '../../configuration';
 import { Logger } from 'tslog';
 import { AppState } from '../state/AppState';
 import { ErcWrapDAO } from '../../dao/ErcWrapDAO';
+import { Dependencies } from '../../bootstrap';
 
 export class EthereumInitialWrapIndexer {
   constructor({
@@ -14,7 +15,7 @@ export class EthereumInitialWrapIndexer {
                 ethereumConfiguration,
                 ethereumProvider,
                 dbClient,
-              }: { logger: Logger, ethereumConfiguration: EthereumConfig, ethereumProvider: ethers.providers.Provider, dbClient: Knex }) {
+              }: Dependencies) {
     this._logger = logger;
     this._ethereumConfig = ethereumConfiguration;
     this._ethereumProvider = ethereumProvider;
@@ -72,13 +73,13 @@ export class EthereumInitialWrapIndexer {
       fromBlock: fromBlock,
       toBlock: 'latest',
       topics: [
-        EthereumInitialWrapIndexer.wrapTopics,
+        EthereumInitialWrapIndexer._wrapTopics,
       ],
     };
   }
 
   private static _parseERCLog(log: ethers.providers.Log): ERC20Wrap | ERC721Wrap | null {
-    const logDescription = EthereumInitialWrapIndexer.wrapInterface.parseLog(log);
+    const logDescription = EthereumInitialWrapIndexer._wrapInterface.parseLog(log);
     if (logDescription.name === 'ERC20WrapAsked') {
       return {
         id: `${log.blockHash}:${log.logIndex}`,
@@ -112,6 +113,6 @@ export class EthereumInitialWrapIndexer {
   private _ethereumConfig: EthereumConfig;
   private _appState: AppState;
   private _logger: Logger;
-  private static readonly wrapTopics: string[] = [id('ERC20WrapAsked(address,address,uint256,string)'), id('ERC721WrapAsked(address,address,uint256,string)')];
-  private static readonly wrapInterface: ethers.utils.Interface = new ethers.utils.Interface(['event ERC20WrapAsked(address user, address token, uint256 amount, string tezosDestinationAddress)', 'event ERC721WrapAsked(address user, address token, uint256 tokenId, string tezosDestinationAddress)']);
+  private static readonly _wrapTopics: string[] = [id('ERC20WrapAsked(address,address,uint256,string)'), id('ERC721WrapAsked(address,address,uint256,string)')];
+  private static readonly _wrapInterface: ethers.utils.Interface = new ethers.utils.Interface(['event ERC20WrapAsked(address user, address token, uint256 amount, string tezosDestinationAddress)', 'event ERC721WrapAsked(address user, address token, uint256 tokenId, string tezosDestinationAddress)']);
 }

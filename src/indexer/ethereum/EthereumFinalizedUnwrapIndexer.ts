@@ -5,6 +5,7 @@ import { EthereumConfig } from '../../configuration';
 import { Logger } from 'tslog';
 import { ERC20Unwrap, ERC721Unwrap } from '../../domain/ERCUnwrap';
 import { ErcUnwrapDAO } from '../../dao/ErcUnwrapDAO';
+import { Dependencies } from '../../bootstrap';
 
 export class EthereumFinalizedUnwrapIndexer {
 
@@ -13,7 +14,7 @@ export class EthereumFinalizedUnwrapIndexer {
                 ethereumConfiguration,
                 ethereumProvider,
                 dbClient,
-              }: { logger: Logger, ethereumConfiguration: EthereumConfig, ethereumProvider: ethers.providers.Provider, dbClient: Knex }) {
+              }: Dependencies) {
     this._logger = logger;
     this._ethereumConfig = ethereumConfiguration;
     this._ethereumProvider = ethereumProvider;

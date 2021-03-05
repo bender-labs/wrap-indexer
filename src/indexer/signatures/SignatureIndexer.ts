@@ -9,9 +9,10 @@ import { AppState } from '../state/AppState';
 import { TezosSigner } from '../../domain/TezosSigner';
 import { SignatureDao } from '../../dao/SignatureDao';
 import { TezosQuorumDao } from '../../dao/TezosQuorumDao';
+import { Dependencies } from '../../bootstrap';
 
 export class SignatureIndexer {
-  constructor({ logger, ipfsClient, dbClient }: { logger: Logger, ipfsClient: IpfsClient, dbClient: Knex }) {
+  constructor({ logger, ipfsClient, dbClient }: Dependencies) {
     this._logger = logger;
     this._ipfsClient = ipfsClient;
     this._dbClient = dbClient;

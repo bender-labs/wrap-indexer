@@ -57,6 +57,15 @@ export class BcdProvider {
     return response.data;
   }
 
+  async getTokenMetadata(contractAddress: string, tokenId: string): Promise<MichelineNode> {
+    const response = await axios.post<MichelineNode>(`${BcdProvider.BCD_URL}/v1/contract/${this._tezosNetwork}/${contractAddress}/views/execute`, {
+      name: 'token_metadata',
+      implementation: 0,
+      data: { '0': parseInt(tokenId) },
+    });
+    return response.data;
+  }
+
   async getBigMapKey(bigmapId: number, key: string): Promise<BigMapKey[]> {
     const response = await axios.get<BigMapKey[]>(`${BcdProvider.BCD_URL}/v1/bigmap/${this._tezosNetwork}/${bigmapId}/keys?q=${encodeURI(key)}`);
     return response.data;

@@ -5,6 +5,7 @@ import { BcdProvider, Operation, Operations } from '../../infrastructure/tezos/b
 import { AppState } from '../state/AppState';
 import { ERC20Unwrap, ERC721Unwrap } from '../../domain/ERCUnwrap';
 import { ErcUnwrapDAO } from '../../dao/ErcUnwrapDAO';
+import { Dependencies } from '../../bootstrap';
 
 export class TezosInitialUnwrapIndexer {
 
@@ -13,7 +14,7 @@ export class TezosInitialUnwrapIndexer {
                 tezosConfiguration,
                 bcd,
                 dbClient,
-              }: { logger: Logger, tezosConfiguration: TezosConfig, bcd: BcdProvider, dbClient: Knex }) {
+              }: Dependencies) {
     this._logger = logger;
     this._tezosConfiguration = tezosConfiguration;
     this._bcd = bcd;

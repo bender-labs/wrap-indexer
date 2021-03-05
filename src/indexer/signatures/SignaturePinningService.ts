@@ -4,9 +4,10 @@ import { IpfsClient } from '../../infrastructure/ipfsClient';
 import { AppState } from '../state/AppState';
 import { TezosSigner } from '../../domain/TezosSigner';
 import { TezosQuorumDao } from '../../dao/TezosQuorumDao';
+import { Dependencies } from '../../bootstrap';
 
 export class SignaturePinningService {
-  constructor({ logger, ipfsClient, dbClient }: { logger: Logger, ipfsClient: IpfsClient, dbClient: Knex }) {
+  constructor({ logger, ipfsClient, dbClient }: Dependencies) {
     this._logger = logger;
     this._ipfsClient = ipfsClient;
     this._dbClient = dbClient;

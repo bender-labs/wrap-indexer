@@ -4,6 +4,7 @@ import { BcdProvider } from '../../infrastructure/tezos/bcdProvider';
 import Knex from 'knex';
 import { ErcWrapDAO } from '../../dao/ErcWrapDAO';
 import { ERC20Wrap, ERC721Wrap } from '../../domain/ERCWrap';
+import { Dependencies } from '../../bootstrap';
 
 type FinalizedUnwrap = {
   blockHash: string,
@@ -17,7 +18,7 @@ export class TezosFinalizedWrapIndexer {
                 tezosConfiguration,
                 bcd,
                 dbClient,
-              }: { logger: Logger, tezosConfiguration: TezosConfig, bcd: BcdProvider, dbClient: Knex }) {
+              }: Dependencies) {
     this._logger = logger;
     this._tezosConfiguration = tezosConfiguration;
     this._bcd = bcd;

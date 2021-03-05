@@ -3,6 +3,7 @@ import { EthereumConfig } from '../../configuration';
 import Knex from 'knex';
 import { ethers } from 'ethers';
 import { EthereumQuorumDao } from '../../dao/EthereumQuorumDao';
+import { Dependencies } from '../../bootstrap';
 
 export class EthereumQuorumIndexer {
 
@@ -11,7 +12,7 @@ export class EthereumQuorumIndexer {
                 ethereumConfiguration,
                 ethereumProvider,
                 dbClient,
-              }: { logger: Logger, ethereumConfiguration: EthereumConfig, ethereumProvider: ethers.providers.Provider, dbClient: Knex }) {
+              }: Dependencies) {
     this._logger = logger;
     this._ethereumConfiguration = ethereumConfiguration;
     this._ethereumProvider = ethereumProvider;

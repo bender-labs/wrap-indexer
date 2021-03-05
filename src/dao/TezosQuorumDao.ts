@@ -17,7 +17,7 @@ export class TezosQuorumDao {
   }
 
   private async _saveQuorum(quorum: TezosQuorum, transaction: Knex.Transaction): Promise<void> {
-    await this._dbClient('tezos_quorum')
+    await this._dbClient.table('tezos_quorum')
       .transacting(transaction)
       .insert({ admin: quorum.admin, threshold: quorum.threshold })
       .onConflict('admin' as never)
@@ -25,14 +25,14 @@ export class TezosQuorumDao {
   }
 
   private async _disableOtherSigners(quorum: TezosQuorum, transaction: Knex.Transaction): Promise<void> {
-    await this._dbClient('tezos_quorum_signers')
+    await this._dbClient.table('tezos_quorum_signers')
       .transacting(transaction)
       .update({ active: false })
       .whereNotIn('public_key', quorum.signers.map<string>(s => s.publicKey));
   }
 
   private async _saveSigner(signer: TezosSigner, transaction: Knex.Transaction): Promise<void> {
-    await this._dbClient('tezos_quorum_signers')
+    await this._dbClient.table('tezos_quorum_signers')
       .transacting(transaction)
       .insert(signer)
       .onConflict('ipns_key' as never)
