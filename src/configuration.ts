@@ -134,8 +134,8 @@ export function loadConfiguration(): Config {
       port: {
         env: 'HTTP_PORT',
         type: 'integer',
-        default: 3000
-      }
+        default: 3000,
+      },
     },
     node: {
       environment: {

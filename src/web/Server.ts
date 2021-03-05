@@ -5,7 +5,7 @@ import BaseRouter from './routes/Router';
 import { Dependencies } from '../bootstrap';
 
 export function httpServer(dependencies: Dependencies): Express {
-  const {logger, configuration} = dependencies;
+  const { logger, configuration } = dependencies;
   const app = express();
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));

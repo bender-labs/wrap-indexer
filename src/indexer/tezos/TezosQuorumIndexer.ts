@@ -7,7 +7,12 @@ import { TezosQuorumDao } from '../../dao/TezosQuorumDao';
 
 export class TezosQuorumIndexer {
 
-  constructor({logger, tezosConfiguration, bcd, dbClient}:{logger: Logger, tezosConfiguration: TezosConfig, bcd: BcdProvider, dbClient: Knex}) {
+  constructor({
+                logger,
+                tezosConfiguration,
+                bcd,
+                dbClient,
+              }: { logger: Logger, tezosConfiguration: TezosConfig, bcd: BcdProvider, dbClient: Knex }) {
     this._logger = logger;
     this._tezosConfiguration = tezosConfiguration;
     this._bcd = bcd;
@@ -37,7 +42,7 @@ export class TezosQuorumIndexer {
     const signers = storage.children.find(c => c.name == 'signers').children.map(c => ({
       ipnsKey: c.name,
       publicKey: c.value as string,
-      active: true
+      active: true,
     }));
     return { admin, threshold, signers };
   }

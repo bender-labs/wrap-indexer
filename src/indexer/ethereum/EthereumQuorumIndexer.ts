@@ -6,7 +6,12 @@ import { EthereumQuorumDao } from '../../dao/EthereumQuorumDao';
 
 export class EthereumQuorumIndexer {
 
-  constructor({logger, ethereumConfiguration, ethereumProvider, dbClient}: {logger: Logger, ethereumConfiguration: EthereumConfig, ethereumProvider: ethers.providers.Provider, dbClient: Knex}) {
+  constructor({
+                logger,
+                ethereumConfiguration,
+                ethereumProvider,
+                dbClient,
+              }: { logger: Logger, ethereumConfiguration: EthereumConfig, ethereumProvider: ethers.providers.Provider, dbClient: Knex }) {
     this._logger = logger;
     this._ethereumConfiguration = ethereumConfiguration;
     this._ethereumProvider = ethereumProvider;

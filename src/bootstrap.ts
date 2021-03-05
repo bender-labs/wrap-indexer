@@ -33,6 +33,6 @@ export function bootstrap(configuration: Config, ethereumConfiguration: Ethereum
     ipfsClient,
     configuration,
     ethereumConfiguration,
-    tezosConfiguration
-  }
+    tezosConfiguration,
+  };
 }

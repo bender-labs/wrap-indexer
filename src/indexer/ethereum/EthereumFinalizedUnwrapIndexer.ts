@@ -8,7 +8,12 @@ import { ErcUnwrapDAO } from '../../dao/ErcUnwrapDAO';
 
 export class EthereumFinalizedUnwrapIndexer {
 
-  constructor({logger, ethereumConfiguration, ethereumProvider, dbClient}: {logger: Logger, ethereumConfiguration: EthereumConfig, ethereumProvider: ethers.providers.Provider, dbClient: Knex}) {
+  constructor({
+                logger,
+                ethereumConfiguration,
+                ethereumProvider,
+                dbClient,
+              }: { logger: Logger, ethereumConfiguration: EthereumConfig, ethereumProvider: ethers.providers.Provider, dbClient: Knex }) {
     this._logger = logger;
     this._ethereumConfig = ethereumConfiguration;
     this._ethereumProvider = ethereumProvider;

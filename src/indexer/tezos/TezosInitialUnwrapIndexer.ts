@@ -8,7 +8,12 @@ import { ErcUnwrapDAO } from '../../dao/ErcUnwrapDAO';
 
 export class TezosInitialUnwrapIndexer {
 
-  constructor({logger, tezosConfiguration, bcd, dbClient}: {logger: Logger, tezosConfiguration: TezosConfig, bcd: BcdProvider, dbClient: Knex}) {
+  constructor({
+                logger,
+                tezosConfiguration,
+                bcd,
+                dbClient,
+              }: { logger: Logger, tezosConfiguration: TezosConfig, bcd: BcdProvider, dbClient: Knex }) {
     this._logger = logger;
     this._tezosConfiguration = tezosConfiguration;
     this._bcd = bcd;

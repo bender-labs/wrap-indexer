@@ -11,7 +11,10 @@ export class ErcWrapDAO {
   }
 
   async setAsFinalized(wrap: ERC20Wrap | ERC721Wrap, transaction: Knex.Transaction): Promise<void> {
-    await this._dbClient.table(this._table(wrap)).transacting(transaction).where({ blockHash: wrap.blockHash, logIndex: wrap.logIndex }).update({ status: 'finalized' });
+    await this._dbClient.table(this._table(wrap)).transacting(transaction).where({
+      blockHash: wrap.blockHash,
+      logIndex: wrap.logIndex,
+    }).update({ status: 'finalized' });
   }
 
   async getNotFinalizedERC20(): Promise<ERC20Wrap[]> {

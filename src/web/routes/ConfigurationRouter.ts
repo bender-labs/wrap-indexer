@@ -14,8 +14,8 @@ async function buildConfiguration(dbClient: Knex): Promise<Configuration> {
   const ethereumThreshold = await new EthereumQuorumDao(dbClient).getThreshold();
   return {
     wrapRequiredSignatures: tezosThreashold,
-    unwrapRequiredSignatures: ethereumThreshold
-  }
+    unwrapRequiredSignatures: ethereumThreshold,
+  };
 }
 
 function build(dependencies: Dependencies): Router {
