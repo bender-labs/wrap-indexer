@@ -4,6 +4,8 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('signatures', table => {
     table.string('signer');
     table.string('cid').primary();
+    table.string('id');
+    table.string('wrap_id');
     table.string('type');
     table.string('signature');
     table.integer('level');

@@ -43,5 +43,10 @@ export class TezosQuorumDao {
     return this._dbClient.table<TezosSigner>('tezos_quorum_signers').where({ active: true });
   }
 
+  async getThreshold(): Promise<number> {
+    const quorum = await this._dbClient.table<TezosQuorum>('tezos_quorum').first();
+    return quorum.threshold;
+  }
+
   private _dbClient: Knex;
 }

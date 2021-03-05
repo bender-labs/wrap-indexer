@@ -1,4 +1,5 @@
 export type ERC20Wrap = {
+  id: string;
   source: string;
   token: string;
   tezosDestination: string;
@@ -10,6 +11,7 @@ export type ERC20Wrap = {
 }
 
 export type ERC721Wrap = {
+  id: string;
   source: string;
   token: string;
   tezosDestination: string;

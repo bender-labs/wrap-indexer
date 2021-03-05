@@ -76,6 +76,7 @@ export class EthereumInitialWrapIndexer {
     const logDescription = EthereumInitialWrapIndexer.wrapInterface.parseLog(log);
     if (logDescription.name === 'ERC20WrapAsked') {
       return {
+        id: `${log.blockHash}:${log.logIndex}`,
         source: logDescription.args['user'],
         token: logDescription.args['token'],
         amount: logDescription.args['amount'].toString(),
@@ -87,6 +88,7 @@ export class EthereumInitialWrapIndexer {
       };
     } else if (logDescription.name === 'ERC721WrapAsked') {
       return {
+        id: `${log.blockHash}:${log.logIndex}`,
         source: logDescription.args['user'],
         token: logDescription.args['token'],
         tokenId: logDescription.args['tokenId'].toString(),

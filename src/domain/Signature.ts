@@ -1,4 +1,5 @@
 export type Erc20MintingSignature = {
+  wrapId: string;
   signer: string;
   cid: string;
   type: string;
@@ -13,6 +14,7 @@ export type Erc20MintingSignature = {
 }
 
 export type Erc721MintingSignature = {
+  wrapId: string;
   signer: string;
   cid: string;
   type: string;
@@ -27,6 +29,8 @@ export type Erc721MintingSignature = {
 }
 
 export type Erc20UnwrapSignature = {
+  id: string;
+  wrapId: string;
   signer: string;
   cid: string;
   type: string;
@@ -39,6 +43,8 @@ export type Erc20UnwrapSignature = {
 }
 
 export type Erc721UnwrapSignature = {
+  id: string;
+  wrapId: string;
   signer: string;
   cid: string;
   type: string;

@@ -78,6 +78,7 @@ export class SignatureIndexer {
   private _parseSignature(signer: TezosSigner, cid: string, value: any): Erc20MintingSignature | Erc721MintingSignature | Erc20UnwrapSignature | Erc721UnwrapSignature {
     if (value.type === 'Erc20MintingSigned') {
       return {
+        wrapId: `${value.payload.parameters.blockHash}:${value.payload.parameters.logIndex}`,
         signer: signer.ipnsKey,
         cid,
         type: value.type,
@@ -92,6 +93,7 @@ export class SignatureIndexer {
       };
     } else if (value.type === 'Erc721MintingSigned') {
       return {
+        wrapId: `${value.payload.parameters.blockHash}:${value.payload.parameters.logIndex}`,
         signer: signer.ipnsKey,
         cid,
         type: value.type,
@@ -106,6 +108,8 @@ export class SignatureIndexer {
       };
     } else if (value.type === 'Erc20UnwrapSigned') {
       return {
+        wrapId: value.payload.parameters.operationId,
+        id: value.payload.parameters.operationId,
         signer: signer.ipnsKey,
         cid,
         type: value.type,
@@ -118,6 +122,8 @@ export class SignatureIndexer {
       };
     } else if (value.type === 'Erc721UnwrapSigned') {
       return {
+        wrapId: value.payload.parameters.operationId,
+        id: value.payload.parameters.operationId,
         signer: signer.ipnsKey,
         cid,
         type: value.type,

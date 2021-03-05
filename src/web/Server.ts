@@ -9,8 +9,8 @@ export function httpServer(dependencies: Dependencies): Express {
   const app = express();
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    logger.info(`${req.method} ${req.url} ${res.statusCode}`);
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    logger.info(`${req.method} ${req.url}`);
     next();
   });
   if (configuration.node.environment === 'production') {
