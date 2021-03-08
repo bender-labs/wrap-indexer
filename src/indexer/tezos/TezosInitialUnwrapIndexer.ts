@@ -74,9 +74,9 @@ export class TezosInitialUnwrapIndexer {
       return {
         id: operation.id,
         source: operation.source,
-        token: operation.parameters.children.find(c => c.name == 'erc_20').value as string,
+        token: '0x' + operation.parameters.children.find(c => c.name == 'erc_20').value,
         amount: operation.parameters.children.find(c => c.name == 'amount').value as number,
-        ethereumDestination: operation.parameters.children.find(c => c.name == 'destination').value as string,
+        ethereumDestination: '0x' + operation.parameters.children.find(c => c.name == 'destination').value,
         operationId,
         status: 'asked',
       };
@@ -84,9 +84,9 @@ export class TezosInitialUnwrapIndexer {
       return {
         id: operation.id,
         source: operation.source,
-        token: operation.parameters.children.find(c => c.name == 'erc_721').value as string,
+        token: '0x' + operation.parameters.children.find(c => c.name == 'erc_721').value,
         tokenId: operation.parameters.children.find(c => c.name == 'token_id').value as number,
-        ethereumDestination: operation.parameters.children.find(c => c.name == 'destination').value as string,
+        ethereumDestination: '0x' + operation.parameters.children.find(c => c.name == 'destination').value,
         operationId,
         status: 'asked',
       };
