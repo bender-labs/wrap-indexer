@@ -6,6 +6,7 @@ import Knex from 'knex';
 import { ERC20Unwrap, ERC721Unwrap } from '../domain/ERCUnwrap';
 
 export type PendingERC20Unwrap = {
+  id: string;
   source: string;
   destination: string;
   token: string;
@@ -15,6 +16,7 @@ export type PendingERC20Unwrap = {
 }
 
 export type PendingERC721Unwrap = {
+  id: string;
   source: string;
   destination: string;
   token: string;
@@ -34,6 +36,7 @@ export class PendingUnwrapsQuery {
     return pendingWraps.map(wrap => {
       const relatedSignatures = signatures.filter(s => s.wrapId == wrap.operationId).map(s => s.signature);
       return {
+        id: wrap.operationId,
         source: wrap.source,
         destination: wrap.ethereumDestination,
         token: wrap.token,
@@ -50,6 +53,7 @@ export class PendingUnwrapsQuery {
     return pendingWraps.map(wrap => {
       const relatedSignatures = signatures.filter(s => s.wrapId == wrap.operationId).map(s => s.signature);
       return {
+        id: wrap.operationId,
         source: wrap.source,
         destination: wrap.ethereumDestination,
         token: wrap.token,

@@ -3,6 +3,7 @@ import { Erc20MintingSignature, Erc721MintingSignature } from '../domain/Signatu
 import Knex from 'knex';
 
 export type PendingERC20Wrap = {
+  id: string,
   source: string;
   destination: string;
   token: string;
@@ -12,6 +13,7 @@ export type PendingERC20Wrap = {
 }
 
 export type PendingERC721Wrap = {
+  id: string,
   source: string;
   destination: string;
   token: string;
@@ -31,6 +33,7 @@ export class PendingWrapsQuery {
     return pendingWraps.map(wrap => {
       const relatedSignatures = signatures.filter(s => s.wrapId == wrap.id).map(s => s.signature);
       return {
+        id: wrap.id,
         source: wrap.source,
         destination: wrap.tezosDestination,
         token: wrap.token,
@@ -47,6 +50,7 @@ export class PendingWrapsQuery {
     return pendingWraps.map(wrap => {
       const relatedSignatures = signatures.filter(s => s.wrapId == wrap.id).map(s => s.signature);
       return {
+        id: wrap.id,
         source: wrap.source,
         destination: wrap.tezosDestination,
         token: wrap.token,
