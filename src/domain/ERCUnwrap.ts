@@ -5,7 +5,7 @@ export type ERC20Unwrap = {
   ethereumDestination: string;
   operationId: string;
   status: string;
-  amount: number;
+  amount: string;
 }
 
 export type ERC721Unwrap = {
@@ -15,5 +15,5 @@ export type ERC721Unwrap = {
   ethereumDestination: string;
   operationId: string;
   status: string;
-  tokenId: number;
+  tokenId: string;
 }

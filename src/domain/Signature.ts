@@ -7,7 +7,7 @@ export type Erc20MintingSignature = {
   owner: string;
   level: number;
   erc: string;
-  amount: number;
+  amount: string;
   transactionHash: string;
   blockHash: string;
   logIndex: number;
@@ -22,7 +22,7 @@ export type Erc721MintingSignature = {
   owner: string;
   level: number;
   erc: string;
-  tokenId: number;
+  tokenId: string;
   transactionHash: string;
   blockHash: string;
   logIndex: number;
@@ -38,7 +38,7 @@ export type Erc20UnwrapSignature = {
   owner: string;
   level: number;
   erc: string;
-  amount: number;
+  amount: string;
   operationId: string;
 }
 
@@ -52,6 +52,6 @@ export type Erc721UnwrapSignature = {
   owner: string;
   level: number;
   erc: string;
-  tokenId: number;
+  tokenId: string;
   operationId: string;
 }

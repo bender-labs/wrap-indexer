@@ -7,7 +7,7 @@ export type ERC20Wrap = {
   blockHash: string;
   logIndex: number;
   status: 'asked' | 'finalized';
-  amount: number;
+  amount: string;
 }
 
 export type ERC721Wrap = {
@@ -19,5 +19,5 @@ export type ERC721Wrap = {
   blockHash: string;
   logIndex: number;
   status: 'asked' | 'finalized';
-  tokenId: number;
+  tokenId: string;
 }
