@@ -48,7 +48,10 @@ export class PendingWrapsQuery {
     return pendingWraps.map(wrap => {
       const relatedSignatures = signatures
         .filter(s => s.wrapId == wrap.id)
-        .reduce((acc, value) => acc[value.signerAddress] = value.signature, {});
+        .reduce((acc, value) => {
+          acc[value.signerAddress] = value.signature;
+          return acc;
+          }, {});
       return {
         id: wrap.id,
         source: wrap.source,
@@ -70,7 +73,10 @@ export class PendingWrapsQuery {
     return pendingWraps.map(wrap => {
       const relatedSignatures = signatures
         .filter(s => s.wrapId == wrap.id)
-        .reduce((acc, value) => acc[value.signerAddress] = value.signature, {});
+        .reduce((acc, value) => {
+          acc[value.signerAddress] = value.signature;
+          return acc;
+        }, {});
       return {
         id: wrap.id,
         source: wrap.source,

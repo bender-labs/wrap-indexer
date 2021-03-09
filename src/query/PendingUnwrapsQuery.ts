@@ -50,7 +50,10 @@ export class PendingUnwrapsQuery {
     return pendingUnwraps.map(unwrap => {
       const relatedSignatures = signatures
         .filter(s => s.wrapId == unwrap.operationId)
-        .reduce((acc, value) => acc[value.signerAddress] = value.signature, {});
+        .reduce((acc, value) => {
+          acc[value.signerAddress] = value.signature;
+          return acc;
+        }, {});
       return {
         id: unwrap.operationId,
         source: unwrap.source,
@@ -72,7 +75,10 @@ export class PendingUnwrapsQuery {
     return pendingUnwraps.map(unwrap => {
       const relatedSignatures = signatures
         .filter(s => s.wrapId == unwrap.operationId)
-        .reduce((acc, value) => acc[value.signerAddress] = value.signature, {});
+        .reduce((acc, value) => {
+          acc[value.signerAddress] = value.signature;
+          return acc;
+        }, {});
       return {
         id: unwrap.operationId,
         source: unwrap.source,
