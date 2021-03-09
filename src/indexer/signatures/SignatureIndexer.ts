@@ -81,6 +81,7 @@ export class SignatureIndexer {
       return {
         wrapId: `${value.payload.parameters.blockHash}:${value.payload.parameters.logIndex}`,
         signer: signer.ipnsKey,
+        signerAddress: value.payload.parameters.signerAddress,
         cid,
         type: value.type,
         signature: value.payload.signature,
@@ -96,6 +97,7 @@ export class SignatureIndexer {
       return {
         wrapId: `${value.payload.parameters.blockHash}:${value.payload.parameters.logIndex}`,
         signer: signer.ipnsKey,
+        signerAddress: value.payload.parameters.signerAddress,
         cid,
         type: value.type,
         signature: value.payload.signature,
@@ -112,6 +114,7 @@ export class SignatureIndexer {
         wrapId: value.payload.parameters.operationId,
         id: value.payload.parameters.operationId,
         signer: signer.ipnsKey,
+        signerAddress: value.payload.parameters.signerAddress,
         cid,
         type: value.type,
         signature: value.payload.signature,
@@ -126,6 +129,7 @@ export class SignatureIndexer {
         wrapId: value.payload.parameters.operationId,
         id: value.payload.parameters.operationId,
         signer: signer.ipnsKey,
+        signerAddress: value.payload.parameters.signerAddress,
         cid,
         type: value.type,
         signature: value.payload.signature,

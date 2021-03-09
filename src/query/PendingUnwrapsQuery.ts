@@ -5,24 +5,28 @@ import {
 import Knex from 'knex';
 import { ERC20Unwrap, ERC721Unwrap } from '../domain/ERCUnwrap';
 
-export type PendingERC20Unwrap = {
+type PendingERC20Unwrap = {
   id: string;
   source: string;
   destination: string;
   token: string;
   amount: string;
   operationId: string;
-  signatures: string[];
+  signatures: {
+    [address: string]: string;
+  }
 }
 
-export type PendingERC721Unwrap = {
+type PendingERC721Unwrap = {
   id: string;
   source: string;
   destination: string;
   token: string;
   tokenId: string;
   operationId: string;
-  signatures: string[];
+  signatures: {
+    [address: string]: string;
+  }
 }
 
 export class PendingUnwrapsQuery {
@@ -34,7 +38,9 @@ export class PendingUnwrapsQuery {
     const pendingWraps: ERC20Unwrap[] = await this._getPendingUnwraps(tezosAddress, ethereumAddress, 'erc20_unwraps') as ERC20Unwrap[];
     const signatures: Erc20UnwrapSignature[] = await this._getSignatures(pendingWraps.map(p => p.id)) as Erc20UnwrapSignature[];
     return pendingWraps.map(wrap => {
-      const relatedSignatures = signatures.filter(s => s.wrapId == wrap.operationId).map(s => s.signature);
+      const relatedSignatures = signatures
+        .filter(s => s.wrapId == wrap.operationId)
+        .reduce((acc, value) => acc[value.signerAddress] = value.signature, {});
       return {
         id: wrap.operationId,
         source: wrap.source,
@@ -51,7 +57,9 @@ export class PendingUnwrapsQuery {
     const pendingWraps: ERC721Unwrap[] = await this._getPendingUnwraps(tezosAddress, ethereumAddress, 'erc721_unwraps') as ERC721Unwrap[];
     const signatures: Erc721UnwrapSignature[] = await this._getSignatures(pendingWraps.map(p => p.id)) as Erc721UnwrapSignature[];
     return pendingWraps.map(wrap => {
-      const relatedSignatures = signatures.filter(s => s.wrapId == wrap.operationId).map(s => s.signature);
+      const relatedSignatures = signatures
+        .filter(s => s.wrapId == wrap.operationId)
+        .reduce((acc, value) => acc[value.signerAddress] = value.signature, {});
       return {
         id: wrap.operationId,
         source: wrap.source,

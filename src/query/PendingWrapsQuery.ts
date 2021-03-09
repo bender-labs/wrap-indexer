@@ -2,24 +2,28 @@ import { ERC20Wrap, ERC721Wrap } from '../domain/ERCWrap';
 import { Erc20MintingSignature, Erc721MintingSignature } from '../domain/Signature';
 import Knex from 'knex';
 
-export type PendingERC20Wrap = {
+type PendingERC20Wrap = {
   id: string,
   source: string;
   destination: string;
   token: string;
   amount: string;
   transactionHash: string;
-  signatures: string[];
+  signatures: {
+    [address: string]: string;
+  }
 }
 
-export type PendingERC721Wrap = {
+type PendingERC721Wrap = {
   id: string,
   source: string;
   destination: string;
   token: string;
   tokenId: string;
   transactionHash: string;
-  signatures: string[];
+  signatures: {
+    [address: string]: string;
+  }
 }
 
 export class PendingWrapsQuery {
@@ -31,7 +35,9 @@ export class PendingWrapsQuery {
     const pendingWraps: ERC20Wrap[] = await this._getPendingWraps(tezosAddress, ethereumAddress, 'erc20_wraps') as ERC20Wrap[];
     const signatures: Erc20MintingSignature[] = await this._getSignatures(pendingWraps.map(p => p.id)) as Erc20MintingSignature[];
     return pendingWraps.map(wrap => {
-      const relatedSignatures = signatures.filter(s => s.wrapId == wrap.id).map(s => s.signature);
+      const relatedSignatures = signatures
+        .filter(s => s.wrapId == wrap.id)
+        .reduce((acc, value) => acc[value.signerAddress] = value.signature, {});
       return {
         id: wrap.id,
         source: wrap.source,
@@ -48,7 +54,9 @@ export class PendingWrapsQuery {
     const pendingWraps: ERC721Wrap[] = await this._getPendingWraps(tezosAddress, ethereumAddress, 'erc721_wraps') as ERC721Wrap[];
     const signatures: Erc721MintingSignature[] = await this._getSignatures(pendingWraps.map(p => p.id)) as Erc721MintingSignature[];
     return pendingWraps.map(wrap => {
-      const relatedSignatures = signatures.filter(s => s.wrapId == wrap.id).map(s => s.signature);
+      const relatedSignatures = signatures
+        .filter(s => s.wrapId == wrap.id)
+        .reduce((acc, value) => acc[value.signerAddress] = value.signature, {});
       return {
         id: wrap.id,
         source: wrap.source,
