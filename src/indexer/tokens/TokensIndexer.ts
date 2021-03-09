@@ -3,7 +3,6 @@ import Knex from 'knex';
 import { Dependencies } from '../../bootstrap';
 import { TokenDao } from '../../dao/TokenDao';
 import { BcdProvider, MichelineNode } from '../../infrastructure/tezos/bcdProvider';
-import { ethers } from 'ethers';
 import { Token } from '../../domain/Token';
 
 type TokenDefinition = {
@@ -14,12 +13,10 @@ type TokenDefinition = {
 }
 
 export class TokensIndexer {
-  constructor({ logger, bcd, ethereumProvider, ethereumConfiguration, tezosConfiguration, dbClient }: Dependencies) {
+  constructor({ logger, bcd, tezosConfiguration, dbClient }: Dependencies) {
     this._logger = logger;
     this._dbClient = dbClient;
     this._bcd = bcd;
-    this._ethereumProvider = ethereumProvider;
-    this._erc20ABI = ethereumConfiguration.erc20ABI;
     this._minterContractAddress = tezosConfiguration.minterContractAddress;
     this._tokenDao = new TokenDao(this._dbClient);
   }
@@ -70,6 +67,7 @@ export class TokensIndexer {
     }
     const decimals = this._extractValueFromMetadata(fa2Metadata, 'decimals') as string;
     const ethereumSymbol = this._extractValueFromMetadata(fa2Metadata, 'eth_symbol') as string;
+    const ethereumName = this._extractValueFromMetadata(fa2Metadata, 'eth_name') as string;
     const tezosName = this._extractValueFromMetadata(fa2Metadata, 'name') as string;
     const tezosSymbol = this._extractValueFromMetadata(fa2Metadata, 'symbol') as string;
     return {
@@ -79,9 +77,9 @@ export class TokensIndexer {
       tezosTokenId: definition.tezosTokenId,
       decimals,
       ethereumSymbol,
+      ethereumName,
       tezosName,
       tezosSymbol,
-      ethereumName: (definition.type == 'ERC20' ? await this._getERCName(definition.ethereumContractAddress) : tezosName),
     };
   }
 
@@ -89,16 +87,9 @@ export class TokensIndexer {
     return fa2Metadata.children.find(c => c.name == name).value;
   }
 
-  private _getERCName(ethereumContractAddress: string): Promise<string> {
-    const contract = new ethers.Contract(ethereumContractAddress, this._erc20ABI, this._ethereumProvider);
-    return contract.name();
-  }
-
   private _logger: Logger;
   private _dbClient: Knex;
   private _tokenDao: TokenDao;
   private _minterContractAddress: string;
   private _bcd: BcdProvider;
-  private _ethereumProvider: ethers.providers.Provider;
-  private _erc20ABI: string;
 }
