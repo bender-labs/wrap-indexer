@@ -39,6 +39,11 @@ export type BigMapKey = {
   }
 }
 
+type NetworkStats = {
+  level: number;
+  network: string;
+}
+
 export class BcdProvider {
   constructor(tezosNetwork: string) {
     this._tezosNetwork = tezosNetwork;
@@ -74,6 +79,11 @@ export class BcdProvider {
   async getBigMapContent(bigmapId: number): Promise<BigMapKey[]> {
     const response = await axios.get<BigMapKey[]>(`${BcdProvider.BCD_URL}/v1/bigmap/${this._tezosNetwork}/${bigmapId}/keys`);
     return response.data;
+  }
+
+  async getNetworkCurrentLevel(): Promise<number> {
+    const response = await axios.get<NetworkStats[]>(`${BcdProvider.BCD_URL}/v1/stats`);
+    return response.data.find(n => n.network == this._tezosNetwork).level;
   }
 
   private _tezosNetwork: string;

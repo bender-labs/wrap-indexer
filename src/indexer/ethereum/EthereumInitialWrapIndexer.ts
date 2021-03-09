@@ -90,6 +90,7 @@ export class EthereumInitialWrapIndexer {
         transactionHash: log.transactionHash,
         blockHash: log.blockHash,
         logIndex: log.logIndex,
+        level: log.blockNumber,
         status: 'asked',
       };
     } else if (logDescription.name === 'ERC721WrapAsked') {
@@ -102,6 +103,7 @@ export class EthereumInitialWrapIndexer {
         transactionHash: log.transactionHash,
         blockHash: log.blockHash,
         logIndex: log.logIndex,
+        level: log.blockNumber,
         status: 'asked',
       };
     }

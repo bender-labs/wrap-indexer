@@ -4,7 +4,7 @@ import {
   PendingWrapsQuery,
 } from '../../query/PendingWrapsQuery';
 
-function build(dependencies: Dependencies): Router {
+function build({ dbClient, ethereumConfiguration, ethereumProvider }: Dependencies): Router {
   const router = Router();
   router.get('/', async (req: Request, res: Response) => {
     const tezosAddress = req.query.tezosAddress as string;
@@ -12,7 +12,7 @@ function build(dependencies: Dependencies): Router {
     if (!tezosAddress && !ethereumAddress) {
       return res.status(400).json({ message: 'MISSING_ADDRESS' });
     }
-    const query = new PendingWrapsQuery(dependencies.dbClient);
+    const query = new PendingWrapsQuery(dbClient, ethereumConfiguration, ethereumProvider);
     const erc20Wraps = await query.erc20(tezosAddress, ethereumAddress);
     const erc721Wraps = await query.erc721(tezosAddress, ethereumAddress);
     return res.json({ erc20Wraps, erc721Wraps });

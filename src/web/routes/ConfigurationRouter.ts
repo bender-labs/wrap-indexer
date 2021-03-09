@@ -17,20 +17,25 @@ type Configuration = {
   tokens: Token[];
 }
 
-async function buildConfiguration(dependencies: Dependencies): Promise<Configuration> {
-  const tezosThreashold = await new TezosQuorumDao(dependencies.dbClient).getThreshold();
-  const ethereumThreshold = await new EthereumQuorumDao(dependencies.dbClient).getThreshold();
-  const tokens = await new TokenDao(dependencies.dbClient).all();
+async function buildConfiguration({
+                                    dbClient,
+                                    configuration,
+                                    ethereumConfiguration,
+                                    tezosConfiguration,
+                                  }: Dependencies): Promise<Configuration> {
+  const tezosThreashold = await new TezosQuorumDao(dbClient).getThreshold();
+  const ethereumThreshold = await new EthereumQuorumDao(dbClient).getThreshold();
+  const tokens = await new TokenDao(dbClient).all();
   return {
-    ethereumNetwork: dependencies.configuration.ethereum.currentNetwork,
-    ethereumNetworkId: dependencies.ethereumConfiguration.networkId,
-    tezosNetwork: dependencies.configuration.tezos.currentNetwork,
-    ethereumWrapContract: dependencies.ethereumConfiguration.wrapContractAddress,
-    tezosMinterContract: dependencies.tezosConfiguration.minterContractAddress,
-    tezosQuorumContract: dependencies.tezosConfiguration.quorumContractAddress,
+    ethereumNetwork: configuration.ethereum.currentNetwork,
+    ethereumNetworkId: ethereumConfiguration.networkId,
+    ethereumWrapContract: ethereumConfiguration.wrapContractAddress,
+    tezosNetwork: configuration.tezos.currentNetwork,
+    tezosMinterContract: tezosConfiguration.minterContractAddress,
+    tezosQuorumContract: tezosConfiguration.quorumContractAddress,
     wrapRequiredSignatures: tezosThreashold,
     unwrapRequiredSignatures: ethereumThreshold,
-    tokens
+    tokens,
   };
 }
 

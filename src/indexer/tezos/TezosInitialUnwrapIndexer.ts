@@ -78,6 +78,7 @@ export class TezosInitialUnwrapIndexer {
         amount: operation.parameters.children.find(c => c.name == 'amount').value as string,
         ethereumDestination: '0x' + operation.parameters.children.find(c => c.name == 'destination').value,
         operationId,
+        level: operation.level,
         status: 'asked',
       };
     } else if (operation.entrypoint === 'unwrap_erc721') {
@@ -88,6 +89,7 @@ export class TezosInitialUnwrapIndexer {
         tokenId: operation.parameters.children.find(c => c.name == 'token_id').value as string,
         ethereumDestination: '0x' + operation.parameters.children.find(c => c.name == 'destination').value,
         operationId,
+        level: operation.level,
         status: 'asked',
       };
     }
