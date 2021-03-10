@@ -45,13 +45,13 @@ export class TokensIndexer {
     const assets = storage.children.find(c => c.name === 'assets');
     const erc20Tokens: TokenDefinition[] = assets.children.find(c => c.name === 'erc20_tokens').children.map(c => ({
       type: 'ERC20',
-      ethereumContractAddress: '0x' + c.name,
+      ethereumContractAddress: '0x' + c.name.toLowerCase(),
       tezosWrappingContract: c.children[0].value as string,
       tezosTokenId: c.children[1].value as string,
     }));
     const erc721Tokens: TokenDefinition[] = assets.children.find(c => c.name === 'erc721_tokens').children.map(c => ({
       type: 'ERC721',
-      ethereumContractAddress: '0x' + c.name,
+      ethereumContractAddress: '0x' + c.name.toLowerCase(),
       tezosWrappingContract: c.value as string,
     }));
     return erc20Tokens.concat(erc721Tokens);

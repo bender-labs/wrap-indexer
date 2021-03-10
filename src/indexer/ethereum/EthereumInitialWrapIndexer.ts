@@ -83,8 +83,8 @@ export class EthereumInitialWrapIndexer {
     if (logDescription.name === 'ERC20WrapAsked') {
       return {
         id: `${log.blockHash}:${log.logIndex}`,
-        source: logDescription.args['user'],
-        token: logDescription.args['token'],
+        source: logDescription.args['user'].toLowerCase(),
+        token: logDescription.args['token'].toLowerCase(),
         amount: logDescription.args['amount'].toString(),
         tezosDestination: logDescription.args['tezosDestinationAddress'],
         transactionHash: log.transactionHash,
@@ -96,8 +96,8 @@ export class EthereumInitialWrapIndexer {
     } else if (logDescription.name === 'ERC721WrapAsked') {
       return {
         id: `${log.blockHash}:${log.logIndex}`,
-        source: logDescription.args['user'],
-        token: logDescription.args['token'],
+        source: logDescription.args['user'].toLowerCase(),
+        token: logDescription.args['token'].toLowerCase(),
         tokenId: logDescription.args['tokenId'].toString(),
         tezosDestination: logDescription.args['tezosDestinationAddress'],
         transactionHash: log.transactionHash,

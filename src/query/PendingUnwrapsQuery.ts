@@ -99,11 +99,11 @@ export class PendingUnwrapsQuery {
       .where({ status: 'asked' })
       .andWhere(function() {
         if (ethereumAddress && tezosAddress) {
-          this.where({ source: tezosAddress }).orWhere({ ethereumDestination: ethereumAddress });
+          this.where({ source: tezosAddress }).orWhere({ ethereumDestination: ethereumAddress.toLowerCase() });
         } else if (ethereumAddress) {
           this.where({ source: tezosAddress });
         } else {
-          this.where({ ethereumDestination: ethereumAddress });
+          this.where({ ethereumDestination: ethereumAddress.toLowerCase() });
         }
       });
   }

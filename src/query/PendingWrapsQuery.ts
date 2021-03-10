@@ -97,9 +97,9 @@ export class PendingWrapsQuery {
       .where({ status: 'asked' })
       .andWhere(function() {
         if (ethereumAddress && tezosAddress) {
-          this.where({ source: ethereumAddress }).orWhere({ tezosDestination: tezosAddress });
+          this.where({ source: ethereumAddress.toLowerCase() }).orWhere({ tezosDestination: tezosAddress });
         } else if (ethereumAddress) {
-          this.where({ source: ethereumAddress });
+          this.where({ source: ethereumAddress.toLowerCase() });
         } else {
           this.where({ tezosDestination: tezosAddress });
         }
