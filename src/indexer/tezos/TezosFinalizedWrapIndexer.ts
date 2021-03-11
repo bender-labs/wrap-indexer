@@ -6,11 +6,6 @@ import { ErcWrapDAO } from '../../dao/ErcWrapDAO';
 import { ERC20Wrap, ERC721Wrap } from '../../domain/ERCWrap';
 import { Dependencies } from '../../bootstrap';
 
-type FinalizedUnwrap = {
-  blockHash: string,
-  logIndex: number
-}
-
 export class TezosFinalizedWrapIndexer {
 
   constructor({
@@ -32,8 +27,8 @@ export class TezosFinalizedWrapIndexer {
     this._logger.info(`${erc20Wraps.length} pending erc20 wraps to watch`);
     const erc721Wraps = await this._wrapDao.getNotFinalizedERC721();
     this._logger.info(`${erc721Wraps.length} pending erc721 wraps to watch`);
-    const finalizedERC20 = erc20Wraps.filter(w => allMints.includes(w));
-    const finalizedERC721 = erc721Wraps.filter(w => allMints.includes(w));
+    const finalizedERC20 = erc20Wraps.filter(w => allMints.includes(w.id));
+    const finalizedERC721 = erc721Wraps.filter(w => allMints.includes(w.id));
     for (const erc20wrap of finalizedERC20) {
       await this._updateWrapState(erc20wrap);
     }
@@ -56,16 +51,13 @@ export class TezosFinalizedWrapIndexer {
     }
   }
 
-  private async _getAllMints(): Promise<FinalizedUnwrap[]> {
+  private async _getAllMints(): Promise<string[]> {
     //TODO: find a way to calculate big map keys to query by keys
     const bigmapId = await this._getMintsBigMapId();
     const content = await this._bcd.getBigMapContent(bigmapId);
     return content.map(r => {
       const keys = r.data.key.children;
-      return {
-        blockHash: keys.find(k => k.name === 'block_hash').value as string,
-        logIndex: keys.find(k => k.name === 'log_index').value as number,
-      };
+      return `0x${keys.find(k => k.name === 'block_hash').value}:${keys.find(k => k.name === 'log_index').value}`;
     });
   }
 
