@@ -63,7 +63,7 @@ export class TezosFinalizedWrapIndexer {
 
   private async _getMintsBigMapId(): Promise<number> {
     const storage = await this._bcd.getStorage(this._tezosConfiguration.minterContractAddress);
-    return storage.children.find(c => c.name === 'assets').children.find(c => c.name === 'mints').value as number;
+    return storage[0].children.find(c => c.name === 'assets').children.find(c => c.name === 'mints').value as number;
   }
 
   private _logger: Logger;

@@ -68,6 +68,7 @@ export class BcdProvider {
       implementation: 0,
       data: { '0': parseInt(tokenId) },
     });
+    console.log(response.data);
     return response.data;
   }
 

@@ -42,7 +42,7 @@ export class TokensIndexer {
 
   private async _getMinterTokens(): Promise<TokenDefinition[]> {
     const storage = await this._bcd.getStorage(this._minterContractAddress);
-    const assets = storage.children.find(c => c.name === 'assets');
+    const assets = storage[0].children.find(c => c.name === 'assets');
     const erc20Tokens: TokenDefinition[] = assets.children.find(c => c.name === 'erc20_tokens').children.map(c => ({
       type: 'ERC20',
       ethereumContractAddress: '0x' + c.name.toLowerCase(),
@@ -63,7 +63,7 @@ export class TokensIndexer {
       fa2Metadata = (await this._bcd.getTokenMetadata(definition.tezosWrappingContract, definition.tezosTokenId)).children[1];
     } else {
       const storage = await this._bcd.getStorage(definition.tezosWrappingContract);
-      fa2Metadata = storage.children.find(c => c.name == 'assets').children.find(c => c.name == 'token_info');
+      fa2Metadata = storage[0].children.find(c => c.name == 'assets').children.find(c => c.name == 'token_info');
     }
     const decimals = this._extractValueFromMetadata(fa2Metadata, 'decimals') as string;
     const ethereumSymbol = this._extractValueFromMetadata(fa2Metadata, 'eth_symbol') as string;

@@ -25,7 +25,7 @@ export class TezosQuorumIndexer {
     let transaction;
     try {
       const storage = await this._bcd.getStorage(this._tezosConfiguration.quorumContractAddress);
-      const tezosQuorum = this._extractQuorum(storage);
+      const tezosQuorum = this._extractQuorum(storage[0]);
       transaction = await this._dbClient.transaction();
       await new TezosQuorumDao(this._dbClient).save(tezosQuorum, transaction);
       await transaction.commit();

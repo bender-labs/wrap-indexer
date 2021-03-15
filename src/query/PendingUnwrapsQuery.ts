@@ -46,7 +46,7 @@ export class PendingUnwrapsQuery {
   async erc20(tezosAddress: string, ethereumAddress: string): Promise<PendingERC20Unwrap[]> {
     const currentLevel = await this._bcd.getNetworkCurrentLevel();
     const pendingUnwraps: ERC20Unwrap[] = await this._getPendingUnwraps(tezosAddress, ethereumAddress, 'erc20_unwraps') as ERC20Unwrap[];
-    const signatures: Erc20UnwrapSignature[] = await this._getSignatures(pendingUnwraps.map(p => p.id)) as Erc20UnwrapSignature[];
+    const signatures: Erc20UnwrapSignature[] = await this._getSignatures(pendingUnwraps.map(p => p.operationId)) as Erc20UnwrapSignature[];
     return pendingUnwraps.map(unwrap => {
       const relatedSignatures = signatures
         .filter(s => s.wrapId == unwrap.operationId)
@@ -71,7 +71,7 @@ export class PendingUnwrapsQuery {
   async erc721(tezosAddress: string, ethereumAddress: string): Promise<PendingERC721Unwrap[]> {
     const currentLevel = await this._bcd.getNetworkCurrentLevel();
     const pendingUnwraps: ERC721Unwrap[] = await this._getPendingUnwraps(tezosAddress, ethereumAddress, 'erc721_unwraps') as ERC721Unwrap[];
-    const signatures: Erc721UnwrapSignature[] = await this._getSignatures(pendingUnwraps.map(p => p.id)) as Erc721UnwrapSignature[];
+    const signatures: Erc721UnwrapSignature[] = await this._getSignatures(pendingUnwraps.map(p => p.operationId)) as Erc721UnwrapSignature[];
     return pendingUnwraps.map(unwrap => {
       const relatedSignatures = signatures
         .filter(s => s.wrapId == unwrap.operationId)
@@ -100,7 +100,7 @@ export class PendingUnwrapsQuery {
       .andWhere(function() {
         if (ethereumAddress && tezosAddress) {
           this.where({ source: tezosAddress }).orWhere({ ethereumDestination: ethereumAddress.toLowerCase() });
-        } else if (ethereumAddress) {
+        } else if (tezosAddress) {
           this.where({ source: tezosAddress });
         } else {
           this.where({ ethereumDestination: ethereumAddress.toLowerCase() });

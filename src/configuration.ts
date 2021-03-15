@@ -35,6 +35,7 @@ export type Config = {
   };
   log: {
     format: LogType;
+    level: "info" | "warn" | "error"
   };
   postgres: {
     username: string;
@@ -124,6 +125,10 @@ export function loadConfiguration(): Config {
         env: 'LOG_FORMAT',
         default: 'pretty',
       },
+      level: {
+        env: 'LOG_LEVEL',
+        default: 'info',
+      }
     },
     postgres: {
       username: {
