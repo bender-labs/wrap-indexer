@@ -7,6 +7,8 @@ import { createIpfsClient, IpfsClient } from './infrastructure/ipfsClient';
 import { Logger } from 'tslog';
 import Knex from 'knex';
 import { ethers } from 'ethers';
+import { TezosToolkit } from '@taquito/taquito';
+import { createTezosToolkit } from './infrastructure/tezos/toolkitProvider';
 
 export type Dependencies = {
   logger: Logger;
@@ -17,6 +19,7 @@ export type Dependencies = {
   configuration: Config;
   ethereumConfiguration: EthereumConfig;
   tezosConfiguration: TezosConfig;
+  tezosToolkit: TezosToolkit;
 }
 
 export function bootstrap(configuration: Config, ethereumConfiguration: EthereumConfig, tezosConfiguration: TezosConfig): Dependencies {
@@ -25,6 +28,7 @@ export function bootstrap(configuration: Config, ethereumConfiguration: Ethereum
   const ethereumProvider = createEthereumProvider(ethereumConfiguration);
   const bcd = createBcd(configuration.tezos.currentNetwork);
   const ipfsClient = createIpfsClient(configuration);
+  const tezosToolkit = createTezosToolkit(tezosConfiguration);
   return {
     logger,
     dbClient,
@@ -34,5 +38,6 @@ export function bootstrap(configuration: Config, ethereumConfiguration: Ethereum
     configuration,
     ethereumConfiguration,
     tezosConfiguration,
+    tezosToolkit,
   };
 }

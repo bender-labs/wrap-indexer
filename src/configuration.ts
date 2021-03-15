@@ -15,6 +15,7 @@ export type TezosConfig = {
   quorumContractAddress: string;
   minterContractAddress: string;
   confirmationsThreshold: number;
+  rpc: string;
 }
 
 export type Config = {
@@ -110,6 +111,10 @@ export function loadConfiguration(): Config {
             env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
             type: 'integer',
             default: 10
+          },
+          rpc: {
+            env: 'TEZOS_RPC',
+            default: 'https://edonet.smartpy.io/'
           }
         },
       },

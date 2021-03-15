@@ -5,6 +5,9 @@ import { SignaturePinningService } from './indexer/signatures/SignaturePinningSe
 import { EthereumFinalizedUnwrapIndexer } from './indexer/ethereum/EthereumFinalizedUnwrapIndexer';
 import { SignatureIndexer } from './indexer/signatures/SignatureIndexer';
 import { EthereumQuorumIndexer } from './indexer/ethereum/EthereumQuorumIndexer';
+import { TezosFinalizedWrapIndexer } from './indexer/tezos/TezosFinalizedWrapIndexer';
+import { TokensIndexer } from './indexer/tokens/TokensIndexer';
+import { TezosQuorumIndexer } from './indexer/tezos/TezosQuorumIndexer';
 
 const every2Minutes = '*/2 * * * *';
 const every10Minutes = '*/10 * * * *';
@@ -16,10 +19,10 @@ export function scheduleJobs(dependencies: Dependencies): Crontab {
   //crontab.register(() => new TezosInitialUnwrapIndexer(dependencies).index(), every2Minutes);
   crontab.register(() => new SignatureIndexer(dependencies).index(), every2Minutes);
   crontab.register(() => new EthereumFinalizedUnwrapIndexer(dependencies).index(), every2Minutes);
-  //crontab.register(() => new TezosFinalizedWrapIndexer(dependencies).index(), every2Minutes);
-  //crontab.register(() => new TezosQuorumIndexer(dependencies).index(), every10Minutes);
+  crontab.register(() => new TezosFinalizedWrapIndexer(dependencies).index(), every2Minutes);
+  crontab.register(() => new TezosQuorumIndexer(dependencies).index(), every10Minutes);
   crontab.register(() => new EthereumQuorumIndexer(dependencies).index(), every10Minutes);
-  //crontab.register(() => new TokensIndexer(dependencies).index(), every10Minutes);
+  crontab.register(() => new TokensIndexer(dependencies).index(), every10Minutes);
   crontab.register(() => new SignaturePinningService(dependencies).index(), every30Minutes);
   return crontab;
 }

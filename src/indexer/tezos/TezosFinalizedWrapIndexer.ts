@@ -1,39 +1,55 @@
 import { Logger } from 'tslog';
 import { TezosConfig } from '../../configuration';
-import { BcdProvider } from '../../infrastructure/tezos/bcdProvider';
 import Knex from 'knex';
 import { ErcWrapDAO } from '../../dao/ErcWrapDAO';
 import { ERC20Wrap, ERC721Wrap } from '../../domain/ERCWrap';
 import { Dependencies } from '../../bootstrap';
+import { TezosToolkit } from '@taquito/taquito';
 
 export class TezosFinalizedWrapIndexer {
 
   constructor({
                 logger,
                 tezosConfiguration,
-                bcd,
+                tezosToolkit,
                 dbClient,
               }: Dependencies) {
     this._logger = logger;
     this._tezosConfiguration = tezosConfiguration;
-    this._bcd = bcd;
+    this._tezosToolkit = tezosToolkit;
     this._dbClient = dbClient;
     this._wrapDao = new ErcWrapDAO(this._dbClient);
   }
 
   async index(): Promise<void> {
-    const allMints = await this._getAllMints();
+    const mintsBigMap = await this._getMintsBigMap();
     const erc20Wraps = await this._wrapDao.getNotFinalizedERC20();
     this._logger.info(`${erc20Wraps.length} pending erc20 wraps to watch`);
+    for (const erc20wrap of erc20Wraps) {
+      const minted = await this._isInMintsMap(mintsBigMap, erc20wrap.blockHash, erc20wrap.logIndex);
+      if (minted) {
+        await this._updateWrapState(erc20wrap);
+      }
+    }
     const erc721Wraps = await this._wrapDao.getNotFinalizedERC721();
     this._logger.info(`${erc721Wraps.length} pending erc721 wraps to watch`);
-    const finalizedERC20 = erc20Wraps.filter(w => allMints.includes(w.id));
-    const finalizedERC721 = erc721Wraps.filter(w => allMints.includes(w.id));
-    for (const erc20wrap of finalizedERC20) {
-      await this._updateWrapState(erc20wrap);
+    for (const erc721wrap of erc721Wraps) {
+      const minted = await this._isInMintsMap(mintsBigMap, erc721wrap.blockHash, erc721wrap.logIndex);
+      if (minted) {
+        await this._updateWrapState(erc721wrap);
+      }
     }
-    for (const erc721wrap of finalizedERC721) {
-      await this._updateWrapState(erc721wrap);
+  }
+
+  private async _isInMintsMap(bigMap: any, blockHash: string, logIndex: number): Promise<boolean> {
+    try {
+      const value = await bigMap.get({
+        'block_hash': blockHash,
+        'log_index': logIndex.toString(),
+      });
+      return value !== undefined;
+    } catch (e) {
+      return false;
     }
   }
 
@@ -51,24 +67,15 @@ export class TezosFinalizedWrapIndexer {
     }
   }
 
-  private async _getAllMints(): Promise<string[]> {
-    //TODO: find a way to calculate big map keys to query by keys
-    const bigmapId = await this._getMintsBigMapId();
-    const content = await this._bcd.getBigMapContent(bigmapId);
-    return content.map(r => {
-      const keys = r.data.key.children;
-      return `0x${keys.find(k => k.name === 'block_hash').value}:${keys.find(k => k.name === 'log_index').value}`;
-    });
-  }
-
-  private async _getMintsBigMapId(): Promise<number> {
-    const storage = await this._bcd.getStorage(this._tezosConfiguration.minterContractAddress);
-    return storage[0].children.find(c => c.name === 'assets').children.find(c => c.name === 'mints').value as number;
+  private async _getMintsBigMap(): Promise<any> {
+    const minterContract = await this._tezosToolkit.contract.at(this._tezosConfiguration.minterContractAddress);
+    const storage = await minterContract.storage<any>();
+    return storage['assets']['mints'];
   }
 
   private _logger: Logger;
   private _tezosConfiguration: TezosConfig;
-  private _bcd: BcdProvider;
+  private _tezosToolkit: TezosToolkit;
   private _wrapDao: ErcWrapDAO;
   private _dbClient: Knex;
 }

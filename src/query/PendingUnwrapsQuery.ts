@@ -5,7 +5,7 @@ import {
 import Knex from 'knex';
 import { ERC20Unwrap, ERC721Unwrap } from '../domain/ERCUnwrap';
 import { TezosConfig } from '../configuration';
-import { BcdProvider } from '../infrastructure/tezos/bcdProvider';
+import { TezosToolkit } from '@taquito/taquito';
 
 type PendingERC20Unwrap = {
   id: string;
@@ -37,14 +37,14 @@ type PendingERC721Unwrap = {
 
 export class PendingUnwrapsQuery {
 
-  constructor(dbClient: Knex, tezosConfiguration: TezosConfig, bcd: BcdProvider) {
+  constructor(dbClient: Knex, tezosConfiguration: TezosConfig, tezosToolkit: TezosToolkit) {
     this._dbClient = dbClient;
     this._tezosConfiguration = tezosConfiguration;
-    this._bcd = bcd;
+    this._tezosToolkit = tezosToolkit;
   }
 
   async erc20(tezosAddress: string, ethereumAddress: string): Promise<PendingERC20Unwrap[]> {
-    const currentLevel = await this._bcd.getNetworkCurrentLevel();
+    const currentLevel = await this._getNetworkLevel();
     const pendingUnwraps: ERC20Unwrap[] = await this._getPendingUnwraps(tezosAddress, ethereumAddress, 'erc20_unwraps') as ERC20Unwrap[];
     const signatures: Erc20UnwrapSignature[] = await this._getSignatures(pendingUnwraps.map(p => p.operationId)) as Erc20UnwrapSignature[];
     return pendingUnwraps.map(unwrap => {
@@ -69,7 +69,7 @@ export class PendingUnwrapsQuery {
   }
 
   async erc721(tezosAddress: string, ethereumAddress: string): Promise<PendingERC721Unwrap[]> {
-    const currentLevel = await this._bcd.getNetworkCurrentLevel();
+    const currentLevel = await this._getNetworkLevel();
     const pendingUnwraps: ERC721Unwrap[] = await this._getPendingUnwraps(tezosAddress, ethereumAddress, 'erc721_unwraps') as ERC721Unwrap[];
     const signatures: Erc721UnwrapSignature[] = await this._getSignatures(pendingUnwraps.map(p => p.operationId)) as Erc721UnwrapSignature[];
     return pendingUnwraps.map(unwrap => {
@@ -93,6 +93,11 @@ export class PendingUnwrapsQuery {
     });
   }
 
+  private async _getNetworkLevel(): Promise<number> {
+    const block = await this._tezosToolkit.rpc.getBlockHeader();
+    return block.level;
+  }
+
   private async _getPendingUnwraps(tezosAddress: string, ethereumAddress: string, table: string): Promise<unknown> {
     return this._dbClient
       .table(table)
@@ -114,5 +119,5 @@ export class PendingUnwrapsQuery {
 
   private _dbClient: Knex;
   private _tezosConfiguration: TezosConfig;
-  private _bcd: BcdProvider;
+  private _tezosToolkit: TezosToolkit;
 }

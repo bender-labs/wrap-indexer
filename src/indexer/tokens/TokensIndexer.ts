@@ -2,8 +2,9 @@ import { Logger } from 'tslog';
 import Knex from 'knex';
 import { Dependencies } from '../../bootstrap';
 import { TokenDao } from '../../dao/TokenDao';
-import { BcdProvider, MichelineNode } from '../../infrastructure/tezos/bcdProvider';
 import { Token } from '../../domain/Token';
+import { TezosToolkit } from '@taquito/taquito';
+import { tzip12 } from '@taquito/tzip12';
 
 type TokenDefinition = {
   type: 'ERC20' | 'ERC721';
@@ -13,10 +14,10 @@ type TokenDefinition = {
 }
 
 export class TokensIndexer {
-  constructor({ logger, bcd, tezosConfiguration, dbClient }: Dependencies) {
+  constructor({ logger, tezosToolkit, tezosConfiguration, dbClient }: Dependencies) {
     this._logger = logger;
     this._dbClient = dbClient;
-    this._bcd = bcd;
+    this._tezosToolkit = tezosToolkit;
     this._minterContractAddress = tezosConfiguration.minterContractAddress;
     this._tokenDao = new TokenDao(this._dbClient);
   }
@@ -41,55 +42,62 @@ export class TokensIndexer {
   }
 
   private async _getMinterTokens(): Promise<TokenDefinition[]> {
-    const storage = await this._bcd.getStorage(this._minterContractAddress);
-    const assets = storage[0].children.find(c => c.name === 'assets');
-    const erc20Tokens: TokenDefinition[] = assets.children.find(c => c.name === 'erc20_tokens').children.map(c => ({
-      type: 'ERC20',
-      ethereumContractAddress: '0x' + c.name.toLowerCase(),
-      tezosWrappingContract: c.children[0].value as string,
-      tezosTokenId: c.children[1].value as string,
-    }));
-    const erc721Tokens: TokenDefinition[] = assets.children.find(c => c.name === 'erc721_tokens').children.map(c => ({
-      type: 'ERC721',
-      ethereumContractAddress: '0x' + c.name.toLowerCase(),
-      tezosWrappingContract: c.value as string,
-    }));
-    return erc20Tokens.concat(erc721Tokens);
+    const minterContract = await this._tezosToolkit.contract.at(this._minterContractAddress);
+    const storage = await minterContract.storage();
+    const tokens = [];
+    for (const token of storage['assets']['erc20_tokens'].entries()) {
+      tokens.push({
+        type: 'ERC20',
+        ethereumContractAddress: '0x' + token[0],
+        tezosWrappingContract: token[1]['0'],
+        tezosTokenId: token[1]['1'].toString(),
+      });
+    }
+    for (const token of storage['assets']['erc721_tokens'].entries()) {
+      tokens.push({
+        type: 'ERC721',
+        ethereumContractAddress: '0x' + token[0],
+        tezosWrappingContract: token[1],
+      });
+    }
+    return tokens;
   }
 
   private async _getTokenMetadata(definition: TokenDefinition): Promise<Token> {
-    let fa2Metadata;
-    if (definition.type == 'ERC20') {
-      fa2Metadata = (await this._bcd.getTokenMetadata(definition.tezosWrappingContract, definition.tezosTokenId)).children[1];
-    } else {
-      const storage = await this._bcd.getStorage(definition.tezosWrappingContract);
-      fa2Metadata = storage[0].children.find(c => c.name == 'assets').children.find(c => c.name == 'token_info');
+    if (definition.type === 'ERC20') {
+      const contract = await this._tezosToolkit.contract.at(definition.tezosWrappingContract, tzip12);
+      const metadata = await contract.tzip12().getTokenMetadata(parseInt(definition.tezosTokenId));
+      return {
+        type: definition.type,
+        ethereumContractAddress: definition.ethereumContractAddress,
+        tezosWrappingContract: definition.tezosWrappingContract,
+        tezosTokenId: definition.tezosTokenId,
+        decimals: metadata.decimals.toString(),
+        ethereumSymbol: metadata['eth_symbol'],
+        ethereumName: metadata['eth_name'],
+        tezosName: metadata.name,
+        tezosSymbol: metadata.symbol,
+      };
     }
-    const decimals = this._extractValueFromMetadata(fa2Metadata, 'decimals') as string;
-    const ethereumSymbol = this._extractValueFromMetadata(fa2Metadata, 'eth_symbol') as string;
-    const ethereumName = this._extractValueFromMetadata(fa2Metadata, 'eth_name') as string;
-    const tezosName = this._extractValueFromMetadata(fa2Metadata, 'name') as string;
-    const tezosSymbol = this._extractValueFromMetadata(fa2Metadata, 'symbol') as string;
+    const contract = await this._tezosToolkit.contract.at(definition.tezosWrappingContract);
+    const storage = await contract.storage();
+    const tokenInfo = storage['assets']['token_info'];
     return {
       type: definition.type,
       ethereumContractAddress: definition.ethereumContractAddress,
       tezosWrappingContract: definition.tezosWrappingContract,
       tezosTokenId: definition.tezosTokenId,
-      decimals,
-      ethereumSymbol,
-      ethereumName,
-      tezosName,
-      tezosSymbol,
+      decimals: '0',
+      ethereumSymbol: Buffer.from(tokenInfo.get('eth_symbol'), 'hex').toString(),
+      ethereumName: Buffer.from(tokenInfo.get('eth_name'), 'hex').toString(),
+      tezosName: Buffer.from(tokenInfo.get('name'), 'hex').toString(),
+      tezosSymbol: Buffer.from(tokenInfo.get('symbol'), 'hex').toString(),
     };
-  }
-
-  private _extractValueFromMetadata(fa2Metadata: MichelineNode, name: string): string | number {
-    return fa2Metadata.children.find(c => c.name == name).value;
   }
 
   private _logger: Logger;
   private _dbClient: Knex;
   private _tokenDao: TokenDao;
   private _minterContractAddress: string;
-  private _bcd: BcdProvider;
+  private _tezosToolkit: TezosToolkit;
 }
