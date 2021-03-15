@@ -65,7 +65,6 @@ export class SignatureIndexer {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async _resolveDag(path: string): Promise<any | null> {
     try {
       return await this._ipfsClient.dag.get(path);
@@ -75,7 +74,6 @@ export class SignatureIndexer {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
   private _parseSignature(signer: TezosSigner, cid: string, value: any): Erc20MintingSignature | Erc721MintingSignature | Erc20UnwrapSignature | Erc721UnwrapSignature {
     if (value.type === 'Erc20MintingSigned') {
       return {
@@ -114,7 +112,7 @@ export class SignatureIndexer {
         wrapId: value.payload.parameters.operationId,
         id: value.payload.parameters.operationId,
         signer: signer.ipnsKey,
-        signerAddress: value.payload.signerAddress,
+        signerAddress: value.payload.signerAddress.toLowerCase(),
         cid,
         type: value.type,
         signature: value.payload.signature,
@@ -129,7 +127,7 @@ export class SignatureIndexer {
         wrapId: value.payload.parameters.operationId,
         id: value.payload.parameters.operationId,
         signer: signer.ipnsKey,
-        signerAddress: value.payload.signerAddress,
+        signerAddress: value.payload.signerAddress.toLowerCase(),
         cid,
         type: value.type,
         signature: value.payload.signature,
