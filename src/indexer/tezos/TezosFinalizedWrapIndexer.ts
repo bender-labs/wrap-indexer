@@ -44,11 +44,12 @@ export class TezosFinalizedWrapIndexer {
   private async _isInMintsMap(bigMap: any, blockHash: string, logIndex: number): Promise<boolean> {
     try {
       const value = await bigMap.get({
-        'block_hash': blockHash,
+        'block_hash': blockHash.replace('0x', ''),
         'log_index': logIndex.toString(),
       });
       return value !== undefined;
     } catch (e) {
+      this._logger.error(`Can't get mints big map key ${e.message}`)
       return false;
     }
   }
