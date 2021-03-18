@@ -1,5 +1,5 @@
 import { Logger } from 'tslog';
-import { TezosConfig } from '../../configuration';
+import { Config, TezosConfig } from '../../configuration';
 import Knex from 'knex';
 import { BcdProvider, Operation, Operations } from '../../infrastructure/tezos/bcdProvider';
 import { AppState } from '../state/AppState';
@@ -8,31 +8,32 @@ import { ErcUnwrapDAO } from '../../dao/ErcUnwrapDAO';
 import { Dependencies } from '../../bootstrap';
 
 export class TezosInitialUnwrapIndexer {
-
   constructor({
                 logger,
                 tezosConfiguration,
+                configuration,
                 bcd,
                 dbClient,
               }: Dependencies) {
     this._logger = logger;
     this._tezosConfiguration = tezosConfiguration;
+    this._configuration = configuration;
     this._bcd = bcd;
     this._dbClient = dbClient;
     this._appState = new AppState(dbClient);
+    this._unwrapDAO = new ErcUnwrapDAO(dbClient);
   }
 
   async index(): Promise<void> {
-    const lastProcessedOperationId = await this._appState.getErcUnwrapLastOperationId();
-    this._logger.info(`Indexing tezos unwraps after operation id ${lastProcessedOperationId ? lastProcessedOperationId : 'none'}`);
-    const operations = await this._getOperations(lastProcessedOperationId);
-    this._logger.info(`${operations.operations.length} unwraps to index`);
-    if (operations.operations.length > 0) {
+    const minLevelProcessed = await this._appState.getErcUnwrapMinLevelProcessed();
+    this._logger.info(`Indexing tezos unwraps from level ${minLevelProcessed ? minLevelProcessed : 'none'}`);
+    const operations = await this._getAllOperationsUntilLevel(minLevelProcessed);
+    if (operations.length > 0) {
       let transaction;
       try {
         transaction = await this._dbClient.transaction();
-        await this._addOperations(operations.operations, transaction);
-        await this._appState.setErcUnwrapLastOperationId(operations.last_id, transaction);
+        await this._addOperations(operations, transaction);
+        await this._appState.setErcUnwrapMinLevelProcessed(operations[0].level, transaction);
         await transaction.commit();
       } catch (e) {
         this._logger.error(`Can't process tezos unwraps ${e.message}`);
@@ -43,16 +44,24 @@ export class TezosInitialUnwrapIndexer {
     }
   }
 
-  private async _getOperations(lastProcessedOperationId: string): Promise<Operations> {
-    const operations = await this._bcd
-      .getContractOperations(
-        this._tezosConfiguration.minterContractAddress,
-        ['unwrap_erc20', 'unwrap_erc721'],
-        lastProcessedOperationId);
-    return {
-      last_id: operations.last_id,
-      operations: operations.operations.filter(o => o.status == 'applied' && !o.mempool),
-    };
+  private async _getAllOperationsUntilLevel(level: number): Promise<Operation[]> {
+    const operations: Operation[] = [];
+    let lastProcessedId = undefined;
+    let inProgress = true;
+    do {
+      const currentOperations = await this._bcd
+        .getContractOperations(
+          this._tezosConfiguration.minterContractAddress,
+          ['unwrap_erc20', 'unwrap_erc721'],
+          lastProcessedId);
+      if (currentOperations.operations.length === 0 || currentOperations.operations[currentOperations.operations.length-1].level < level) {
+        inProgress = false;
+      } else {
+        lastProcessedId = currentOperations.last_id;
+      }
+      operations.push(...currentOperations.operations.filter(o => o.status == 'applied' && !o.mempool && o.level >= level));
+    } while (inProgress);
+    return operations;
   }
 
   private async _addOperations(operationsToProcess: Operation[], transaction: Knex.Transaction): Promise<void> {
@@ -64,7 +73,10 @@ export class TezosInitialUnwrapIndexer {
       }
       const unwrap = this._parseERCUnwrap(operation, operationId);
       if (unwrap) {
-        await new ErcUnwrapDAO(this._dbClient).save(unwrap, transaction);
+        const existingUnwrap = await this._unwrapDAO.isExist(unwrap, transaction);
+        if (!existingUnwrap) {
+          await this._unwrapDAO.save(unwrap, transaction);
+        }
       }
     }
   }
@@ -102,4 +114,6 @@ export class TezosInitialUnwrapIndexer {
   private _bcd: BcdProvider;
   private _dbClient: Knex;
   private _appState: AppState;
+  private _configuration: Config;
+  private _unwrapDAO: ErcUnwrapDAO;
 }

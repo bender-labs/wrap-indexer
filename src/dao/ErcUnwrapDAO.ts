@@ -22,9 +22,15 @@ export class ErcUnwrapDAO {
     return this._dbClient.table<ERC721Unwrap>('erc721_unwraps').where({ status: 'asked' });
   }
 
+  async isExist(unwrap: ERC20Unwrap | ERC721Unwrap, transaction: Knex.Transaction) {
+    const count = await this._dbClient.table(this._table(unwrap)).transacting(transaction).where( {id: unwrap.id }).count();
+    return count[0].count !== '0';
+  }
+
   private _table(unwrap: ERC20Unwrap | ERC721Unwrap): string {
     return (unwrap as ERC20Unwrap).amount !== undefined ? 'erc20_unwraps' : 'erc721_unwraps';
   }
 
   private _dbClient: Knex;
+
 }
