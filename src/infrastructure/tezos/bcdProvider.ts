@@ -29,16 +29,6 @@ export type Operations = {
   last_id: string;
 }
 
-export type BigMapKey = {
-  data: {
-    key: MichelineNode;
-    value: MichelineNode;
-    key_hash: string;
-    key_string: string;
-    count: number;
-  }
-}
-
 export class BcdProvider {
   constructor(tezosNetwork: string) {
     this._tezosNetwork = tezosNetwork;

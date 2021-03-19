@@ -73,7 +73,7 @@ export function loadConfiguration(): Config {
           },
           wrapContractAddress: {
             env: 'ETHEREUM_WRAP_CONTRACT_ADDRESS',
-            default: '0x9F18441Dfad24E3EE783b8649A5d40aE7B5576C4',
+              default: '0x0cFa220dDA04DA22754baA1929798ec5E01A3483',
           },
           firstBlockToIndex: {
             env: 'ETHEREUM_FIRST_BLOCK_TO_INDEX',

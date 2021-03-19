@@ -1,7 +1,7 @@
 import { Logger } from 'tslog';
-import { Config, TezosConfig } from '../../configuration';
+import { TezosConfig } from '../../configuration';
 import Knex from 'knex';
-import { BcdProvider, Operation, Operations } from '../../infrastructure/tezos/bcdProvider';
+import { BcdProvider, Operation } from '../../infrastructure/tezos/bcdProvider';
 import { AppState } from '../state/AppState';
 import { ERC20Unwrap, ERC721Unwrap } from '../../domain/ERCUnwrap';
 import { ErcUnwrapDAO } from '../../dao/ErcUnwrapDAO';
@@ -11,13 +11,11 @@ export class TezosInitialUnwrapIndexer {
   constructor({
                 logger,
                 tezosConfiguration,
-                configuration,
                 bcd,
                 dbClient,
               }: Dependencies) {
     this._logger = logger;
     this._tezosConfiguration = tezosConfiguration;
-    this._configuration = configuration;
     this._bcd = bcd;
     this._dbClient = dbClient;
     this._appState = new AppState(dbClient);
@@ -114,6 +112,5 @@ export class TezosInitialUnwrapIndexer {
   private _bcd: BcdProvider;
   private _dbClient: Knex;
   private _appState: AppState;
-  private _configuration: Config;
   private _unwrapDAO: ErcUnwrapDAO;
 }

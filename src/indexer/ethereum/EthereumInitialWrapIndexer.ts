@@ -10,6 +10,7 @@ import { ErcWrapDAO } from '../../dao/ErcWrapDAO';
 import { Dependencies } from '../../bootstrap';
 
 export class EthereumInitialWrapIndexer {
+
   constructor({
                 logger,
                 ethereumConfiguration,
@@ -21,6 +22,7 @@ export class EthereumInitialWrapIndexer {
     this._ethereumProvider = ethereumProvider;
     this._dbClient = dbClient;
     this._appState = new AppState(this._dbClient);
+    this._wrapDAO = new ErcWrapDAO(this._dbClient);
   }
 
   async index(): Promise<void> {
@@ -46,16 +48,33 @@ export class EthereumInitialWrapIndexer {
 
   private async _addEvents(rawLogs: ethers.providers.Log[], transaction: Knex.Transaction) {
     const wraps = rawLogs.map(log => EthereumInitialWrapIndexer._parseERCLog(log));
+    await this._ensureExistingWrapsAreOnTheRightChain(wraps, transaction);
     for (const wrap of wraps) {
       if (wrap) {
-        await new ErcWrapDAO(this._dbClient).save(wrap, transaction);
+        const exist = await this._wrapDAO.isExist(wrap, transaction);
+        if (!exist) {
+          await this._wrapDAO.save(wrap, transaction);
+        }
+      }
+    }
+  }
+
+  private async _ensureExistingWrapsAreOnTheRightChain(wraps: (ERC20Wrap | ERC721Wrap)[], transaction: Knex.Transaction) {
+    const transactionsHashAndBlockLevel = wraps.map(w => ({blockHash: w.blockHash, logIndex: w.logIndex, transactionHash: w.transactionHash}));
+    for (const transactionHashAndBlockLevel of transactionsHashAndBlockLevel) {
+      const existingWraps : (ERC20Wrap | ERC721Wrap)[] = await this._wrapDAO.getERC20ByTransactionHash(transactionHashAndBlockLevel.transactionHash);
+      existingWraps.concat(await this._wrapDAO.getERC721ByTransactionHash(transactionHashAndBlockLevel.transactionHash));
+      const wrapsOnWrongChain = existingWraps.filter(w => w.blockHash !== transactionHashAndBlockLevel.blockHash || w.logIndex.toString() !== transactionHashAndBlockLevel.logIndex.toString());
+      if (wrapsOnWrongChain.length > 0) {
+        this._logger.info(`Wraps found on a different block, removing wraps ${wrapsOnWrongChain.map(w => w.id)}`);
+        await this._wrapDAO.remove(wrapsOnWrongChain, transaction);
       }
     }
   }
 
   private async _getFirstBlockToIndex(): Promise<number> {
     const lastIndexedBlock = await this._appState.getErcWrapLastIndexedBlock();
-    return lastIndexedBlock ? lastIndexedBlock + 1 : this._ethereumConfig.firstBlockToIndex;
+    return lastIndexedBlock ? lastIndexedBlock - this._ethereumConfig.confirmationsThreshold + 1 : this._ethereumConfig.firstBlockToIndex;
   }
 
   private async _setLastIndexedBlock(block: number, transaction: Knex.Transaction): Promise<void> {
@@ -115,6 +134,7 @@ export class EthereumInitialWrapIndexer {
   private _ethereumConfig: EthereumConfig;
   private _appState: AppState;
   private _logger: Logger;
+  private _wrapDAO: ErcWrapDAO;
   private static readonly _wrapTopics: string[] = [id('ERC20WrapAsked(address,address,uint256,string)'), id('ERC721WrapAsked(address,address,uint256,string)')];
   private static readonly _wrapInterface: ethers.utils.Interface = new ethers.utils.Interface(['event ERC20WrapAsked(address user, address token, uint256 amount, string tezosDestinationAddress)', 'event ERC721WrapAsked(address user, address token, uint256 tokenId, string tezosDestinationAddress)']);
 }
