@@ -45,7 +45,7 @@ export class TezosQuorumDao {
 
   async getThreshold(): Promise<number> {
     const quorum = await this._dbClient.table<TezosQuorum>('tezos_quorum').first();
-    return quorum.threshold;
+    return quorum?.threshold;
   }
 
   private _dbClient: Knex;
