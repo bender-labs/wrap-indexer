@@ -1,12 +1,15 @@
+export type ERCUnwrapStatus = 'asked' | 'finalized';
+
 export type ERC20Unwrap = {
   id: string;
   source: string;
   token: string;
   ethereumDestination: string;
-  operationId: string;
+  operationHash: string;
   level: number;
-  status: string;
+  status: ERCUnwrapStatus;
   amount: string;
+  finalizedAtLevel: number;
 }
 
 export type ERC721Unwrap = {
@@ -14,8 +17,9 @@ export type ERC721Unwrap = {
   source: string;
   token: string;
   ethereumDestination: string;
-  operationId: string;
+  operationHash: string;
   level: number;
-  status: string;
+  status: ERCUnwrapStatus;
   tokenId: string;
+  finalizedAtLevel: number;
 }

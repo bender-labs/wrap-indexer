@@ -1,3 +1,5 @@
+export type ERCWrapStatus = 'asked' | 'finalized';
+
 export type ERC20Wrap = {
   id: string;
   source: string;
@@ -7,8 +9,9 @@ export type ERC20Wrap = {
   blockHash: string;
   logIndex: number;
   level: number;
-  status: 'asked' | 'finalized';
+  status: ERCWrapStatus;
   amount: string;
+  finalizedAtLevel: number;
 }
 
 export type ERC721Wrap = {
@@ -20,6 +23,7 @@ export type ERC721Wrap = {
   blockHash: string;
   logIndex: number;
   level: number;
-  status: 'asked' | 'finalized';
+  status: ERCWrapStatus;
   tokenId: string;
+  finalizedAtLevel: number;
 }

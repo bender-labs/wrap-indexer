@@ -23,13 +23,16 @@ export class EthereumFinalizedUnwrapIndexer {
   }
 
   async index(): Promise<void> {
+    const minLevelToCheck = (await this._getNetworkLevel()) - this._ethereumConfig.confirmationsThreshold;
     const contract = new ethers.Contract(this._ethereumConfig.wrapContractAddress, this._ethereumConfig.wrapABI, this._ethereumProvider);
     const erc20Unwraps = await this._unwrapDao.getNotFinalizedERC20();
+    erc20Unwraps.concat(await this._unwrapDao.getFinalizedERC20UntilLevel(minLevelToCheck))
     this._logger.info(`${erc20Unwraps.length} pending erc20 unwraps to watch`);
     for (const unwrap of erc20Unwraps) {
       await this._updateUnwrapState(unwrap, contract);
     }
     const erc721Unwraps = await this._unwrapDao.getNotFinalizedERC721();
+    erc721Unwraps.concat(await this._unwrapDao.getFinalizedERC721UntilLevel(minLevelToCheck))
     this._logger.info(`${erc721Unwraps.length} pending erc721 unwraps to watch`);
     for (const unwrap of erc721Unwraps) {
       await this._updateUnwrapState(unwrap, contract);
@@ -39,18 +42,26 @@ export class EthereumFinalizedUnwrapIndexer {
   private async _updateUnwrapState(unwrap: ERC20Unwrap | ERC721Unwrap, contract: ethers.Contract): Promise<void> {
     let transaction;
     try {
-      const processed = await contract.isTezosOperationProcessed(unwrap.operationId);
-      if (processed) {
+      const processed = await contract.isTezosOperationProcessed(unwrap.id);
+      if (processed && unwrap.status === 'asked') {
         transaction = await this._dbClient.transaction();
-        await this._unwrapDao.setAsFinalized(unwrap, transaction);
+        await this._unwrapDao.setStatus(unwrap, 'finalized', await this._ethereumProvider.getBlockNumber(), transaction);
+        await transaction.commit();
+      } else if (!processed && unwrap.status === 'finalized') {
+        transaction = await this._dbClient.transaction();
+        await this._unwrapDao.setStatus(unwrap, 'asked', null, transaction);
         await transaction.commit();
       }
     } catch (e) {
-      this._logger.error(`Can't process pending unwrap ${unwrap.operationId} ${e.message}`);
+      this._logger.error(`Can't process pending unwrap ${unwrap.id} ${e.message}`);
       if (transaction) {
         transaction.rollback();
       }
     }
+  }
+
+  private async _getNetworkLevel(): Promise<number> {
+    return this._ethereumProvider.getBlockNumber();
   }
 
   private _ethereumProvider: ethers.providers.Provider;

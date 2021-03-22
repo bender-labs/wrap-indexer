@@ -101,11 +101,11 @@ export function loadConfiguration(): Config {
         edo2net: {
           quorumContractAddress: {
             env: 'TEZOS_QUORUM_CONTRACT',
-            default: 'KT1WYBSc6L9REgZwXmQm7BLWnGhdcoL1167j',
+            default: 'KT1C5ftQmsS41bwS5wQKWRmEhUCyfk6kan2S',
           },
           minterContractAddress: {
             env: 'TEZOS_MINTER_CONTRACT',
-            default: 'KT1BRshgFv5mvu3C91z6iyKvftEwppPUQUDZ',
+            default: 'KT1RjHY3G7omtaohqnkEqCybQ73BqFeHkZh1',
           },
           confirmationsThreshold: {
             env: 'TEZOS_CONFIRMATIONS_THRESHOLD',

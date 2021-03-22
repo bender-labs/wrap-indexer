@@ -20,12 +20,12 @@ export class AppState {
     await this._setValue({ key: 'erc_wrap_last_indexed_block', value: block.toString() }, transaction);
   }
 
-  async getErcUnwrapMinLevelProcessed(): Promise<number | null> {
+  async getErcUnwrapLevelProcessed(): Promise<number | null> {
     const item = await this._getValue('erc_unwrap_min_level_processed');
     return item ? +item.value : null;
   }
 
-  async setErcUnwrapMinLevelProcessed(lastId: number, transaction: Knex.Transaction): Promise<void> {
+  async setErcUnwrapLevelProcessed(lastId: number, transaction: Knex.Transaction): Promise<void> {
     await this._setValue({ key: 'erc_unwrap_min_level_processed', value: lastId.toString() }, transaction);
   }
 

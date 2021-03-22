@@ -111,6 +111,7 @@ export class EthereumInitialWrapIndexer {
         logIndex: log.logIndex,
         level: log.blockNumber,
         status: 'asked',
+        finalizedAtLevel: null
       };
     } else if (logDescription.name === 'ERC721WrapAsked') {
       return {
@@ -124,6 +125,7 @@ export class EthereumInitialWrapIndexer {
         logIndex: log.logIndex,
         level: log.blockNumber,
         status: 'asked',
+        finalizedAtLevel: null
       };
     }
     return null;

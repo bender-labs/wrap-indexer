@@ -23,15 +23,16 @@ export class TezosInitialUnwrapIndexer {
   }
 
   async index(): Promise<void> {
-    const minLevelProcessed = await this._appState.getErcUnwrapMinLevelProcessed();
-    this._logger.info(`Indexing tezos unwraps from level ${minLevelProcessed ? minLevelProcessed : 'none'}`);
-    const operations = await this._getAllOperationsUntilLevel(minLevelProcessed);
+    const maxLevelProcessed = await this._appState.getErcUnwrapLevelProcessed();
+    const minLevelToProcess = maxLevelProcessed ? maxLevelProcessed - this._tezosConfiguration.confirmationsThreshold : null;
+    this._logger.info(`Indexing tezos unwraps from level ${minLevelToProcess}`);
+    const operations = await this._getAllOperationsUntilLevel(minLevelToProcess);
     if (operations.length > 0) {
       let transaction;
       try {
         transaction = await this._dbClient.transaction();
         await this._addOperations(operations, transaction);
-        await this._appState.setErcUnwrapMinLevelProcessed(operations[0].level, transaction);
+        await this._appState.setErcUnwrapLevelProcessed(operations[0].level, transaction);
         await transaction.commit();
       } catch (e) {
         this._logger.error(`Can't process tezos unwraps ${e.message}`);
@@ -52,7 +53,7 @@ export class TezosInitialUnwrapIndexer {
           this._tezosConfiguration.minterContractAddress,
           ['unwrap_erc20', 'unwrap_erc721'],
           lastProcessedId);
-      if (currentOperations.operations.length === 0 || currentOperations.operations[currentOperations.operations.length-1].level < level) {
+      if (currentOperations.operations.length === 0 || currentOperations.operations[currentOperations.operations.length - 1].level < level) {
         inProgress = false;
       } else {
         lastProcessedId = currentOperations.last_id;
@@ -63,47 +64,64 @@ export class TezosInitialUnwrapIndexer {
   }
 
   private async _addOperations(operationsToProcess: Operation[], transaction: Knex.Transaction): Promise<void> {
-    for (const operation of operationsToProcess) {
+    const unwraps = operationsToProcess.map(operation => {
       let operationId = `${operation.hash}/${operation.counter}`;
       if (operation.internal) {
         // TODO get nonce of internal operation
         operationId += `/${0}`;
       }
-      const unwrap = this._parseERCUnwrap(operation, operationId);
-      if (unwrap) {
-        const existingUnwrap = await this._unwrapDAO.isExist(unwrap, transaction);
-        if (!existingUnwrap) {
-          await this._unwrapDAO.save(unwrap, transaction);
-        }
+      return this._parseERCUnwrap(operation, operationId);
+    });
+    await this._ensureExistingUnwrapsAreOnTheRightChain(unwraps, transaction);
+    for (const unwrap of unwraps) {
+      const existingUnwrap = await this._unwrapDAO.isExist(unwrap, transaction);
+      if (!existingUnwrap) {
+        await this._unwrapDAO.save(unwrap, transaction);
       }
     }
   }
 
-  private _parseERCUnwrap(operation: Operation, operationId: string): ERC20Unwrap | ERC721Unwrap | null {
+  private async _ensureExistingUnwrapsAreOnTheRightChain(unwraps: (ERC20Unwrap | ERC721Unwrap)[], transaction: Knex.Transaction) {
+    const operationsHashAndLevel = unwraps.map(w => ({
+      level: w.level,
+      operationHash: w.operationHash
+    }));
+    for (const operationHashAndBlockLevel of operationsHashAndLevel) {
+      const existingUnwraps: (ERC20Unwrap | ERC721Unwrap)[] = await this._unwrapDAO.getERC20ByOperationHash(operationHashAndBlockLevel.operationHash);
+      existingUnwraps.concat(await this._unwrapDAO.getERC721ByOperationHash(operationHashAndBlockLevel.operationHash));
+      const unwrapsOnWrongChain = existingUnwraps.filter(w => w.level.toString() !== operationHashAndBlockLevel.level.toString());
+      if (unwrapsOnWrongChain.length > 0) {
+        this._logger.info(`Unwraps found on a different block, removing unwraps ${unwrapsOnWrongChain.map(w => w.id)}`);
+        await this._unwrapDAO.remove(unwrapsOnWrongChain, transaction);
+      }
+    }
+  }
+
+  private _parseERCUnwrap(operation: Operation, operationId: string): ERC20Unwrap | ERC721Unwrap {
     if (operation.entrypoint === 'unwrap_erc20') {
       return {
-        id: operation.id,
+        id: operationId,
         source: operation.source,
         token: '0x' + operation.parameters[0].children.find(c => c.name == 'erc_20').value,
         amount: operation.parameters[0].children.find(c => c.name == 'amount').value as string,
         ethereumDestination: '0x' + (operation.parameters[0].children.find(c => c.name == 'destination').value as string).toLowerCase(),
-        operationId,
+        operationHash: operation.hash,
         level: operation.level,
         status: 'asked',
-      };
-    } else if (operation.entrypoint === 'unwrap_erc721') {
-      return {
-        id: operation.id,
-        source: operation.source,
-        token: '0x' + operation.parameters[0].children.find(c => c.name == 'erc_721').value,
-        tokenId: operation.parameters[0].children.find(c => c.name == 'token_id').value as string,
-        ethereumDestination: '0x' + (operation.parameters[0].children.find(c => c.name == 'destination').value as string).toLowerCase(),
-        operationId,
-        level: operation.level,
-        status: 'asked',
+        finalizedAtLevel: null
       };
     }
-    return null;
+    return {
+      id: operationId,
+      source: operation.source,
+      token: '0x' + operation.parameters[0].children.find(c => c.name == 'erc_721').value,
+      tokenId: operation.parameters[0].children.find(c => c.name == 'token_id').value as string,
+      ethereumDestination: '0x' + (operation.parameters[0].children.find(c => c.name == 'destination').value as string).toLowerCase(),
+      operationHash: operation.hash,
+      level: operation.level,
+      status: 'asked',
+      finalizedAtLevel: null
+    };
   }
 
 

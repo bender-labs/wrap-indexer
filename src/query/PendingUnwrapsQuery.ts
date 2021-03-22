@@ -13,7 +13,6 @@ type PendingERC20Unwrap = {
   destination: string;
   token: string;
   amount: string;
-  operationId: string;
   signatures: {
     [address: string]: string;
   },
@@ -27,7 +26,6 @@ type PendingERC721Unwrap = {
   destination: string;
   token: string;
   tokenId: string;
-  operationId: string;
   signatures: {
     [address: string]: string;
   }
@@ -46,21 +44,20 @@ export class PendingUnwrapsQuery {
   async erc20(tezosAddress: string, ethereumAddress: string): Promise<PendingERC20Unwrap[]> {
     const currentLevel = await this._getNetworkLevel();
     const pendingUnwraps: ERC20Unwrap[] = await this._getPendingUnwraps(tezosAddress, ethereumAddress, 'erc20_unwraps') as ERC20Unwrap[];
-    const signatures: Erc20UnwrapSignature[] = await this._getSignatures(pendingUnwraps.map(p => p.operationId)) as Erc20UnwrapSignature[];
+    const signatures: Erc20UnwrapSignature[] = await this._getSignatures(pendingUnwraps.map(p => p.id)) as Erc20UnwrapSignature[];
     return pendingUnwraps.map(unwrap => {
       const relatedSignatures = signatures
-        .filter(s => s.wrapId == unwrap.operationId)
+        .filter(s => s.wrapId == unwrap.id)
         .reduce((acc, value) => {
           acc[value.signerAddress] = value.signature;
           return acc;
         }, {});
       return {
-        id: unwrap.operationId,
+        id: unwrap.id,
         source: unwrap.source,
         destination: unwrap.ethereumDestination,
         token: unwrap.token,
         amount: unwrap.amount.toString(),
-        operationId: unwrap.operationId,
         signatures: relatedSignatures,
         confirmations: currentLevel - unwrap.level,
         confirmationsThreshold: this._tezosConfiguration.confirmationsThreshold
@@ -71,21 +68,20 @@ export class PendingUnwrapsQuery {
   async erc721(tezosAddress: string, ethereumAddress: string): Promise<PendingERC721Unwrap[]> {
     const currentLevel = await this._getNetworkLevel();
     const pendingUnwraps: ERC721Unwrap[] = await this._getPendingUnwraps(tezosAddress, ethereumAddress, 'erc721_unwraps') as ERC721Unwrap[];
-    const signatures: Erc721UnwrapSignature[] = await this._getSignatures(pendingUnwraps.map(p => p.operationId)) as Erc721UnwrapSignature[];
+    const signatures: Erc721UnwrapSignature[] = await this._getSignatures(pendingUnwraps.map(p => p.id)) as Erc721UnwrapSignature[];
     return pendingUnwraps.map(unwrap => {
       const relatedSignatures = signatures
-        .filter(s => s.wrapId == unwrap.operationId)
+        .filter(s => s.wrapId == unwrap.id)
         .reduce((acc, value) => {
           acc[value.signerAddress] = value.signature;
           return acc;
         }, {});
       return {
-        id: unwrap.operationId,
+        id: unwrap.id,
         source: unwrap.source,
         destination: unwrap.ethereumDestination,
         token: unwrap.token,
         tokenId: unwrap.tokenId.toString(),
-        operationId: unwrap.operationId,
         signatures: relatedSignatures,
         confirmations: currentLevel - unwrap.level,
         confirmationsThreshold: this._tezosConfiguration.confirmationsThreshold
