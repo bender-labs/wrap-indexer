@@ -1,6 +1,6 @@
 {
   "name": "wrap-indexer",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "description": "Wrap Indexer",
   "engines": {
     "node": ">= 14.15 <15"
