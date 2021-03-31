@@ -22,7 +22,9 @@ export class SignaturePinningService {
       try {
         await this._pinSignatureOf(signer);
       } catch (e) {
-        this._logger.error(`Can't pin signatures of ${signer.ipnsKey} ${e.message}`);
+        this._logger.error(
+          `Can't pin signatures of ${signer.ipnsKey} ${e.message}`
+        );
       }
     }
   }

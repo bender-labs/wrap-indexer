@@ -1,6 +1,6 @@
 export type ERCWrapStatus = 'asked' | 'finalized';
 
-export type ERC20Wrap = {
+export interface ERC20Wrap {
   id: string;
   source: string;
   token: string;
@@ -14,7 +14,7 @@ export type ERC20Wrap = {
   finalizedAtLevel: number;
 }
 
-export type ERC721Wrap = {
+export interface ERC721Wrap {
   id: string;
   source: string;
   token: string;

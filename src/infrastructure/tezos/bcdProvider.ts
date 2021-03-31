@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export type MichelineNode = {
+export interface MichelineNode {
   prim: string;
   type: string;
   name?: string;
@@ -8,7 +8,7 @@ export type MichelineNode = {
   children?: Array<MichelineNode>;
 }
 
-export type Operation = {
+export interface Operation {
   level: number;
   counter: number;
   parameters: MichelineNode;
@@ -24,7 +24,7 @@ export type Operation = {
   mempool: boolean;
 }
 
-export type Operations = {
+export interface Operations {
   operations: Array<Operation>;
   last_id: string;
 }
@@ -34,26 +34,30 @@ export class BcdProvider {
     this._tezosNetwork = tezosNetwork;
   }
 
-  async getContractOperations(contractAddress: string, entrypoints: string[], lastId?: string): Promise<Operations> {
-    const response = await axios.get<Operations>(`${BcdProvider.BCD_URL}/v1/contract/${this._tezosNetwork}/${contractAddress}/operations\\?entrypoints\\=${entrypoints.join(',')}${lastId ? '&last_id=' + lastId : ''}`);
+  async getContractOperations(
+    contractAddress: string,
+    entrypoints: string[],
+    lastId?: string
+  ): Promise<Operations> {
+    const response = await axios.get<Operations>(
+      `${BcdProvider.BCD_URL}/v1/contract/${
+        this._tezosNetwork
+      }/${contractAddress}/operations\\?entrypoints\\=${entrypoints.join(',')}${
+        lastId ? '&last_id=' + lastId : ''
+      }`
+    );
     return {
       last_id: response.data.last_id,
-      operations: response.data.operations.filter(o => entrypoints.includes(o.entrypoint)),
+      operations: response.data.operations.filter((o) =>
+        entrypoints.includes(o.entrypoint)
+      ),
     };
   }
 
   async getStorage(contractAddress: string): Promise<MichelineNode> {
-    const response = await axios.get<MichelineNode>(`${BcdProvider.BCD_URL}/v1/contract/${this._tezosNetwork}/${contractAddress}/storage`);
-    return response.data;
-  }
-
-  async getTokenMetadata(contractAddress: string, tokenId: string): Promise<MichelineNode> {
-    const response = await axios.post<MichelineNode>(`${BcdProvider.BCD_URL}/v1/contract/${this._tezosNetwork}/${contractAddress}/views/execute`, {
-      name: 'token_metadata',
-      implementation: 0,
-      data: { '0': parseInt(tokenId) },
-    });
-    console.log(response.data);
+    const response = await axios.get<MichelineNode>(
+      `${BcdProvider.BCD_URL}/v1/contract/${this._tezosNetwork}/${contractAddress}/storage`
+    );
     return response.data;
   }
 

@@ -1,5 +1,5 @@
-export type Token = {
-  type: "ERC20" | "ERC721";
+export interface Token {
+  type: 'ERC20' | 'ERC721';
   ethereumSymbol: string;
   ethereumName: string;
   ethereumContractAddress: string;
@@ -8,4 +8,5 @@ export type Token = {
   tezosTokenId?: string;
   tezosSymbol: string;
   tezosName: string;
+  thumbnailUri?: string;
 }

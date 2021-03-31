@@ -6,8 +6,12 @@ import { Fees } from '../../domain/Fees';
 import { FeesDao } from '../../dao/FeesDao';
 
 export class FeesIndexer {
-
-  constructor({ logger, tezosToolkit, tezosConfiguration, dbClient }: Dependencies) {
+  constructor({
+    logger,
+    tezosToolkit,
+    tezosConfiguration,
+    dbClient,
+  }: Dependencies) {
     this._logger = logger;
     this._dbClient = dbClient;
     this._tezosToolkit = tezosToolkit;
@@ -32,14 +36,16 @@ export class FeesIndexer {
   }
 
   async _getFees(): Promise<Fees> {
-    const minterContract = await this._tezosToolkit.contract.at(this._minterContractAddress);
+    const minterContract = await this._tezosToolkit.contract.at(
+      this._minterContractAddress
+    );
     const storage = await minterContract.storage();
     const fees = storage['governance'];
     return {
       erc20UnwrappingFees: fees['erc20_unwrapping_fees'].toNumber(),
       erc20WrappingFees: fees['erc20_wrapping_fees'].toNumber(),
       erc721UnwrappingFees: fees['erc721_unwrapping_fees'].toNumber(),
-      erc721WrappingFees: fees['erc721_wrapping_fees'].toNumber()
+      erc721WrappingFees: fees['erc721_wrapping_fees'].toNumber(),
     };
   }
 

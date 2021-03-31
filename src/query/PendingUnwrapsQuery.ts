@@ -7,20 +7,21 @@ import { ERC20Unwrap, ERC721Unwrap } from '../domain/ERCUnwrap';
 import { TezosConfig } from '../configuration';
 import { TezosToolkit } from '@taquito/taquito';
 
-type PendingERC20Unwrap = {
+interface PendingERC20Unwrap {
   id: string;
   source: string;
   destination: string;
   token: string;
   amount: string;
+  operationHash: string;
   signatures: {
     [address: string]: string;
-  },
+  };
   confirmations: number;
   confirmationsThreshold: number;
 }
 
-type PendingERC721Unwrap = {
+interface PendingERC721Unwrap {
   id: string;
   source: string;
   destination: string;
@@ -28,26 +29,38 @@ type PendingERC721Unwrap = {
   tokenId: string;
   signatures: {
     [address: string]: string;
-  }
+  };
   confirmations: number;
   confirmationsThreshold: number;
 }
 
 export class PendingUnwrapsQuery {
-
-  constructor(dbClient: Knex, tezosConfiguration: TezosConfig, tezosToolkit: TezosToolkit) {
+  constructor(
+    dbClient: Knex,
+    tezosConfiguration: TezosConfig,
+    tezosToolkit: TezosToolkit
+  ) {
     this._dbClient = dbClient;
     this._tezosConfiguration = tezosConfiguration;
     this._tezosToolkit = tezosToolkit;
   }
 
-  async erc20(tezosAddress: string, ethereumAddress: string): Promise<PendingERC20Unwrap[]> {
+  async erc20(
+    tezosAddress: string,
+    ethereumAddress: string
+  ): Promise<PendingERC20Unwrap[]> {
     const currentLevel = await this._getNetworkLevel();
-    const pendingUnwraps: ERC20Unwrap[] = await this._getPendingUnwraps(tezosAddress, ethereumAddress, 'erc20_unwraps') as ERC20Unwrap[];
-    const signatures: Erc20UnwrapSignature[] = await this._getSignatures(pendingUnwraps.map(p => p.id)) as Erc20UnwrapSignature[];
-    return pendingUnwraps.map(unwrap => {
+    const pendingUnwraps: ERC20Unwrap[] = (await this._getPendingUnwraps(
+      tezosAddress,
+      ethereumAddress,
+      'erc20_unwraps'
+    )) as ERC20Unwrap[];
+    const signatures: Erc20UnwrapSignature[] = (await this._getSignatures(
+      pendingUnwraps.map((p) => p.id)
+    )) as Erc20UnwrapSignature[];
+    return pendingUnwraps.map((unwrap) => {
       const relatedSignatures = signatures
-        .filter(s => s.wrapId == unwrap.id)
+        .filter((s) => s.wrapId == unwrap.id)
         .reduce((acc, value) => {
           acc[value.signerAddress] = value.signature;
           return acc;
@@ -58,20 +71,30 @@ export class PendingUnwrapsQuery {
         destination: unwrap.ethereumDestination,
         token: unwrap.token,
         amount: unwrap.amount.toString(),
+        operationHash: unwrap.operationHash,
         signatures: relatedSignatures,
         confirmations: currentLevel - unwrap.level,
-        confirmationsThreshold: this._tezosConfiguration.confirmationsThreshold
+        confirmationsThreshold: this._tezosConfiguration.confirmationsThreshold,
       };
     });
   }
 
-  async erc721(tezosAddress: string, ethereumAddress: string): Promise<PendingERC721Unwrap[]> {
+  async erc721(
+    tezosAddress: string,
+    ethereumAddress: string
+  ): Promise<PendingERC721Unwrap[]> {
     const currentLevel = await this._getNetworkLevel();
-    const pendingUnwraps: ERC721Unwrap[] = await this._getPendingUnwraps(tezosAddress, ethereumAddress, 'erc721_unwraps') as ERC721Unwrap[];
-    const signatures: Erc721UnwrapSignature[] = await this._getSignatures(pendingUnwraps.map(p => p.id)) as Erc721UnwrapSignature[];
-    return pendingUnwraps.map(unwrap => {
+    const pendingUnwraps: ERC721Unwrap[] = (await this._getPendingUnwraps(
+      tezosAddress,
+      ethereumAddress,
+      'erc721_unwraps'
+    )) as ERC721Unwrap[];
+    const signatures: Erc721UnwrapSignature[] = (await this._getSignatures(
+      pendingUnwraps.map((p) => p.id)
+    )) as Erc721UnwrapSignature[];
+    return pendingUnwraps.map((unwrap) => {
       const relatedSignatures = signatures
-        .filter(s => s.wrapId == unwrap.id)
+        .filter((s) => s.wrapId == unwrap.id)
         .reduce((acc, value) => {
           acc[value.signerAddress] = value.signature;
           return acc;
@@ -81,10 +104,11 @@ export class PendingUnwrapsQuery {
         source: unwrap.source,
         destination: unwrap.ethereumDestination,
         token: unwrap.token,
+        operationHash: unwrap.operationHash,
         tokenId: unwrap.tokenId.toString(),
         signatures: relatedSignatures,
         confirmations: currentLevel - unwrap.level,
-        confirmationsThreshold: this._tezosConfiguration.confirmationsThreshold
+        confirmationsThreshold: this._tezosConfiguration.confirmationsThreshold,
       };
     });
   }
@@ -94,13 +118,19 @@ export class PendingUnwrapsQuery {
     return block.level;
   }
 
-  private async _getPendingUnwraps(tezosAddress: string, ethereumAddress: string, table: string): Promise<unknown> {
+  private async _getPendingUnwraps(
+    tezosAddress: string,
+    ethereumAddress: string,
+    table: string
+  ): Promise<unknown> {
     return this._dbClient
       .table(table)
       .where({ status: 'asked' })
-      .andWhere(function() {
+      .andWhere(function () {
         if (ethereumAddress && tezosAddress) {
-          this.where({ source: tezosAddress }).orWhere({ ethereumDestination: ethereumAddress.toLowerCase() });
+          this.where({ source: tezosAddress }).orWhere({
+            ethereumDestination: ethereumAddress.toLowerCase(),
+          });
         } else if (tezosAddress) {
           this.where({ source: tezosAddress });
         } else {

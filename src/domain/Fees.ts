@@ -1,4 +1,4 @@
-export type Fees = {
+export interface Fees {
   erc20WrappingFees: number;
   erc20UnwrappingFees: number;
   erc721WrappingFees: number;

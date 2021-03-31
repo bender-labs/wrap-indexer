@@ -10,13 +10,12 @@ import { ErcWrapDAO } from '../../dao/ErcWrapDAO';
 import { Dependencies } from '../../bootstrap';
 
 export class EthereumInitialWrapIndexer {
-
   constructor({
-                logger,
-                ethereumConfiguration,
-                ethereumProvider,
-                dbClient,
-              }: Dependencies) {
+    logger,
+    ethereumConfiguration,
+    ethereumProvider,
+    dbClient,
+  }: Dependencies) {
     this._logger = logger;
     this._ethereumConfig = ethereumConfiguration;
     this._ethereumProvider = ethereumProvider;
@@ -35,7 +34,10 @@ export class EthereumInitialWrapIndexer {
       try {
         transaction = await this._dbClient.transaction();
         await this._addEvents(rawLogs, transaction);
-        await this._setLastIndexedBlock(_.maxBy(rawLogs, log => log.blockNumber).blockNumber, transaction);
+        await this._setLastIndexedBlock(
+          _.maxBy(rawLogs, (log) => log.blockNumber).blockNumber,
+          transaction
+        );
         await transaction.commit();
       } catch (e) {
         this._logger.error(`Can't process wrap events ${e.message}`);
@@ -46,8 +48,13 @@ export class EthereumInitialWrapIndexer {
     }
   }
 
-  private async _addEvents(rawLogs: ethers.providers.Log[], transaction: Knex.Transaction) {
-    const wraps = rawLogs.map(log => EthereumInitialWrapIndexer._parseERCLog(log));
+  private async _addEvents(
+    rawLogs: ethers.providers.Log[],
+    transaction: Knex.Transaction
+  ) {
+    const wraps = rawLogs.map((log) =>
+      EthereumInitialWrapIndexer._parseERCLog(log)
+    );
     await this._ensureExistingWrapsAreOnTheRightChain(wraps, transaction);
     for (const wrap of wraps) {
       if (wrap) {
@@ -59,14 +66,39 @@ export class EthereumInitialWrapIndexer {
     }
   }
 
-  private async _ensureExistingWrapsAreOnTheRightChain(wraps: (ERC20Wrap | ERC721Wrap)[], transaction: Knex.Transaction) {
-    const transactionsHashAndBlockLevel = wraps.map(w => ({blockHash: w.blockHash, logIndex: w.logIndex, transactionHash: w.transactionHash}));
+  private async _ensureExistingWrapsAreOnTheRightChain(
+    wraps: (ERC20Wrap | ERC721Wrap)[],
+    transaction: Knex.Transaction
+  ) {
+    const transactionsHashAndBlockLevel = wraps.map((w) => ({
+      blockHash: w.blockHash,
+      logIndex: w.logIndex,
+      transactionHash: w.transactionHash,
+    }));
     for (const transactionHashAndBlockLevel of transactionsHashAndBlockLevel) {
-      const existingWraps : (ERC20Wrap | ERC721Wrap)[] = await this._wrapDAO.getERC20ByTransactionHash(transactionHashAndBlockLevel.transactionHash);
-      existingWraps.concat(await this._wrapDAO.getERC721ByTransactionHash(transactionHashAndBlockLevel.transactionHash));
-      const wrapsOnWrongChain = existingWraps.filter(w => w.blockHash !== transactionHashAndBlockLevel.blockHash || w.logIndex.toString() !== transactionHashAndBlockLevel.logIndex.toString());
+      const existingWraps: (
+        | ERC20Wrap
+        | ERC721Wrap
+      )[] = await this._wrapDAO.getERC20ByTransactionHash(
+        transactionHashAndBlockLevel.transactionHash
+      );
+      existingWraps.concat(
+        await this._wrapDAO.getERC721ByTransactionHash(
+          transactionHashAndBlockLevel.transactionHash
+        )
+      );
+      const wrapsOnWrongChain = existingWraps.filter(
+        (w) =>
+          w.blockHash !== transactionHashAndBlockLevel.blockHash ||
+          w.logIndex.toString() !==
+            transactionHashAndBlockLevel.logIndex.toString()
+      );
       if (wrapsOnWrongChain.length > 0) {
-        this._logger.info(`Wraps found on a different block, removing wraps ${wrapsOnWrongChain.map(w => w.id)}`);
+        this._logger.info(
+          `Wraps found on a different block, removing wraps ${wrapsOnWrongChain.map(
+            (w) => w.id
+          )}`
+        );
         await this._wrapDAO.remove(wrapsOnWrongChain, transaction);
       }
     }
@@ -74,10 +106,15 @@ export class EthereumInitialWrapIndexer {
 
   private async _getFirstBlockToIndex(): Promise<number> {
     const lastIndexedBlock = await this._appState.getErcWrapLastIndexedBlock();
-    return lastIndexedBlock ? lastIndexedBlock - this._ethereumConfig.confirmationsThreshold + 1 : this._ethereumConfig.firstBlockToIndex;
+    return lastIndexedBlock
+      ? lastIndexedBlock - this._ethereumConfig.confirmationsThreshold + 1
+      : this._ethereumConfig.firstBlockToIndex;
   }
 
-  private async _setLastIndexedBlock(block: number, transaction: Knex.Transaction): Promise<void> {
+  private async _setLastIndexedBlock(
+    block: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
     await this._appState.setErcWrapLastIndexedBlock(block, transaction);
   }
 
@@ -91,14 +128,16 @@ export class EthereumInitialWrapIndexer {
       address: this._ethereumConfig.wrapContractAddress,
       fromBlock: fromBlock,
       toBlock: 'latest',
-      topics: [
-        EthereumInitialWrapIndexer._wrapTopics,
-      ],
+      topics: [EthereumInitialWrapIndexer._wrapTopics],
     };
   }
 
-  private static _parseERCLog(log: ethers.providers.Log): ERC20Wrap | ERC721Wrap | null {
-    const logDescription = EthereumInitialWrapIndexer._wrapInterface.parseLog(log);
+  private static _parseERCLog(
+    log: ethers.providers.Log
+  ): ERC20Wrap | ERC721Wrap | null {
+    const logDescription = EthereumInitialWrapIndexer._wrapInterface.parseLog(
+      log
+    );
     if (logDescription.name === 'ERC20WrapAsked') {
       return {
         id: `${log.blockHash}:${log.logIndex}`,
@@ -111,7 +150,7 @@ export class EthereumInitialWrapIndexer {
         logIndex: log.logIndex,
         level: log.blockNumber,
         status: 'asked',
-        finalizedAtLevel: null
+        finalizedAtLevel: null,
       };
     } else if (logDescription.name === 'ERC721WrapAsked') {
       return {
@@ -125,7 +164,7 @@ export class EthereumInitialWrapIndexer {
         logIndex: log.logIndex,
         level: log.blockNumber,
         status: 'asked',
-        finalizedAtLevel: null
+        finalizedAtLevel: null,
       };
     }
     return null;
@@ -137,6 +176,14 @@ export class EthereumInitialWrapIndexer {
   private _appState: AppState;
   private _logger: Logger;
   private _wrapDAO: ErcWrapDAO;
-  private static readonly _wrapTopics: string[] = [id('ERC20WrapAsked(address,address,uint256,string)'), id('ERC721WrapAsked(address,address,uint256,string)')];
-  private static readonly _wrapInterface: ethers.utils.Interface = new ethers.utils.Interface(['event ERC20WrapAsked(address user, address token, uint256 amount, string tezosDestinationAddress)', 'event ERC721WrapAsked(address user, address token, uint256 tokenId, string tezosDestinationAddress)']);
+  private static readonly _wrapTopics: string[] = [
+    id('ERC20WrapAsked(address,address,uint256,string)'),
+    id('ERC721WrapAsked(address,address,uint256,string)'),
+  ];
+  private static readonly _wrapInterface: ethers.utils.Interface = new ethers.utils.Interface(
+    [
+      'event ERC20WrapAsked(address user, address token, uint256 amount, string tezosDestinationAddress)',
+      'event ERC721WrapAsked(address user, address token, uint256 tokenId, string tezosDestinationAddress)',
+    ]
+  );
 }

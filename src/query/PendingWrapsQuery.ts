@@ -4,7 +4,7 @@ import Knex from 'knex';
 import { EthereumConfig } from '../configuration';
 import { ethers } from 'ethers';
 
-type PendingERC20Wrap = {
+interface PendingERC20Wrap {
   id: string,
   source: string;
   destination: string;
@@ -18,7 +18,7 @@ type PendingERC20Wrap = {
   confirmationsThreshold: number;
 }
 
-type PendingERC721Wrap = {
+interface PendingERC721Wrap {
   id: string,
   source: string;
   destination: string;
@@ -51,7 +51,7 @@ export class PendingWrapsQuery {
         .reduce((acc, value) => {
           acc[value.signer] = value.signature;
           return acc;
-          }, {});
+        }, {});
       return {
         id: wrap.id,
         source: wrap.source,
@@ -61,7 +61,7 @@ export class PendingWrapsQuery {
         transactionHash: wrap.transactionHash,
         signatures: relatedSignatures,
         confirmations: currentBlock - wrap.level,
-        confirmationsThreshold: this._ethereumConfiguration.confirmationsThreshold
+        confirmationsThreshold: this._ethereumConfiguration.confirmationsThreshold,
       };
     });
   }
@@ -86,7 +86,7 @@ export class PendingWrapsQuery {
         transactionHash: wrap.transactionHash,
         signatures: relatedSignatures,
         confirmations: currentBlock - wrap.level,
-        confirmationsThreshold: this._ethereumConfiguration.confirmationsThreshold
+        confirmationsThreshold: this._ethereumConfiguration.confirmationsThreshold,
       };
     });
   }

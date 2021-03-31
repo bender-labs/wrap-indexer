@@ -1,5 +1,5 @@
-export type TezosSigner = {
-  ipnsKey: string,
-  publicKey: string,
-  active: boolean
+export interface TezosSigner {
+  ipnsKey: string;
+  publicKey: string;
+  active: boolean;
 }

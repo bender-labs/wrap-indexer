@@ -2,8 +2,10 @@ import { Logger } from 'tslog';
 import Knex from 'knex';
 import { IpfsClient } from '../../infrastructure/ipfsClient';
 import {
-  Erc20MintingSignature, Erc20UnwrapSignature,
-  Erc721MintingSignature, Erc721UnwrapSignature,
+  Erc20MintingSignature,
+  Erc20UnwrapSignature,
+  Erc721MintingSignature,
+  Erc721UnwrapSignature,
 } from '../../domain/Signature';
 import { AppState } from '../state/AppState';
 import { TezosSigner } from '../../domain/TezosSigner';
@@ -39,20 +41,34 @@ export class SignatureIndexer {
     }
   }
 
-  private async _indexSigner(signer: TezosSigner, transaction: Knex.Transaction): Promise<void> {
+  private async _indexSigner(
+    signer: TezosSigner,
+    transaction: Knex.Transaction
+  ): Promise<void> {
     const cid = await this._resolveIpnsPath('/ipns/' + signer.ipnsKey);
-    const lastIndexedSignature = await this._appState.getLastIndexedSignature(signer.ipnsKey);
+    const lastIndexedSignature = await this._appState.getLastIndexedSignature(
+      signer.ipnsKey
+    );
     if (cid != null && cid != lastIndexedSignature) {
       let current = cid;
       do {
         const result = await this._resolveDag(current);
         if (result != null) {
-          const signature = this._parseSignature(signer, current.toString(), result.value);
+          const signature = this._parseSignature(
+            signer,
+            current.toString(),
+            result.value
+          );
           await this._signatureDao.save(signature, transaction);
         }
-        current = result && result.value.parent ? '/ipfs/' + result.value.parent : null;
+        current =
+          result && result.value.parent ? '/ipfs/' + result.value.parent : null;
       } while (current && current != lastIndexedSignature);
-      await this._appState.setLastIndexedSignature(signer.ipnsKey, cid.toString(), transaction);
+      await this._appState.setLastIndexedSignature(
+        signer.ipnsKey,
+        cid.toString(),
+        transaction
+      );
     }
   }
 
@@ -74,7 +90,15 @@ export class SignatureIndexer {
     }
   }
 
-  private _parseSignature(signer: TezosSigner, cid: string, value: any): Erc20MintingSignature | Erc721MintingSignature | Erc20UnwrapSignature | Erc721UnwrapSignature {
+  private _parseSignature(
+    signer: TezosSigner,
+    cid: string,
+    value: any
+  ):
+    | Erc20MintingSignature
+    | Erc721MintingSignature
+    | Erc20UnwrapSignature
+    | Erc721UnwrapSignature {
     if (value.type === 'Erc20MintingSigned') {
       return {
         wrapId: `${value.payload.parameters.blockHash}:${value.payload.parameters.logIndex}`,

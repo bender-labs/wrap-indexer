@@ -7,7 +7,7 @@ import { Token } from '../../domain/Token';
 import { FeesDao } from '../../dao/FeesDao';
 import { Fees } from '../../domain/Fees';
 
-type Configuration = {
+interface Configuration {
   ethereumNetwork: string;
   ethereumNetworkId: number;
   tezosNetwork: string;
@@ -40,7 +40,7 @@ async function buildConfiguration({
     wrapRequiredSignatures: tezosThreashold,
     unwrapRequiredSignatures: ethereumThreshold,
     tokens,
-    fees
+    fees,
   };
 }
 

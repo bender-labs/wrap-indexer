@@ -9,13 +9,9 @@ export class FeesDao {
   async save(fees: Fees, transaction: Knex.Transaction): Promise<void> {
     const exist = await this._dbClient.table<Fees>('fees').count();
     if (exist[0].count === '0') {
-      await this._dbClient.table('fees')
-        .transacting(transaction)
-        .insert(fees);
+      await this._dbClient.table('fees').transacting(transaction).insert(fees);
     } else {
-      await this._dbClient.table('fees')
-        .transacting(transaction)
-        .update(fees);
+      await this._dbClient.table('fees').transacting(transaction).update(fees);
     }
   }
 

@@ -36,7 +36,7 @@ export type Config = {
   };
   log: {
     format: LogType;
-    level: "info" | "warn" | "error"
+    level: 'info' | 'warn' | 'error'
   };
   postgres: {
     username: string;
@@ -73,7 +73,7 @@ export function loadConfiguration(): Config {
           },
           wrapContractAddress: {
             env: 'ETHEREUM_WRAP_CONTRACT_ADDRESS',
-              default: '0x0cFa220dDA04DA22754baA1929798ec5E01A3483',
+            default: '0x0cFa220dDA04DA22754baA1929798ec5E01A3483',
           },
           firstBlockToIndex: {
             env: 'ETHEREUM_FIRST_BLOCK_TO_INDEX',
@@ -87,8 +87,8 @@ export function loadConfiguration(): Config {
           confirmationsThreshold: {
             env: 'ETHEREUM_CONFIRMATIONS_THRESHOLD',
             type: 'integer',
-            default: 10
-          }
+            default: 10,
+          },
         },
       },
     },
@@ -110,12 +110,12 @@ export function loadConfiguration(): Config {
           confirmationsThreshold: {
             env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
             type: 'integer',
-            default: 10
+            default: 10,
           },
           rpc: {
             env: 'TEZOS_RPC',
-            default: 'https://edonet.smartpy.io/'
-          }
+            default: 'https://edonet.smartpy.io/',
+          },
         },
       },
     },
@@ -133,7 +133,7 @@ export function loadConfiguration(): Config {
       level: {
         env: 'LOG_LEVEL',
         default: 'info',
-      }
+      },
     },
     postgres: {
       username: {

@@ -11,8 +11,16 @@ export class SignatureDao {
     this._dbClient = dbClient;
   }
 
-  async save(signature: Erc20MintingSignature | Erc721MintingSignature | Erc20UnwrapSignature | Erc721UnwrapSignature, transaction: Knex.Transaction): Promise<void> {
-    await this._dbClient.table('signatures')
+  async save(
+    signature:
+      | Erc20MintingSignature
+      | Erc721MintingSignature
+      | Erc20UnwrapSignature
+      | Erc721UnwrapSignature,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._dbClient
+      .table('signatures')
       .transacting(transaction)
       .insert(signature);
   }

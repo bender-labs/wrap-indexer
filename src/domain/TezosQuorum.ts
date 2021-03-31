@@ -1,6 +1,6 @@
 import { TezosSigner } from './TezosSigner';
 
-export type TezosQuorum = {
+export interface TezosQuorum {
   admin: string;
   threshold: number;
   signers: TezosSigner[];

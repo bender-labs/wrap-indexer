@@ -8,11 +8,11 @@ import { TezosToolkit } from '@taquito/taquito';
 
 export class TezosQuorumIndexer {
   constructor({
-                logger,
-                tezosConfiguration,
-                tezosToolkit,
-                dbClient,
-              }: Dependencies) {
+    logger,
+    tezosConfiguration,
+    tezosToolkit,
+    dbClient,
+  }: Dependencies) {
     this._logger = logger;
     this._tezosConfiguration = tezosConfiguration;
     this._tezosToolkit = tezosToolkit;
@@ -23,7 +23,9 @@ export class TezosQuorumIndexer {
     this._logger.info(`Indexing tezos quorum`);
     let transaction;
     try {
-      const quorumContract = await this._tezosToolkit.contract.at(this._tezosConfiguration.quorumContractAddress);
+      const quorumContract = await this._tezosToolkit.contract.at(
+        this._tezosConfiguration.quorumContractAddress
+      );
       const quorumStorage = await quorumContract.storage();
       const tezosQuorum = this._extractQuorum(quorumStorage);
       transaction = await this._dbClient.transaction();

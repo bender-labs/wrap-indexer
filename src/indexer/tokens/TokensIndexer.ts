@@ -6,7 +6,7 @@ import { Token } from '../../domain/Token';
 import { TezosToolkit } from '@taquito/taquito';
 import { tzip12 } from '@taquito/tzip12';
 
-type TokenDefinition = {
+interface TokenDefinition {
   type: 'ERC20' | 'ERC721';
   ethereumContractAddress: string;
   tezosWrappingContract: string;
@@ -14,7 +14,12 @@ type TokenDefinition = {
 }
 
 export class TokensIndexer {
-  constructor({ logger, tezosToolkit, tezosConfiguration, dbClient }: Dependencies) {
+  constructor({
+    logger,
+    tezosToolkit,
+    tezosConfiguration,
+    dbClient,
+  }: Dependencies) {
     this._logger = logger;
     this._dbClient = dbClient;
     this._tezosToolkit = tezosToolkit;
@@ -42,7 +47,9 @@ export class TokensIndexer {
   }
 
   private async _getMinterTokens(): Promise<TokenDefinition[]> {
-    const minterContract = await this._tezosToolkit.contract.at(this._minterContractAddress);
+    const minterContract = await this._tezosToolkit.contract.at(
+      this._minterContractAddress
+    );
     const storage = await minterContract.storage();
     const tokens = [];
     for (const token of storage['assets']['erc20_tokens'].entries()) {
@@ -65,8 +72,13 @@ export class TokensIndexer {
 
   private async _getTokenMetadata(definition: TokenDefinition): Promise<Token> {
     if (definition.type === 'ERC20') {
-      const contract = await this._tezosToolkit.contract.at(definition.tezosWrappingContract, tzip12);
-      const metadata = await contract.tzip12().getTokenMetadata(parseInt(definition.tezosTokenId));
+      const contract = await this._tezosToolkit.contract.at(
+        definition.tezosWrappingContract,
+        tzip12
+      );
+      const metadata = await contract
+        .tzip12()
+        .getTokenMetadata(parseInt(definition.tezosTokenId));
       return {
         type: definition.type,
         ethereumContractAddress: definition.ethereumContractAddress,
@@ -77,9 +89,12 @@ export class TokensIndexer {
         ethereumName: metadata['eth_name'],
         tezosName: metadata.name,
         tezosSymbol: metadata.symbol,
+        thumbnailUri: metadata['thumbnailUri'],
       };
     }
-    const contract = await this._tezosToolkit.contract.at(definition.tezosWrappingContract);
+    const contract = await this._tezosToolkit.contract.at(
+      definition.tezosWrappingContract
+    );
     const storage = await contract.storage();
     const tokenInfo = storage['assets']['token_info'];
     return {
@@ -88,7 +103,10 @@ export class TokensIndexer {
       tezosWrappingContract: definition.tezosWrappingContract,
       tezosTokenId: definition.tezosTokenId,
       decimals: '0',
-      ethereumSymbol: Buffer.from(tokenInfo.get('eth_symbol'), 'hex').toString(),
+      ethereumSymbol: Buffer.from(
+        tokenInfo.get('eth_symbol'),
+        'hex'
+      ).toString(),
       ethereumName: Buffer.from(tokenInfo.get('eth_name'), 'hex').toString(),
       tezosName: Buffer.from(tokenInfo.get('name'), 'hex').toString(),
       tezosSymbol: Buffer.from(tokenInfo.get('symbol'), 'hex').toString(),

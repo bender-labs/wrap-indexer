@@ -2,13 +2,13 @@ import Knex from 'knex';
 import { Token } from '../domain/Token';
 
 export class TokenDao {
-
   constructor(dbClient: Knex) {
     this._dbClient = dbClient;
   }
 
   async save(token: Token, transaction: Knex.Transaction): Promise<void> {
-    await this._dbClient.table('tokens')
+    await this._dbClient
+      .table<Token>('tokens')
       .transacting(transaction)
       .insert(token)
       .onConflict('ethereum_contract_address' as never)

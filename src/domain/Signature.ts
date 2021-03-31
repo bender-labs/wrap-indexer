@@ -1,4 +1,4 @@
-export type Erc20MintingSignature = {
+export interface Erc20MintingSignature {
   wrapId: string;
   signer: string;
   signerAddress: string;
@@ -14,7 +14,7 @@ export type Erc20MintingSignature = {
   logIndex: number;
 }
 
-export type Erc721MintingSignature = {
+export interface Erc721MintingSignature {
   wrapId: string;
   signer: string;
   signerAddress: string;
@@ -30,7 +30,7 @@ export type Erc721MintingSignature = {
   logIndex: number;
 }
 
-export type Erc20UnwrapSignature = {
+export interface Erc20UnwrapSignature {
   id: string;
   wrapId: string;
   signer: string;
@@ -45,7 +45,7 @@ export type Erc20UnwrapSignature = {
   operationId: string;
 }
 
-export type Erc721UnwrapSignature = {
+export interface Erc721UnwrapSignature {
   id: string;
   wrapId: string;
   signer: string;
