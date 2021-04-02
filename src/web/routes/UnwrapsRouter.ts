@@ -15,8 +15,8 @@ function build({
     const ethereumAddress = req.query.ethereumAddress as string;
     const status = req.query.status as WrapStatus;
     const operationHash = req.query.hash as string;
-    if (!tezosAddress && !ethereumAddress) {
-      return res.status(400).json({ message: 'MISSING_ADDRESS' });
+    if (!tezosAddress && !ethereumAddress && !operationHash) {
+      return res.status(400).json({ message: 'MISSING_ADDRESS_OR_HASH' });
     }
     const unwraps = await query.search(
       tezosAddress,
