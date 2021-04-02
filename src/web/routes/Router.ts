@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import PendingWrapsRouter from './PendingWrapsRouter';
-import PendingUnwrapsRouter from './PendingUnwrapsRouter';
+import WrapsRouter from './WrapsRouter';
+import UnwrapsRouter from './UnwrapsRouter';
 import { Dependencies } from '../../bootstrap';
 import ConfigurationRouter from './ConfigurationRouter';
 
 function build(dependencies: Dependencies): Router {
   const router = Router();
-  router.use('/wraps/pending', PendingWrapsRouter(dependencies));
-  router.use('/unwraps/pending', PendingUnwrapsRouter(dependencies));
+  router.use('/wraps', WrapsRouter(dependencies));
+  router.use('/unwraps', UnwrapsRouter(dependencies));
   router.use('/configuration', ConfigurationRouter(dependencies));
   return router;
 }

@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { id } from 'ethers/lib/utils';
 import { EthereumConfig } from '../../configuration';
 import { Logger } from 'tslog';
-import { ERC20Unwrap, ERC721Unwrap } from '../../domain/ERCUnwrap';
+import { ERCUnwrap } from '../../domain/ERCUnwrap';
 import { ErcUnwrapDAO } from '../../dao/ErcUnwrapDAO';
 import { Dependencies } from '../../bootstrap';
 
@@ -30,28 +30,18 @@ export class EthereumFinalizedUnwrapIndexer {
       this._ethereumConfig.wrapABI,
       this._ethereumProvider
     );
-    const erc20Unwraps = await this._unwrapDao.getNotFinalizedERC20();
-    erc20Unwraps.concat(
-      await this._unwrapDao.getFinalizedERC20UntilLevel(minLevelToCheck)
+    const unwraps = await this._unwrapDao.getNotFinalized();
+    unwraps.concat(
+      await this._unwrapDao.getFinalizedUntilLevel(minLevelToCheck)
     );
-    this._logger.info(`${erc20Unwraps.length} pending erc20 unwraps to watch`);
-    for (const unwrap of erc20Unwraps) {
-      await this._updateUnwrapState(unwrap, contract);
-    }
-    const erc721Unwraps = await this._unwrapDao.getNotFinalizedERC721();
-    erc721Unwraps.concat(
-      await this._unwrapDao.getFinalizedERC721UntilLevel(minLevelToCheck)
-    );
-    this._logger.info(
-      `${erc721Unwraps.length} pending erc721 unwraps to watch`
-    );
-    for (const unwrap of erc721Unwraps) {
+    this._logger.info(`${unwraps.length} pending unwraps to watch`);
+    for (const unwrap of unwraps) {
       await this._updateUnwrapState(unwrap, contract);
     }
   }
 
   private async _updateUnwrapState(
-    unwrap: ERC20Unwrap | ERC721Unwrap,
+    unwrap: ERCUnwrap,
     contract: ethers.Contract
   ): Promise<void> {
     let transaction;

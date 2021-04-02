@@ -1,21 +1,28 @@
 import { Request, Response, Router } from 'express';
 import { Dependencies } from '../../bootstrap';
-import {
-  PendingWrapsQuery,
-} from '../../query/PendingWrapsQuery';
+import { WrapsQuery } from '../../query/WrapsQuery';
+import { WrapStatus } from '../../domain/ERCWrap';
 
-function build({ dbClient, ethereumConfiguration, ethereumProvider }: Dependencies): Router {
+function build({
+  dbClient,
+  ethereumConfiguration,
+  ethereumProvider,
+}: Dependencies): Router {
   const router = Router();
+  const query = new WrapsQuery(
+    dbClient,
+    ethereumConfiguration,
+    ethereumProvider
+  );
   router.get('/', async (req: Request, res: Response) => {
     const tezosAddress = req.query.tezosAddress as string;
     const ethereumAddress = req.query.ethereumAddress as string;
+    const status = req.query.status as WrapStatus;
     if (!tezosAddress && !ethereumAddress) {
       return res.status(400).json({ message: 'MISSING_ADDRESS' });
     }
-    const query = new PendingWrapsQuery(dbClient, ethereumConfiguration, ethereumProvider);
-    const erc20Wraps = await query.erc20(tezosAddress, ethereumAddress);
-    const erc721Wraps = await query.erc721(tezosAddress, ethereumAddress);
-    return res.json({ erc20Wraps, erc721Wraps });
+    const wraps = await query.search(tezosAddress, ethereumAddress, status);
+    return res.json({ result: wraps });
   });
   return router;
 }

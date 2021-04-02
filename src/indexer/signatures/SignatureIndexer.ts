@@ -1,12 +1,7 @@
 import { Logger } from 'tslog';
 import Knex from 'knex';
 import { IpfsClient } from '../../infrastructure/ipfsClient';
-import {
-  Erc20MintingSignature,
-  Erc20UnwrapSignature,
-  Erc721MintingSignature,
-  Erc721UnwrapSignature,
-} from '../../domain/Signature';
+import { WrapSignature, UnwrapSignature } from '../../domain/Signature';
 import { AppState } from '../state/AppState';
 import { TezosSigner } from '../../domain/TezosSigner';
 import { SignatureDao } from '../../dao/SignatureDao';
@@ -94,11 +89,7 @@ export class SignatureIndexer {
     signer: TezosSigner,
     cid: string,
     value: any
-  ):
-    | Erc20MintingSignature
-    | Erc721MintingSignature
-    | Erc20UnwrapSignature
-    | Erc721UnwrapSignature {
+  ): WrapSignature | UnwrapSignature {
     if (value.type === 'Erc20MintingSigned') {
       return {
         wrapId: `${value.payload.parameters.blockHash}:${value.payload.parameters.logIndex}`,

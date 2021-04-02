@@ -1,8 +1,8 @@
 import { Logger } from 'tslog';
 import { TezosConfig } from '../../configuration';
 import Knex from 'knex';
-import { ErcWrapDAO } from '../../dao/ErcWrapDAO';
-import { ERC20Wrap, ERC721Wrap } from '../../domain/ERCWrap';
+import { WrapDAO } from '../../dao/WrapDAO';
+import { ERCWrap } from '../../domain/ERCWrap';
 import { Dependencies } from '../../bootstrap';
 import { TezosToolkit } from '@taquito/taquito';
 
@@ -17,7 +17,7 @@ export class TezosFinalizedWrapIndexer {
     this._tezosConfiguration = tezosConfiguration;
     this._tezosToolkit = tezosToolkit;
     this._dbClient = dbClient;
-    this._wrapDao = new ErcWrapDAO(this._dbClient);
+    this._wrapDao = new WrapDAO(this._dbClient);
   }
 
   async index(): Promise<void> {
@@ -25,34 +25,17 @@ export class TezosFinalizedWrapIndexer {
       (await this._getNetworkLevel()) -
       this._tezosConfiguration.confirmationsThreshold;
     const mintsBigMap = await this._getMintsBigMap();
-    const erc20Wraps = await this._wrapDao.getNotFinalizedERC20();
-    erc20Wraps.concat(
-      await this._wrapDao.getFinalizedERC20UntilLevel(minLevelToCheck)
-    );
-    this._logger.info(`${erc20Wraps.length} pending erc20 wraps to watch`);
-    for (const erc20wrap of erc20Wraps) {
+    const wraps = await this._wrapDao.getNotFinalized();
+    wraps.concat(await this._wrapDao.getFinalizedUntilLevel(minLevelToCheck));
+    this._logger.info(`${wraps.length} pending wraps to watch`);
+    for (const wrap of wraps) {
       const minted = await this._isInMintsMap(
         mintsBigMap,
-        erc20wrap.blockHash,
-        erc20wrap.logIndex
+        wrap.blockHash,
+        wrap.logIndex
       );
       if (minted != null) {
-        await this._updateWrapState(erc20wrap, minted);
-      }
-    }
-    const erc721Wraps = await this._wrapDao.getNotFinalizedERC721();
-    erc721Wraps.concat(
-      await this._wrapDao.getFinalizedERC721UntilLevel(minLevelToCheck)
-    );
-    this._logger.info(`${erc721Wraps.length} pending erc721 wraps to watch`);
-    for (const erc721wrap of erc721Wraps) {
-      const minted = await this._isInMintsMap(
-        mintsBigMap,
-        erc721wrap.blockHash,
-        erc721wrap.logIndex
-      );
-      if (minted != null) {
-        await this._updateWrapState(erc721wrap, minted);
+        await this._updateWrapState(wrap, minted);
       }
     }
   }
@@ -75,7 +58,7 @@ export class TezosFinalizedWrapIndexer {
   }
 
   private async _updateWrapState(
-    wrap: ERC20Wrap | ERC721Wrap,
+    wrap: ERCWrap,
     minted: boolean
   ): Promise<void> {
     let transaction;
@@ -120,6 +103,6 @@ export class TezosFinalizedWrapIndexer {
   private _logger: Logger;
   private _tezosConfiguration: TezosConfig;
   private _tezosToolkit: TezosToolkit;
-  private _wrapDao: ErcWrapDAO;
+  private _wrapDao: WrapDAO;
   private _dbClient: Knex;
 }

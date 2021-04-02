@@ -1,25 +1,15 @@
-export type ERCUnwrapStatus = 'asked' | 'finalized';
+import { ERCType, WrapStatus } from './ERCWrap';
 
-export interface ERC20Unwrap {
+export interface ERCUnwrap {
   id: string;
   source: string;
   token: string;
   ethereumDestination: string;
   operationHash: string;
   level: number;
-  status: ERCUnwrapStatus;
-  amount: string;
+  status: WrapStatus;
+  amount?: string;
+  tokenId?: string;
   finalizedAtLevel: number;
-}
-
-export interface ERC721Unwrap {
-  id: string;
-  source: string;
-  token: string;
-  ethereumDestination: string;
-  operationHash: string;
-  level: number;
-  status: ERCUnwrapStatus;
-  tokenId: string;
-  finalizedAtLevel: number;
+  type: ERCType;
 }

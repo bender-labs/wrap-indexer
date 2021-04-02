@@ -1,6 +1,7 @@
-export type ERCWrapStatus = 'asked' | 'finalized';
+export type WrapStatus = 'asked' | 'finalized';
+export type ERCType = 'ERC20' | 'ERC721';
 
-export interface ERC20Wrap {
+export interface ERCWrap {
   id: string;
   source: string;
   token: string;
@@ -9,21 +10,9 @@ export interface ERC20Wrap {
   blockHash: string;
   logIndex: number;
   level: number;
-  status: ERCWrapStatus;
-  amount: string;
+  amount?: string;
+  tokenId?: string;
   finalizedAtLevel: number;
-}
-
-export interface ERC721Wrap {
-  id: string;
-  source: string;
-  token: string;
-  tezosDestination: string;
-  transactionHash: string;
-  blockHash: string;
-  logIndex: number;
-  level: number;
-  status: ERCWrapStatus;
-  tokenId: string;
-  finalizedAtLevel: number;
+  status: WrapStatus;
+  type: ERCType;
 }

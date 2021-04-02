@@ -3,7 +3,7 @@ import { TezosConfig } from '../../configuration';
 import Knex from 'knex';
 import { BcdProvider, Operation } from '../../infrastructure/tezos/bcdProvider';
 import { AppState } from '../state/AppState';
-import { ERC20Unwrap, ERC721Unwrap } from '../../domain/ERCUnwrap';
+import { ERCUnwrap } from '../../domain/ERCUnwrap';
 import { ErcUnwrapDAO } from '../../dao/ErcUnwrapDAO';
 import { Dependencies } from '../../bootstrap';
 
@@ -97,7 +97,7 @@ export class TezosInitialUnwrapIndexer {
   }
 
   private async _ensureExistingUnwrapsAreOnTheRightChain(
-    unwraps: (ERC20Unwrap | ERC721Unwrap)[],
+    unwraps: ERCUnwrap[],
     transaction: Knex.Transaction
   ) {
     const operationsHashAndLevel = unwraps.map((w) => ({
@@ -105,16 +105,8 @@ export class TezosInitialUnwrapIndexer {
       operationHash: w.operationHash,
     }));
     for (const operationHashAndBlockLevel of operationsHashAndLevel) {
-      const existingUnwraps: (
-        | ERC20Unwrap
-        | ERC721Unwrap
-      )[] = await this._unwrapDAO.getERC20ByOperationHash(
+      const existingUnwraps: ERCUnwrap[] = await this._unwrapDAO.getByOperationHash(
         operationHashAndBlockLevel.operationHash
-      );
-      existingUnwraps.concat(
-        await this._unwrapDAO.getERC721ByOperationHash(
-          operationHashAndBlockLevel.operationHash
-        )
       );
       const unwrapsOnWrongChain = existingUnwraps.filter(
         (w) =>
@@ -134,7 +126,7 @@ export class TezosInitialUnwrapIndexer {
   private _parseERCUnwrap(
     operation: Operation,
     operationId: string
-  ): ERC20Unwrap | ERC721Unwrap {
+  ): ERCUnwrap {
     if (operation.entrypoint === 'unwrap_erc20') {
       return {
         id: operationId,
@@ -152,6 +144,7 @@ export class TezosInitialUnwrapIndexer {
         operationHash: operation.hash,
         level: operation.level,
         status: 'asked',
+        type: 'ERC20',
         finalizedAtLevel: null,
       };
     }
@@ -171,6 +164,7 @@ export class TezosInitialUnwrapIndexer {
       operationHash: operation.hash,
       level: operation.level,
       status: 'asked',
+      type: 'ERC721',
       finalizedAtLevel: null,
     };
   }

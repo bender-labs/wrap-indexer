@@ -1,10 +1,5 @@
 import Knex from 'knex';
-import {
-  Erc20MintingSignature,
-  Erc721MintingSignature,
-  Erc20UnwrapSignature,
-  Erc721UnwrapSignature,
-} from '../domain/Signature';
+import { WrapSignature, UnwrapSignature } from '../domain/Signature';
 
 export class SignatureDao {
   constructor(dbClient: Knex) {
@@ -12,11 +7,7 @@ export class SignatureDao {
   }
 
   async save(
-    signature:
-      | Erc20MintingSignature
-      | Erc721MintingSignature
-      | Erc20UnwrapSignature
-      | Erc721UnwrapSignature,
+    signature: WrapSignature | UnwrapSignature,
     transaction: Knex.Transaction
   ): Promise<void> {
     await this._dbClient

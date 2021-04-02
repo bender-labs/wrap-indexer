@@ -2,11 +2,11 @@ import Knex from 'knex';
 import * as _ from 'lodash';
 import { ethers } from 'ethers';
 import { id } from 'ethers/lib/utils';
-import { ERC20Wrap, ERC721Wrap } from '../../domain/ERCWrap';
+import { ERCWrap } from '../../domain/ERCWrap';
 import { EthereumConfig } from '../../configuration';
 import { Logger } from 'tslog';
 import { AppState } from '../state/AppState';
-import { ErcWrapDAO } from '../../dao/ErcWrapDAO';
+import { WrapDAO } from '../../dao/WrapDAO';
 import { Dependencies } from '../../bootstrap';
 
 export class EthereumInitialWrapIndexer {
@@ -21,7 +21,7 @@ export class EthereumInitialWrapIndexer {
     this._ethereumProvider = ethereumProvider;
     this._dbClient = dbClient;
     this._appState = new AppState(this._dbClient);
-    this._wrapDAO = new ErcWrapDAO(this._dbClient);
+    this._wrapDAO = new WrapDAO(this._dbClient);
   }
 
   async index(): Promise<void> {
@@ -67,7 +67,7 @@ export class EthereumInitialWrapIndexer {
   }
 
   private async _ensureExistingWrapsAreOnTheRightChain(
-    wraps: (ERC20Wrap | ERC721Wrap)[],
+    wraps: ERCWrap[],
     transaction: Knex.Transaction
   ) {
     const transactionsHashAndBlockLevel = wraps.map((w) => ({
@@ -76,16 +76,8 @@ export class EthereumInitialWrapIndexer {
       transactionHash: w.transactionHash,
     }));
     for (const transactionHashAndBlockLevel of transactionsHashAndBlockLevel) {
-      const existingWraps: (
-        | ERC20Wrap
-        | ERC721Wrap
-      )[] = await this._wrapDAO.getERC20ByTransactionHash(
+      const existingWraps: ERCWrap[] = await this._wrapDAO.getByTransactionHash(
         transactionHashAndBlockLevel.transactionHash
-      );
-      existingWraps.concat(
-        await this._wrapDAO.getERC721ByTransactionHash(
-          transactionHashAndBlockLevel.transactionHash
-        )
       );
       const wrapsOnWrongChain = existingWraps.filter(
         (w) =>
@@ -132,9 +124,7 @@ export class EthereumInitialWrapIndexer {
     };
   }
 
-  private static _parseERCLog(
-    log: ethers.providers.Log
-  ): ERC20Wrap | ERC721Wrap | null {
+  private static _parseERCLog(log: ethers.providers.Log): ERCWrap | null {
     const logDescription = EthereumInitialWrapIndexer._wrapInterface.parseLog(
       log
     );
@@ -151,6 +141,7 @@ export class EthereumInitialWrapIndexer {
         level: log.blockNumber,
         status: 'asked',
         finalizedAtLevel: null,
+        type: 'ERC20',
       };
     } else if (logDescription.name === 'ERC721WrapAsked') {
       return {
@@ -165,6 +156,7 @@ export class EthereumInitialWrapIndexer {
         level: log.blockNumber,
         status: 'asked',
         finalizedAtLevel: null,
+        type: 'ERC721',
       };
     }
     return null;
@@ -175,7 +167,7 @@ export class EthereumInitialWrapIndexer {
   private _ethereumConfig: EthereumConfig;
   private _appState: AppState;
   private _logger: Logger;
-  private _wrapDAO: ErcWrapDAO;
+  private _wrapDAO: WrapDAO;
   private static readonly _wrapTopics: string[] = [
     id('ERC20WrapAsked(address,address,uint256,string)'),
     id('ERC721WrapAsked(address,address,uint256,string)'),
