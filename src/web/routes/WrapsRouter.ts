@@ -18,10 +18,16 @@ function build({
     const tezosAddress = req.query.tezosAddress as string;
     const ethereumAddress = req.query.ethereumAddress as string;
     const status = req.query.status as WrapStatus;
+    const transactionHash = req.query.hash as string;
     if (!tezosAddress && !ethereumAddress) {
       return res.status(400).json({ message: 'MISSING_ADDRESS' });
     }
-    const wraps = await query.search(tezosAddress, ethereumAddress, status);
+    const wraps = await query.search(
+      tezosAddress,
+      ethereumAddress,
+      status,
+      transactionHash
+    );
     return res.json({ result: wraps });
   });
   return router;

@@ -35,13 +35,15 @@ export class WrapsQuery {
   async search(
     tezosAddress: string,
     ethereumAddress: string,
-    status: WrapStatus
+    status: WrapStatus,
+    transactionHash: string
   ): Promise<WrapWithSignatures[]> {
     const currentBlock = await this._ethereumProvider.getBlockNumber();
     const pendingWraps: ERCWrap[] = await this._getWraps(
       tezosAddress,
       ethereumAddress,
-      status
+      status,
+      transactionHash
     );
     const signatures: WrapSignature[] = await this._getSignatures(
       pendingWraps.map((p) => p.id)
@@ -74,7 +76,8 @@ export class WrapsQuery {
   private async _getWraps(
     tezosAddress: string,
     ethereumAddress: string,
-    status: WrapStatus
+    status: WrapStatus,
+    transactionHash: string
   ): Promise<ERCWrap[]> {
     return this._dbClient
       .table<ERCWrap>('wraps')
@@ -89,6 +92,11 @@ export class WrapsQuery {
       .andWhere(function () {
         if (status) {
           this.where({ status });
+        }
+      })
+      .andWhere(function () {
+        if (transactionHash) {
+          this.where({ transactionHash });
         }
       });
   }
