@@ -15,10 +15,10 @@ export class SignaturePinningService {
   }
 
   async index(): Promise<void> {
-    this._logger.info(`Pinning signatures`);
+    this._logger.debug(`Pinning signatures`);
     const signers = await new TezosQuorumDao(this._dbClient).getActiveSigners();
     for (const signer of signers) {
-      this._logger.info(`Pinning signatures of ${signer.ipnsKey}`);
+      this._logger.debug(`Pinning signatures of ${signer.ipnsKey}`);
       try {
         await this._pinSignatureOf(signer);
       } catch (e) {

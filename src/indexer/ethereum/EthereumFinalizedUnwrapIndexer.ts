@@ -34,7 +34,7 @@ export class EthereumFinalizedUnwrapIndexer {
     unwraps.concat(
       await this._unwrapDao.getFinalizedUntilLevel(minLevelToCheck)
     );
-    this._logger.info(`${unwraps.length} pending unwraps to watch`);
+    this._logger.debug(`${unwraps.length} pending unwraps to watch`);
     for (const unwrap of unwraps) {
       await this._updateUnwrapState(unwrap, contract);
     }

@@ -20,7 +20,7 @@ export class TezosQuorumIndexer {
   }
 
   async index(): Promise<void> {
-    this._logger.info(`Indexing tezos quorum`);
+    this._logger.debug(`Indexing tezos quorum`);
     let transaction;
     try {
       const quorumContract = await this._tezosToolkit.contract.at(

@@ -28,7 +28,7 @@ export class TokensIndexer {
   }
 
   async index(): Promise<void> {
-    this._logger.info(`Indexing tokens`);
+    this._logger.debug(`Indexing tokens`);
     const minterTokenDefinitions = await this._getMinterTokens();
     for (const definition of minterTokenDefinitions) {
       let transaction;

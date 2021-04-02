@@ -27,7 +27,7 @@ export class TezosFinalizedWrapIndexer {
     const mintsBigMap = await this._getMintsBigMap();
     const wraps = await this._wrapDao.getNotFinalized();
     wraps.concat(await this._wrapDao.getFinalizedUntilLevel(minLevelToCheck));
-    this._logger.info(`${wraps.length} pending wraps to watch`);
+    this._logger.debug(`${wraps.length} pending wraps to watch`);
     for (const wrap of wraps) {
       const minted = await this._isInMintsMap(
         mintsBigMap,

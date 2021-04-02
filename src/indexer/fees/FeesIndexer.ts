@@ -20,7 +20,7 @@ export class FeesIndexer {
   }
 
   async index(): Promise<void> {
-    this._logger.info(`Indexing fees`);
+    this._logger.debug(`Indexing fees`);
     const fees = await this._getFees();
     let transaction;
     try {

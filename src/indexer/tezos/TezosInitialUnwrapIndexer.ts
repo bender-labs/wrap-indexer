@@ -22,7 +22,9 @@ export class TezosInitialUnwrapIndexer {
     const minLevelToProcess = maxLevelProcessed
       ? maxLevelProcessed - this._tezosConfiguration.confirmationsThreshold
       : null;
-    this._logger.info(`Indexing tezos unwraps from level ${minLevelToProcess}`);
+    this._logger.debug(
+      `Indexing tezos unwraps from level ${minLevelToProcess}`
+    );
     const operations = await this._getAllOperationsUntilLevel(
       minLevelToProcess
     );
@@ -113,7 +115,7 @@ export class TezosInitialUnwrapIndexer {
           w.level.toString() !== operationHashAndBlockLevel.level.toString()
       );
       if (unwrapsOnWrongChain.length > 0) {
-        this._logger.info(
+        this._logger.debug(
           `Unwraps found on a different block, removing unwraps ${unwrapsOnWrongChain.map(
             (w) => w.id
           )}`

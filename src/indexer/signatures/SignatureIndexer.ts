@@ -18,10 +18,10 @@ export class SignatureIndexer {
   }
 
   async index(): Promise<void> {
-    this._logger.info(`Indexing signatures`);
+    this._logger.debug(`Indexing signatures`);
     const signers = await new TezosQuorumDao(this._dbClient).getActiveSigners();
     for (const signer of signers) {
-      this._logger.info(`Indexing signatures of ${signer.ipnsKey}`);
+      this._logger.debug(`Indexing signatures of ${signer.ipnsKey}`);
       let transaction;
       try {
         transaction = await this._dbClient.transaction();

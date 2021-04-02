@@ -19,7 +19,7 @@ export class EthereumQuorumIndexer {
   }
 
   async index(): Promise<void> {
-    this._logger.info(`Indexing ethereum quorum`);
+    this._logger.debug(`Indexing ethereum quorum`);
     let transaction;
     try {
       const contract = new ethers.Contract(

@@ -26,9 +26,9 @@ export class EthereumInitialWrapIndexer {
 
   async index(): Promise<void> {
     const firstBlock = await this._getFirstBlockToIndex();
-    this._logger.info(`Indexing new wrap events from block ${firstBlock}`);
+    this._logger.debug(`Indexing new wrap events from block ${firstBlock}`);
     const rawLogs = await this._getLogs(firstBlock);
-    this._logger.info(`${rawLogs.length} wrap events to index`);
+    this._logger.debug(`${rawLogs.length} wrap events to index`);
     if (rawLogs.length > 0) {
       let transaction;
       try {
