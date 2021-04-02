@@ -3,9 +3,7 @@
   "version": "1.0.26",
   "license": "MIT",
   "description": "Wrap protocol indexer",
-  "repository": {
-    "url": "https://github.com/bender-labs/wrap-indexer.git",
-  },
+  "repository": "github:bender-labs/wrap-indexer",
   "engines": {
     "node": ">= 14.15 <15"
   },
