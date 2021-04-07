@@ -39,6 +39,7 @@ export class TezosQuorumIndexer {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _extractQuorum(storage: any): TezosQuorum {
     const admin = storage['admin'];
     const threshold = storage['threshold'].toNumber();

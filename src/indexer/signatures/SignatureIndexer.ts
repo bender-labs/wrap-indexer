@@ -69,13 +69,14 @@ export class SignatureIndexer {
 
   private async _resolveIpnsPath(path: string): Promise<string | null> {
     try {
-      return await this._ipfsClient.resolve(path, { timeout: 30 * 1000 });
+      return await this._ipfsClient.resolve(path, { timeout: 20 * 1000 });
     } catch (e) {
       this._logger.warn(`Can't resolve ipns path ${path}: ${e.message}`);
       return null;
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async _resolveDag(path: string): Promise<any | null> {
     try {
       return await this._ipfsClient.dag.get(path);
@@ -88,6 +89,7 @@ export class SignatureIndexer {
   private _parseSignature(
     signer: TezosSigner,
     cid: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any
   ): WrapSignature | UnwrapSignature {
     if (value.type === 'Erc20MintingSigned') {

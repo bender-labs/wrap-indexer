@@ -6,15 +6,6 @@ export class WrapDAO {
     this._dbClient = dbClient;
   }
 
-  async isExist(wrap: ERCWrap, transaction: Knex.Transaction) {
-    const count = await this._dbClient
-      .table('wraps')
-      .transacting(transaction)
-      .where({ id: wrap.id })
-      .count();
-    return count[0].count !== '0';
-  }
-
   async save(wrap: ERCWrap, transaction: Knex.Transaction): Promise<void> {
     await this._dbClient.table('wraps').transacting(transaction).insert(wrap);
   }
@@ -58,6 +49,18 @@ export class WrapDAO {
         .where({ id: wrap.id })
         .delete();
     }
+  }
+
+  async isExist(
+    wrap: ERCWrap,
+    transaction: Knex.Transaction
+  ): Promise<boolean> {
+    const count = await this._dbClient
+      .table('wraps')
+      .transacting(transaction)
+      .where({ id: wrap.id })
+      .count();
+    return count[0].count !== '0';
   }
 
   private _dbClient: Knex;

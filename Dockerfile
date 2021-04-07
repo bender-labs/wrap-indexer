@@ -10,7 +10,6 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install --only=production
 COPY --from=0 /usr/src/app/build ./build
-EXPOSE 3000
 ENV LOG_FORMAT json
 ENV LOG_LEVEL info
 CMD ./node_modules/.bin/knex migrate:latest --cwd /usr/src/app/build/src/db  && npm run start

@@ -41,6 +41,7 @@ export class TezosFinalizedWrapIndexer {
   }
 
   private async _isInMintsMap(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bigMap: any,
     blockHash: string,
     logIndex: number
@@ -87,10 +88,12 @@ export class TezosFinalizedWrapIndexer {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async _getMintsBigMap(): Promise<any> {
     const minterContract = await this._tezosToolkit.contract.at(
       this._tezosConfiguration.minterContractAddress
     );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const storage = await minterContract.storage<any>();
     return storage['assets']['mints'];
   }

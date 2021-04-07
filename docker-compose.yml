@@ -1,0 +1,47 @@
+version: '3'
+services:
+  wrap_indexer:
+    container_name: wrap_indexer
+    build: .
+    environment:
+      ETHEREUM_NETWORK: "rinkeby"
+      ETHEREUM_NETWORK_ID: "4"
+      ETHEREUM_RPC: "https://rinkeby.infura.io/v3/fa01913603ac4f058ab8a0bfc0b2ba9a"
+      ETHEREUM_WRAP_CONTRACT_ADDRESS: "0x0cFa220dDA04DA22754baA1929798ec5E01A3483"
+      ETHEREUM_FIRST_BLOCK_TO_INDEX: "7997335"
+      ETHEREUM_CONFIRMATIONS_THRESHOLD: "10"
+      TEZOS_NETWORK: "edo2net"
+      TEZOS_QUORUM_CONTRACT: "KT1C5ftQmsS41bwS5wQKWRmEhUCyfk6kan2S"
+      TEZOS_MINTER_CONTRACT: "KT1RjHY3G7omtaohqnkEqCybQ73BqFeHkZh1"
+      TEZOS_CONFIRMATIONS_THRESHOLD: "10"
+      TEZOS_RPC: "https://edonet.smartpy.io/"
+      IPFS_NODE: "http://wrap_ipfs:5001"
+      POSTGRES_DB_USER: "wrap"
+      POSTGRES_DB_PASSWORD: "wrap"
+      POSTGRES_DB_HOST: "wrap_postgres"
+      POSTGRES_DB_PORT: "5432"
+      POSTGRES_DB_NAME: "indexer"
+      HTTP_PORT: "3000"
+      LOG_FORMAT: "pretty"
+      LOG_LEVEL: "debug"
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - "wrap_postgres"
+      - "wrap_ipfs"
+    restart: unless-stopped
+  wrap_postgres:
+    container_name: wrap_postgres
+    image: "postgres:13-alpine"
+    environment:
+      POSTGRES_USER: wrap
+      POSTGRES_PASSWORD: wrap
+      POSTGRES_DB: indexer
+    volumes:
+      - ./data-postgresql:/var/lib/postgresql/data
+  wrap_ipfs:
+    container_name: wrap_ipfs
+    image: ipfs/go-ipfs:v0.8.0
+    command: ["daemon", "--migrate=true", "--enable-pubsub-experiment", "--enable-namesys-pubsub"]
+    volumes:
+      - ./data-ipfs:/data/ipfs
