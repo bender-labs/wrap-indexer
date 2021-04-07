@@ -1,3 +1,6 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Actions Status](https://github.com/bender-labs/wrap-indexer/workflows/indexer-main/badge.svg)](https://github.com/bender-labs/wrap-indexer/actions)
+
 # Wrap protocol indexer
 
 This indexer aims to ease wraps and unwraps via dapps.
