@@ -3,8 +3,9 @@ import Knex from 'knex';
 import { Dependencies } from '../../bootstrap';
 import { TokenDao } from '../../dao/TokenDao';
 import { Token } from '../../domain/Token';
-import { TezosToolkit } from '@taquito/taquito';
+import { compose, TezosToolkit } from '@taquito/taquito';
 import { tzip12 } from '@taquito/tzip12';
+import { tzip16 } from '@taquito/tzip16';
 
 interface TokenDefinition {
   type: 'ERC20' | 'ERC721';
@@ -74,7 +75,7 @@ export class TokensIndexer {
     if (definition.type === 'ERC20') {
       const contract = await this._tezosToolkit.contract.at(
         definition.tezosWrappingContract,
-        tzip12
+        compose(tzip16, tzip12)
       );
       const metadata = await contract
         .tzip12()
