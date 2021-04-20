@@ -11,7 +11,8 @@ export class WrapDAO {
   }
 
   async setStatus(
-    wrap: ERCWrap,
+    blockHash: string,
+    logIndex: number,
     status: WrapStatus,
     level: number,
     transaction: Knex.Transaction
@@ -20,8 +21,8 @@ export class WrapDAO {
       .table('wraps')
       .transacting(transaction)
       .where({
-        blockHash: wrap.blockHash,
-        logIndex: wrap.logIndex,
+        blockHash,
+        logIndex,
       })
       .update({ status, finalizedAtLevel: level });
   }

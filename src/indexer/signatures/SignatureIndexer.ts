@@ -7,14 +7,22 @@ import { TezosSigner } from '../../domain/TezosSigner';
 import { SignatureDao } from '../../dao/SignatureDao';
 import { TezosQuorumDao } from '../../dao/TezosQuorumDao';
 import { Dependencies } from '../../bootstrap';
+import { MintingFailedEvent } from '../../domain/MintingFailedEvent';
+import { WrapDAO } from '../../dao/WrapDAO';
+import { UnwrapDAO } from '../../dao/UnwrapDAO';
+import { ERCUnwrap } from '../../domain/ERCUnwrap';
+import { TezosToolkit } from '@taquito/taquito';
 
 export class SignatureIndexer {
-  constructor({ logger, ipfsClient, dbClient }: Dependencies) {
+  constructor({ logger, ipfsClient, dbClient, tezosToolkit }: Dependencies) {
     this._logger = logger;
     this._ipfsClient = ipfsClient;
     this._dbClient = dbClient;
+    this._tezosToolkit = tezosToolkit;
     this._appState = new AppState(this._dbClient);
     this._signatureDao = new SignatureDao(this._dbClient);
+    this._wrapDao = new WrapDAO(this._dbClient);
+    this._unwrapDao = new UnwrapDAO(this._dbClient);
   }
 
   async index(): Promise<void> {
@@ -49,12 +57,16 @@ export class SignatureIndexer {
       do {
         const result = await this._resolveDag(current);
         if (result != null) {
-          const signature = this._parseSignature(
-            signer,
-            current.toString(),
-            result.value
-          );
-          await this._signatureDao.save(signature, transaction);
+          if (this._isAFailedEvent(result.value.type)) {
+            await this._processFailedEvent(result.value, transaction);
+          } else {
+            await this._indexSignature(
+              signer,
+              current.toString(),
+              result.value,
+              transaction
+            );
+          }
         }
         current =
           result && result.value.parent ? '/ipfs/' + result.value.parent : null;
@@ -65,6 +77,61 @@ export class SignatureIndexer {
         transaction
       );
     }
+  }
+
+  private async _indexSignature(
+    signer: TezosSigner,
+    cid: string,
+    value: any,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    const signature = this._parseSignature(signer, cid, value);
+    if (signature) {
+      await this._signatureDao.save(signature, transaction);
+    }
+  }
+
+  private async _processFailedEvent(
+    value: any,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    const event = this._parseFailedEvent(value);
+    await this._wrapDao.setStatus(
+      event.blockHash,
+      event.logIndex,
+      'reverted',
+      event.level,
+      transaction
+    );
+    const unwrap = await this._buildUnwrapFromRevert(event);
+    const existingUnwrap = await this._unwrapDao.isExist(unwrap, transaction);
+    if (!existingUnwrap) {
+      await this._unwrapDao.save(unwrap, transaction);
+    }
+  }
+
+  private async _buildUnwrapFromRevert(
+    event: MintingFailedEvent
+  ): Promise<ERCUnwrap> {
+    const wrapId = `revert:${event.wrapId}`;
+    const currentLevel = (await this._tezosToolkit.rpc.getBlockHeader()).level;
+    return {
+      id: wrapId,
+      source: event.owner,
+      token: event.erc,
+      amount: event.amount,
+      tokenId: event.tokenId,
+      ethereumDestination: event.owner,
+      operationHash: wrapId,
+      level: currentLevel,
+      status: 'asked',
+      type: event.type === 'Erc20MintingFailed' ? 'ERC20' : 'ERC721',
+      finalizedAtLevel: null,
+    };
+  }
+
+  private _isAFailedEvent(type: string): boolean {
+    return type === 'Erc20MintingFailed' || type === 'Erc721MintingFailed';
   }
 
   private async _resolveIpnsPath(path: string): Promise<string | null> {
@@ -92,75 +159,113 @@ export class SignatureIndexer {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any
   ): WrapSignature | UnwrapSignature {
-    if (value.type === 'Erc20MintingSigned') {
-      return {
-        wrapId: `${value.payload.parameters.blockHash}:${value.payload.parameters.logIndex}`,
-        signer: signer.ipnsKey,
-        signerAddress: value.payload.signerAddress,
-        cid,
-        type: value.type,
-        signature: value.payload.signature,
-        owner: value.payload.parameters.owner,
-        level: value.payload.level,
-        erc: value.payload.parameters.erc20,
-        amount: value.payload.parameters.amount,
-        transactionHash: value.payload.transactionHash,
-        blockHash: value.payload.parameters.blockHash,
-        logIndex: value.payload.parameters.logIndex,
-      };
-    } else if (value.type === 'Erc721MintingSigned') {
-      return {
-        wrapId: `${value.payload.parameters.blockHash}:${value.payload.parameters.logIndex}`,
-        signer: signer.ipnsKey,
-        signerAddress: value.payload.signerAddress,
-        cid,
-        type: value.type,
-        signature: value.payload.signature,
-        owner: value.payload.parameters.owner,
-        level: value.payload.level,
-        erc: value.payload.parameters.erc721,
-        tokenId: value.payload.parameters.tokenId,
-        transactionHash: value.payload.transactionHash,
-        blockHash: value.payload.parameters.blockHash,
-        logIndex: value.payload.parameters.logIndex,
-      };
-    } else if (value.type === 'Erc20UnwrapSigned') {
-      return {
-        wrapId: value.payload.parameters.operationId,
-        id: value.payload.parameters.operationId,
-        signer: signer.ipnsKey,
-        signerAddress: value.payload.signerAddress.toLowerCase(),
-        cid,
-        type: value.type,
-        signature: value.payload.signature,
-        owner: value.payload.parameters.owner,
-        level: value.payload.level,
-        erc: value.payload.parameters.erc20,
-        amount: value.payload.parameters.amount,
-        operationId: value.payload.parameters.operationId,
-      };
-    } else if (value.type === 'Erc721UnwrapSigned') {
-      return {
-        wrapId: value.payload.parameters.operationId,
-        id: value.payload.parameters.operationId,
-        signer: signer.ipnsKey,
-        signerAddress: value.payload.signerAddress.toLowerCase(),
-        cid,
-        type: value.type,
-        signature: value.payload.signature,
-        owner: value.payload.parameters.owner,
-        level: value.payload.level,
-        erc: value.payload.parameters.erc721,
-        tokenId: value.payload.parameters.tokenId,
-        operationId: value.payload.parameters.operationId,
-      };
+    switch (value.type) {
+      case 'Erc20MintingSigned':
+        return {
+          wrapId: `${value.payload.parameters.blockHash}:${value.payload.parameters.logIndex}`,
+          signer: signer.ipnsKey,
+          signerAddress: value.payload.signerAddress,
+          cid,
+          type: value.type,
+          signature: value.payload.signature,
+          owner: value.payload.parameters.owner,
+          level: value.payload.level,
+          erc: value.payload.parameters.erc20,
+          amount: value.payload.parameters.amount,
+          transactionHash: value.payload.transactionHash,
+          blockHash: value.payload.parameters.blockHash,
+          logIndex: value.payload.parameters.logIndex,
+        };
+      case 'Erc721MintingSigned':
+        return {
+          wrapId: `${value.payload.parameters.blockHash}:${value.payload.parameters.logIndex}`,
+          signer: signer.ipnsKey,
+          signerAddress: value.payload.signerAddress,
+          cid,
+          type: value.type,
+          signature: value.payload.signature,
+          owner: value.payload.parameters.owner,
+          level: value.payload.level,
+          erc: value.payload.parameters.erc721,
+          tokenId: value.payload.parameters.tokenId,
+          transactionHash: value.payload.transactionHash,
+          blockHash: value.payload.parameters.blockHash,
+          logIndex: value.payload.parameters.logIndex,
+        };
+      case 'Erc20UnwrapSigned':
+        return {
+          wrapId: value.payload.parameters.operationId,
+          id: value.payload.parameters.operationId,
+          signer: signer.ipnsKey,
+          signerAddress: value.payload.signerAddress.toLowerCase(),
+          cid,
+          type: value.type,
+          signature: value.payload.signature,
+          owner: value.payload.parameters.owner,
+          level: value.payload.level,
+          erc: value.payload.parameters.erc20,
+          amount: value.payload.parameters.amount,
+          operationId: value.payload.parameters.operationId,
+        };
+      case 'Erc721UnwrapSigned':
+        return {
+          wrapId: value.payload.parameters.operationId,
+          id: value.payload.parameters.operationId,
+          signer: signer.ipnsKey,
+          signerAddress: value.payload.signerAddress.toLowerCase(),
+          cid,
+          type: value.type,
+          signature: value.payload.signature,
+          owner: value.payload.parameters.owner,
+          level: value.payload.level,
+          erc: value.payload.parameters.erc721,
+          tokenId: value.payload.parameters.tokenId,
+          operationId: value.payload.parameters.operationId,
+        };
+      default:
+        return null;
     }
-    return null;
+  }
+
+  private _parseFailedEvent(value: any): MintingFailedEvent {
+    switch (value.type) {
+      case 'Erc20MintingFailed':
+        return {
+          wrapId: `${value.payload.payload.blockHash}:${value.payload.payload.logIndex}`,
+          type: value.type,
+          owner: value.payload.payload.owner,
+          level: value.payload.level,
+          reason: value.payload.reason,
+          erc: value.payload.payload.erc20,
+          amount: value.payload.payload.amount,
+          transactionHash: value.payload.transactionHash,
+          blockHash: value.payload.payload.blockHash,
+          logIndex: value.payload.payload.logIndex,
+        };
+      case 'Erc721MintingFailed':
+        return {
+          wrapId: `${value.payload.parameters.blockHash}:${value.payload.parameters.logIndex}`,
+          type: value.type,
+          owner: value.payload.parameters.owner,
+          level: value.payload.level,
+          reason: value.reason,
+          erc: value.payload.parameters.erc721,
+          tokenId: value.payload.parameters.tokenId,
+          transactionHash: value.payload.transactionHash,
+          blockHash: value.payload.parameters.blockHash,
+          logIndex: value.payload.parameters.logIndex,
+        };
+      default:
+        return null;
+    }
   }
 
   private _logger: Logger;
   private _ipfsClient: IpfsClient;
   private _dbClient: Knex;
+  private _tezosToolkit: TezosToolkit;
   private _appState: AppState;
   private _signatureDao: SignatureDao;
+  private _wrapDao: WrapDAO;
+  private _unwrapDao: UnwrapDAO;
 }

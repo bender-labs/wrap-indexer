@@ -67,7 +67,8 @@ export class TezosFinalizedWrapIndexer {
       if (minted && wrap.status === 'asked') {
         transaction = await this._dbClient.transaction();
         await this._wrapDao.setStatus(
-          wrap,
+          wrap.blockHash,
+          wrap.logIndex,
           'finalized',
           await this._getNetworkLevel(),
           transaction
@@ -75,7 +76,13 @@ export class TezosFinalizedWrapIndexer {
         await transaction.commit();
       } else if (!minted && wrap.status === 'finalized') {
         transaction = await this._dbClient.transaction();
-        await this._wrapDao.setStatus(wrap, 'asked', null, transaction);
+        await this._wrapDao.setStatus(
+          wrap.blockHash,
+          wrap.logIndex,
+          'asked',
+          null,
+          transaction
+        );
         await transaction.commit();
       }
     } catch (e) {

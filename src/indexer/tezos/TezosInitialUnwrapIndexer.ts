@@ -32,7 +32,7 @@ export class TezosInitialUnwrapIndexer {
       let transaction;
       try {
         transaction = await this._dbClient.transaction();
-        await this._addOperations(operations, transaction);
+        await this._addUnwraps(operations, transaction);
         await this._appState.setErcUnwrapLevelProcessed(
           operations[0].level,
           transaction
@@ -77,7 +77,7 @@ export class TezosInitialUnwrapIndexer {
     return operations;
   }
 
-  private async _addOperations(
+  private async _addUnwraps(
     operationsToProcess: Operation[],
     transaction: Knex.Transaction
   ): Promise<void> {

@@ -1,4 +1,4 @@
-export type WrapStatus = 'asked' | 'finalized';
+export type WrapStatus = 'asked' | 'finalized' | 'reverted';
 export type ERCType = 'ERC20' | 'ERC721';
 
 export interface ERCWrap {
