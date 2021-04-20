@@ -97,10 +97,29 @@ export function loadConfiguration(): Config {
     tezos: {
       currentNetwork: {
         env: 'TEZOS_NETWORK',
-        default: 'edo2net',
+        default: 'florencenet',
       },
       networks: {
         edo2net: {
+          quorumContractAddress: {
+            env: 'TEZOS_QUORUM_CONTRACT',
+            default: 'KT1C5ftQmsS41bwS5wQKWRmEhUCyfk6kan2S',
+          },
+          minterContractAddress: {
+            env: 'TEZOS_MINTER_CONTRACT',
+            default: 'KT1RjHY3G7omtaohqnkEqCybQ73BqFeHkZh1',
+          },
+          confirmationsThreshold: {
+            env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
+            type: 'integer',
+            default: 10,
+          },
+          rpc: {
+            env: 'TEZOS_RPC',
+            default: 'https://edonet.smartpy.io/',
+          },
+        },
+        florencenet: {
           quorumContractAddress: {
             env: 'TEZOS_QUORUM_CONTRACT',
             default: 'KT1Qjq1Yp27QUT8s8ECRbra48pbDmfWa1u2K',

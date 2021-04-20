@@ -96,14 +96,16 @@ export class SignatureIndexer {
     transaction: Knex.Transaction
   ): Promise<void> {
     const event = this._parseFailedEvent(value);
+    const currentTezosLevel = (await this._tezosToolkit.rpc.getBlockHeader())
+      .level;
     await this._wrapDao.setStatus(
       event.blockHash,
       event.logIndex,
       'reverted',
-      event.level,
+      currentTezosLevel,
       transaction
     );
-    const unwrap = await this._buildUnwrapFromRevert(event);
+    const unwrap = await this._buildUnwrapFromRevert(event, currentTezosLevel);
     const existingUnwrap = await this._unwrapDao.isExist(unwrap, transaction);
     if (!existingUnwrap) {
       await this._unwrapDao.save(unwrap, transaction);
@@ -111,10 +113,10 @@ export class SignatureIndexer {
   }
 
   private async _buildUnwrapFromRevert(
-    event: MintingFailedEvent
+    event: MintingFailedEvent,
+    currentTezosLevel: number
   ): Promise<ERCUnwrap> {
     const wrapId = `revert:${event.wrapId}`;
-    const currentLevel = (await this._tezosToolkit.rpc.getBlockHeader()).level;
     return {
       id: wrapId,
       source: event.owner,
@@ -123,7 +125,7 @@ export class SignatureIndexer {
       tokenId: event.tokenId,
       ethereumDestination: event.owner,
       operationHash: wrapId,
-      level: currentLevel,
+      level: currentTezosLevel,
       status: 'asked',
       type: event.type === 'Erc20MintingFailed' ? 'ERC20' : 'ERC721',
       finalizedAtLevel: null,
