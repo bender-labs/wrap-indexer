@@ -68,7 +68,8 @@ export class WrapsQuery {
         status: wrap.status,
         transactionHash: wrap.transactionHash,
         signatures: relatedSignatures,
-        confirmations: currentBlock - wrap.level,
+        confirmations:
+          currentBlock - wrap.level < 0 ? 0 : currentBlock - wrap.level,
         confirmationsThreshold: this._ethereumConfiguration
           .confirmationsThreshold,
       };

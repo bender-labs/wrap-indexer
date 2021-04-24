@@ -69,7 +69,8 @@ export class UnwrapsQuery {
         status: unwrap.status,
         operationHash: unwrap.operationHash,
         signatures: relatedSignatures,
-        confirmations: currentLevel - unwrap.level,
+        confirmations:
+          currentLevel - unwrap.level < 0 ? 0 : currentLevel - unwrap.level,
         confirmationsThreshold: this._tezosConfiguration.confirmationsThreshold,
       };
     });
