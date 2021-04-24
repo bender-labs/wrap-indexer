@@ -106,6 +106,7 @@ export function loadConfiguration(): Config {
           },
           firstBlockToIndex: {
             env: 'ETHEREUM_FIRST_BLOCK_TO_INDEX',
+            type: 'integer',
           },
           wrapABI: {
             env: 'ETHEREUM_WRAP_ABI',
@@ -114,6 +115,7 @@ export function loadConfiguration(): Config {
           },
           confirmationsThreshold: {
             env: 'ETHEREUM_CONFIRMATIONS_THRESHOLD',
+            type: 'integer',
           },
         },
       },
@@ -171,6 +173,7 @@ export function loadConfiguration(): Config {
           },
           confirmationsThreshold: {
             env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
+            type: 'integer',
           },
           rpc: {
             env: 'TEZOS_RPC',
