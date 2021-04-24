@@ -1,5 +1,6 @@
 import { UnwrapSignature } from '../domain/Signature';
 import Knex from 'knex';
+import * as NodeCache from 'node-cache';
 import { ERCUnwrap } from '../domain/ERCUnwrap';
 import { TezosConfig } from '../configuration';
 import { TezosToolkit } from '@taquito/taquito';
@@ -31,6 +32,7 @@ export class UnwrapsQuery {
     this._dbClient = dbClient;
     this._tezosConfiguration = tezosConfiguration;
     this._tezosToolkit = tezosToolkit;
+    this._cache = new NodeCache({ stdTTL: 30, checkperiod: 10 });
   }
 
   async search(
@@ -74,8 +76,13 @@ export class UnwrapsQuery {
   }
 
   private async _getNetworkLevel(): Promise<number> {
-    const block = await this._tezosToolkit.rpc.getBlockHeader();
-    return block.level;
+    let currentLevel = this._cache.get<string>('currentLevel');
+    if (!currentLevel) {
+      const block = await this._tezosToolkit.rpc.getBlockHeader();
+      this._cache.set<string>('currentLevel', block.level.toString());
+      currentLevel = block.level.toString();
+    }
+    return +currentLevel;
   }
 
   private async _getUnwraps(
@@ -113,4 +120,5 @@ export class UnwrapsQuery {
   private _dbClient: Knex;
   private _tezosConfiguration: TezosConfig;
   private _tezosToolkit: TezosToolkit;
+  private _cache: NodeCache;
 }

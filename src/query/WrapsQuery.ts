@@ -1,6 +1,7 @@
+import Knex from 'knex';
+import * as NodeCache from 'node-cache';
 import { ERCType, ERCWrap, WrapStatus } from '../domain/ERCWrap';
 import { WrapSignature } from '../domain/Signature';
-import Knex from 'knex';
 import { EthereumConfig } from '../configuration';
 import { ethers } from 'ethers';
 
@@ -30,6 +31,7 @@ export class WrapsQuery {
     this._dbClient = dbClient;
     this._ethereumConfiguration = ethereumConfiguration;
     this._ethereumProvider = ethereumProvider;
+    this._cache = new NodeCache({ stdTTL: 30, checkperiod: 10 });
   }
 
   async search(
@@ -38,7 +40,7 @@ export class WrapsQuery {
     status: WrapStatus,
     transactionHash: string
   ): Promise<WrapWithSignatures[]> {
-    const currentBlock = await this._ethereumProvider.getBlockNumber();
+    const currentBlock = await this._getBlockNumber();
     const pendingWraps: ERCWrap[] = await this._getWraps(
       tezosAddress,
       ethereumAddress,
@@ -71,6 +73,16 @@ export class WrapsQuery {
           .confirmationsThreshold,
       };
     });
+  }
+
+  private async _getBlockNumber(): Promise<number> {
+    let currentBlockNumber = this._cache.get<string>('currentBlockNumber');
+    if (!currentBlockNumber) {
+      const block = await this._ethereumProvider.getBlockNumber();
+      this._cache.set<string>('currentBlockNumber', block.toString());
+      currentBlockNumber = block.toString();
+    }
+    return +currentBlockNumber;
   }
 
   private async _getWraps(
@@ -110,4 +122,5 @@ export class WrapsQuery {
   private _dbClient: Knex;
   private _ethereumConfiguration: EthereumConfig;
   private _ethereumProvider: ethers.providers.Provider;
+  private _cache: NodeCache;
 }
