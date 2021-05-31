@@ -2,7 +2,7 @@ import { Logger } from 'tslog';
 import { EthereumConfig } from '../../configuration';
 import Knex from 'knex';
 import { ethers } from 'ethers';
-import { EthereumQuorumDao } from '../../dao/EthereumQuorumDao';
+import { EthereumQuorumRepository } from '../../repository/EthereumQuorumRepository';
 import { Dependencies } from '../../bootstrap';
 
 export class EthereumQuorumIndexer {
@@ -31,7 +31,7 @@ export class EthereumQuorumIndexer {
       const threshold = await contract.getThreshold();
       const signers = await contract.getOwners();
       transaction = await this._dbClient.transaction();
-      await new EthereumQuorumDao(this._dbClient).save(
+      await new EthereumQuorumRepository(this._dbClient).save(
         {
           admin: administrator,
           threshold: threshold.toNumber(),

@@ -3,7 +3,7 @@ import Knex from 'knex';
 import { IpfsClient } from '../../infrastructure/ipfsClient';
 import { AppState } from '../state/AppState';
 import { TezosSigner } from '../../domain/TezosSigner';
-import { TezosQuorumDao } from '../../dao/TezosQuorumDao';
+import { TezosQuorumRepository } from '../../repository/TezosQuorumRepository';
 import { Dependencies } from '../../bootstrap';
 
 export class SignaturePinningService {
@@ -16,7 +16,9 @@ export class SignaturePinningService {
 
   async index(): Promise<void> {
     this._logger.debug(`Pinning signatures`);
-    const signers = await new TezosQuorumDao(this._dbClient).getActiveSigners();
+    const signers = await new TezosQuorumRepository(
+      this._dbClient
+    ).getActiveSigners();
     for (const signer of signers) {
       this._logger.debug(`Pinning signatures of ${signer.ipnsKey}`);
       try {

@@ -1,13 +1,14 @@
 import Knex from 'knex';
-import { EthereumQuorum } from '../domain/EthereumQuorum';
+import { TezosSigner } from '../domain/TezosSigner';
+import { TezosQuorum } from '../domain/TezosQuorum';
 
-export class EthereumQuorumDao {
+export class TezosQuorumRepository {
   constructor(dbClient: Knex) {
     this._dbClient = dbClient;
   }
 
   async save(
-    quorum: EthereumQuorum,
+    quorum: TezosQuorum,
     transaction: Knex.Transaction
   ): Promise<void> {
     await this._saveQuorum(quorum, transaction);
@@ -18,11 +19,11 @@ export class EthereumQuorumDao {
   }
 
   private async _saveQuorum(
-    quorum: EthereumQuorum,
+    quorum: TezosQuorum,
     transaction: Knex.Transaction
   ): Promise<void> {
     await this._dbClient
-      .table('ethereum_quorum')
+      .table('tezos_quorum')
       .transacting(transaction)
       .insert({ admin: quorum.admin, threshold: quorum.threshold })
       .onConflict('admin' as never)
@@ -30,31 +31,40 @@ export class EthereumQuorumDao {
   }
 
   private async _disableOtherSigners(
-    quorum: EthereumQuorum,
+    quorum: TezosQuorum,
     transaction: Knex.Transaction
   ): Promise<void> {
     await this._dbClient
-      .table('ethereum_quorum_signers')
+      .table('tezos_quorum_signers')
       .transacting(transaction)
       .update({ active: false })
-      .whereNotIn('address', quorum.signers);
+      .whereNotIn(
+        'public_key',
+        quorum.signers.map<string>((s) => s.publicKey)
+      );
   }
 
   private async _saveSigner(
-    signer: string,
+    signer: TezosSigner,
     transaction: Knex.Transaction
   ): Promise<void> {
     await this._dbClient
-      .table('ethereum_quorum_signers')
+      .table('tezos_quorum_signers')
       .transacting(transaction)
-      .insert({ address: signer, active: true })
-      .onConflict('address' as never)
+      .insert(signer)
+      .onConflict('ipns_key' as never)
       .merge({ active: true });
+  }
+
+  async getActiveSigners(): Promise<TezosSigner[]> {
+    return this._dbClient
+      .table<TezosSigner>('tezos_quorum_signers')
+      .where({ active: true });
   }
 
   async getThreshold(): Promise<number> {
     const quorum = await this._dbClient
-      .table<EthereumQuorum>('ethereum_quorum')
+      .table<TezosQuorum>('tezos_quorum')
       .first();
     return quorum?.threshold;
   }

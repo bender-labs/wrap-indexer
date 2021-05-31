@@ -3,7 +3,7 @@ import Knex from 'knex';
 import { Dependencies } from '../../bootstrap';
 import { TezosToolkit } from '@taquito/taquito';
 import { Fees } from '../../domain/Fees';
-import { FeesDao } from '../../dao/FeesDao';
+import { FeesRepository } from '../../repository/FeesRepository';
 
 export class FeesIndexer {
   constructor({
@@ -16,7 +16,7 @@ export class FeesIndexer {
     this._dbClient = dbClient;
     this._tezosToolkit = tezosToolkit;
     this._minterContractAddress = tezosConfiguration.minterContractAddress;
-    this._feesDAO = new FeesDao(dbClient);
+    this._feesDAO = new FeesRepository(dbClient);
   }
 
   async index(): Promise<void> {
@@ -53,5 +53,5 @@ export class FeesIndexer {
   private _dbClient: Knex;
   private _minterContractAddress: string;
   private _tezosToolkit: TezosToolkit;
-  private _feesDAO: FeesDao;
+  private _feesDAO: FeesRepository;
 }

@@ -1,7 +1,7 @@
 import { Logger } from 'tslog';
 import Knex from 'knex';
 import { Dependencies } from '../../bootstrap';
-import { TokenDao } from '../../dao/TokenDao';
+import { TokenRepository } from '../../repository/TokenRepository';
 import { Token } from '../../domain/Token';
 import { compose, TezosToolkit } from '@taquito/taquito';
 import { tzip12 } from '@taquito/tzip12';
@@ -25,7 +25,7 @@ export class TokensIndexer {
     this._dbClient = dbClient;
     this._tezosToolkit = tezosToolkit;
     this._minterContractAddress = tezosConfiguration.minterContractAddress;
-    this._tokenDao = new TokenDao(this._dbClient);
+    this._tokenDao = new TokenRepository(this._dbClient);
   }
 
   async index(): Promise<void> {
@@ -116,7 +116,7 @@ export class TokensIndexer {
 
   private _logger: Logger;
   private _dbClient: Knex;
-  private _tokenDao: TokenDao;
+  private _tokenDao: TokenRepository;
   private _minterContractAddress: string;
   private _tezosToolkit: TezosToolkit;
 }

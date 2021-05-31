@@ -14,6 +14,7 @@ export type EthereumConfig = {
 export type TezosConfig = {
   quorumContractAddress: string;
   minterContractAddress: string;
+  stakingReserveContractAddress: string;
   confirmationsThreshold: number;
   rpc: string;
 };
@@ -126,25 +127,6 @@ export function loadConfiguration(): Config {
         default: 'florencenet',
       },
       networks: {
-        edo2net: {
-          quorumContractAddress: {
-            env: 'TEZOS_QUORUM_CONTRACT',
-            default: 'KT1C5ftQmsS41bwS5wQKWRmEhUCyfk6kan2S',
-          },
-          minterContractAddress: {
-            env: 'TEZOS_MINTER_CONTRACT',
-            default: 'KT1RjHY3G7omtaohqnkEqCybQ73BqFeHkZh1',
-          },
-          confirmationsThreshold: {
-            env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
-            type: 'integer',
-            default: 10,
-          },
-          rpc: {
-            env: 'TEZOS_RPC',
-            default: 'https://edonet.smartpy.io/',
-          },
-        },
         florencenet: {
           quorumContractAddress: {
             env: 'TEZOS_QUORUM_CONTRACT',
@@ -153,6 +135,10 @@ export function loadConfiguration(): Config {
           minterContractAddress: {
             env: 'TEZOS_MINTER_CONTRACT',
             default: 'KT1KwYvgkaFDRroKqWf9C8dcDeyK1hUWt7se',
+          },
+          stakingReserveContractAddress: {
+            env: 'TEZOS_STAKING_RESERVE_CONTRACT',
+            default: 'KT1TfNHibGeNojBdWsC2pNcDfhfSmAH9pM7b',
           },
           confirmationsThreshold: {
             env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
@@ -170,6 +156,9 @@ export function loadConfiguration(): Config {
           },
           minterContractAddress: {
             env: 'TEZOS_MINTER_CONTRACT',
+          },
+          stakingReserveContractAddress: {
+            env: 'TEZOS_STAKING_RESERVE_CONTRACT',
           },
           confirmationsThreshold: {
             env: 'TEZOS_CONFIRMATIONS_THRESHOLD',

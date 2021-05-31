@@ -4,12 +4,12 @@ import { IpfsClient } from '../../infrastructure/ipfsClient';
 import { WrapSignature, UnwrapSignature } from '../../domain/Signature';
 import { AppState } from '../state/AppState';
 import { TezosSigner } from '../../domain/TezosSigner';
-import { SignatureDao } from '../../dao/SignatureDao';
-import { TezosQuorumDao } from '../../dao/TezosQuorumDao';
+import { SignatureRepository } from '../../repository/SignatureRepository';
+import { TezosQuorumRepository } from '../../repository/TezosQuorumRepository';
 import { Dependencies } from '../../bootstrap';
 import { MintingFailedEvent } from '../../domain/MintingFailedEvent';
-import { WrapDAO } from '../../dao/WrapDAO';
-import { UnwrapDAO } from '../../dao/UnwrapDAO';
+import { WrapRepository } from '../../repository/WrapRepository';
+import { UnwrapRepository } from '../../repository/UnwrapRepository';
 import { ERCUnwrap } from '../../domain/ERCUnwrap';
 import { TezosToolkit } from '@taquito/taquito';
 
@@ -20,14 +20,16 @@ export class SignatureIndexer {
     this._dbClient = dbClient;
     this._tezosToolkit = tezosToolkit;
     this._appState = new AppState(this._dbClient);
-    this._signatureDao = new SignatureDao(this._dbClient);
-    this._wrapDao = new WrapDAO(this._dbClient);
-    this._unwrapDao = new UnwrapDAO(this._dbClient);
+    this._signatureDao = new SignatureRepository(this._dbClient);
+    this._wrapDao = new WrapRepository(this._dbClient);
+    this._unwrapDao = new UnwrapRepository(this._dbClient);
   }
 
   async index(): Promise<void> {
     this._logger.debug(`Indexing signatures`);
-    const signers = await new TezosQuorumDao(this._dbClient).getActiveSigners();
+    const signers = await new TezosQuorumRepository(
+      this._dbClient
+    ).getActiveSigners();
     for (const signer of signers) {
       this._logger.debug(`Indexing signatures of ${signer.ipnsKey}`);
       let transaction;
@@ -267,7 +269,7 @@ export class SignatureIndexer {
   private _dbClient: Knex;
   private _tezosToolkit: TezosToolkit;
   private _appState: AppState;
-  private _signatureDao: SignatureDao;
-  private _wrapDao: WrapDAO;
-  private _unwrapDao: UnwrapDAO;
+  private _signatureDao: SignatureRepository;
+  private _wrapDao: WrapRepository;
+  private _unwrapDao: UnwrapRepository;
 }

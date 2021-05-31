@@ -1,7 +1,7 @@
 import Knex from 'knex';
 import { ERCWrap, WrapStatus } from '../domain/ERCWrap';
 
-export class WrapDAO {
+export class WrapRepository {
   constructor(dbClient: Knex) {
     this._dbClient = dbClient;
   }

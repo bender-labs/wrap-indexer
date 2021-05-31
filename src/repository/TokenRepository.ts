@@ -1,7 +1,7 @@
 import Knex from 'knex';
 import { Token } from '../domain/Token';
 
-export class TokenDao {
+export class TokenRepository {
   constructor(dbClient: Knex) {
     this._dbClient = dbClient;
   }

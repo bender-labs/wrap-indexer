@@ -4,7 +4,7 @@ import Knex from 'knex';
 import { BcdProvider, Operation } from '../../infrastructure/tezos/bcdProvider';
 import { AppState } from '../state/AppState';
 import { ERCUnwrap } from '../../domain/ERCUnwrap';
-import { UnwrapDAO } from '../../dao/UnwrapDAO';
+import { UnwrapRepository } from '../../repository/UnwrapRepository';
 import { Dependencies } from '../../bootstrap';
 
 export class TezosInitialUnwrapIndexer {
@@ -14,7 +14,7 @@ export class TezosInitialUnwrapIndexer {
     this._bcd = bcd;
     this._dbClient = dbClient;
     this._appState = new AppState(dbClient);
-    this._unwrapDAO = new UnwrapDAO(dbClient);
+    this._unwrapDAO = new UnwrapRepository(dbClient);
   }
 
   async index(): Promise<void> {
@@ -176,5 +176,5 @@ export class TezosInitialUnwrapIndexer {
   private _bcd: BcdProvider;
   private _dbClient: Knex;
   private _appState: AppState;
-  private _unwrapDAO: UnwrapDAO;
+  private _unwrapDAO: UnwrapRepository;
 }

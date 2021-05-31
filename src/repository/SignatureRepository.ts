@@ -1,7 +1,7 @@
 import Knex from 'knex';
 import { WrapSignature, UnwrapSignature } from '../domain/Signature';
 
-export class SignatureDao {
+export class SignatureRepository {
   constructor(dbClient: Knex) {
     this._dbClient = dbClient;
   }

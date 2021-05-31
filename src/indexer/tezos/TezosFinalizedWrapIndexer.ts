@@ -1,7 +1,7 @@
 import { Logger } from 'tslog';
 import { TezosConfig } from '../../configuration';
 import Knex from 'knex';
-import { WrapDAO } from '../../dao/WrapDAO';
+import { WrapRepository } from '../../repository/WrapRepository';
 import { ERCWrap } from '../../domain/ERCWrap';
 import { Dependencies } from '../../bootstrap';
 import { TezosToolkit } from '@taquito/taquito';
@@ -17,7 +17,7 @@ export class TezosFinalizedWrapIndexer {
     this._tezosConfiguration = tezosConfiguration;
     this._tezosToolkit = tezosToolkit;
     this._dbClient = dbClient;
-    this._wrapDao = new WrapDAO(this._dbClient);
+    this._wrapDao = new WrapRepository(this._dbClient);
   }
 
   async index(): Promise<void> {
@@ -113,6 +113,6 @@ export class TezosFinalizedWrapIndexer {
   private _logger: Logger;
   private _tezosConfiguration: TezosConfig;
   private _tezosToolkit: TezosToolkit;
-  private _wrapDao: WrapDAO;
+  private _wrapDao: WrapRepository;
   private _dbClient: Knex;
 }

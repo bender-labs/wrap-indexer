@@ -6,7 +6,7 @@ import { ERCWrap } from '../../domain/ERCWrap';
 import { EthereumConfig } from '../../configuration';
 import { Logger } from 'tslog';
 import { AppState } from '../state/AppState';
-import { WrapDAO } from '../../dao/WrapDAO';
+import { WrapRepository } from '../../repository/WrapRepository';
 import { Dependencies } from '../../bootstrap';
 
 export class EthereumInitialWrapIndexer {
@@ -21,7 +21,7 @@ export class EthereumInitialWrapIndexer {
     this._ethereumProvider = ethereumProvider;
     this._dbClient = dbClient;
     this._appState = new AppState(this._dbClient);
-    this._wrapDAO = new WrapDAO(this._dbClient);
+    this._wrapDAO = new WrapRepository(this._dbClient);
   }
 
   async index(): Promise<void> {
@@ -167,7 +167,7 @@ export class EthereumInitialWrapIndexer {
   private _ethereumConfig: EthereumConfig;
   private _appState: AppState;
   private _logger: Logger;
-  private _wrapDAO: WrapDAO;
+  private _wrapDAO: WrapRepository;
   private static readonly _wrapTopics: string[] = [
     id('ERC20WrapAsked(address,address,uint256,string)'),
     id('ERC721WrapAsked(address,address,uint256,string)'),

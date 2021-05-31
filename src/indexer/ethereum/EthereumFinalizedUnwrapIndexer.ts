@@ -4,7 +4,7 @@ import { id } from 'ethers/lib/utils';
 import { EthereumConfig } from '../../configuration';
 import { Logger } from 'tslog';
 import { ERCUnwrap } from '../../domain/ERCUnwrap';
-import { UnwrapDAO } from '../../dao/UnwrapDAO';
+import { UnwrapRepository } from '../../repository/UnwrapRepository';
 import { Dependencies } from '../../bootstrap';
 
 export class EthereumFinalizedUnwrapIndexer {
@@ -18,7 +18,7 @@ export class EthereumFinalizedUnwrapIndexer {
     this._ethereumConfig = ethereumConfiguration;
     this._ethereumProvider = ethereumProvider;
     this._dbClient = dbClient;
-    this._unwrapDao = new UnwrapDAO(this._dbClient);
+    this._unwrapDao = new UnwrapRepository(this._dbClient);
   }
 
   async index(): Promise<void> {
@@ -79,7 +79,7 @@ export class EthereumFinalizedUnwrapIndexer {
   private _dbClient: Knex;
   private _ethereumConfig: EthereumConfig;
   private _logger: Logger;
-  private _unwrapDao: UnwrapDAO;
+  private _unwrapDao: UnwrapRepository;
   static readonly wrapTopics: string[] = [
     id('ERC20WrapAsked(address,address,uint256,string)'),
     id('ERC721WrapAsked(address,address,uint256,string)'),

@@ -2,7 +2,7 @@ import { Logger } from 'tslog';
 import { TezosConfig } from '../../configuration';
 import Knex from 'knex';
 import { TezosQuorum } from '../../domain/TezosQuorum';
-import { TezosQuorumDao } from '../../dao/TezosQuorumDao';
+import { TezosQuorumRepository } from '../../repository/TezosQuorumRepository';
 import { Dependencies } from '../../bootstrap';
 import { TezosToolkit } from '@taquito/taquito';
 
@@ -29,7 +29,10 @@ export class TezosQuorumIndexer {
       const quorumStorage = await quorumContract.storage();
       const tezosQuorum = this._extractQuorum(quorumStorage);
       transaction = await this._dbClient.transaction();
-      await new TezosQuorumDao(this._dbClient).save(tezosQuorum, transaction);
+      await new TezosQuorumRepository(this._dbClient).save(
+        tezosQuorum,
+        transaction
+      );
       await transaction.commit();
     } catch (e) {
       this._logger.error(`Can't process tezos quorum ${e.message}`);

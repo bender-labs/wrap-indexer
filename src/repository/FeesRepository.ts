@@ -1,7 +1,7 @@
 import Knex from 'knex';
 import { Fees } from '../domain/Fees';
 
-export class FeesDao {
+export class FeesRepository {
   constructor(dbClient: Knex) {
     this._dbClient = dbClient;
   }

@@ -1,10 +1,10 @@
 import { Request, Response, Router } from 'express';
 import { Dependencies } from '../../bootstrap';
-import { TezosQuorumDao } from '../../dao/TezosQuorumDao';
-import { EthereumQuorumDao } from '../../dao/EthereumQuorumDao';
-import { TokenDao } from '../../dao/TokenDao';
+import { TezosQuorumRepository } from '../../repository/TezosQuorumRepository';
+import { EthereumQuorumRepository } from '../../repository/EthereumQuorumRepository';
+import { TokenRepository } from '../../repository/TokenRepository';
 import { Token } from '../../domain/Token';
-import { FeesDao } from '../../dao/FeesDao';
+import { FeesRepository } from '../../repository/FeesRepository';
 import { Fees } from '../../domain/Fees';
 
 interface Configuration {
@@ -21,15 +21,19 @@ interface Configuration {
 }
 
 async function buildConfiguration({
-                                    dbClient,
-                                    configuration,
-                                    ethereumConfiguration,
-                                    tezosConfiguration,
-                                  }: Dependencies): Promise<Configuration> {
-  const tezosThreashold = await new TezosQuorumDao(dbClient).getThreshold();
-  const ethereumThreshold = await new EthereumQuorumDao(dbClient).getThreshold();
-  const fees = await new FeesDao(dbClient).getFees();
-  const tokens = await new TokenDao(dbClient).all();
+  dbClient,
+  configuration,
+  ethereumConfiguration,
+  tezosConfiguration,
+}: Dependencies): Promise<Configuration> {
+  const tezosThreashold = await new TezosQuorumRepository(
+    dbClient
+  ).getThreshold();
+  const ethereumThreshold = await new EthereumQuorumRepository(
+    dbClient
+  ).getThreshold();
+  const fees = await new FeesRepository(dbClient).getFees();
+  const tokens = await new TokenRepository(dbClient).all();
   return {
     ethereumNetwork: configuration.ethereum.currentNetwork,
     ethereumNetworkId: ethereumConfiguration.networkId,

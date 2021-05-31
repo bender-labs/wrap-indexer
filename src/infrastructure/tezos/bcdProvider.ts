@@ -29,6 +29,12 @@ export interface Operations {
   last_id: string;
 }
 
+export interface BigMapValue {
+  keyHash: string;
+  keyString: string;
+  value: MichelineNode;
+}
+
 export class BcdProvider {
   constructor(tezosNetwork: string) {
     this._tezosNetwork = tezosNetwork;
@@ -52,6 +58,20 @@ export class BcdProvider {
         entrypoints.includes(o.entrypoint)
       ),
     };
+  }
+
+  async getBigMapContent(bigMapId: string): Promise<Array<BigMapValue>> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await axios.get<Array<any>>(
+      `${BcdProvider.BCD_URL}/v1/bigmap/${this._tezosNetwork}/${bigMapId}/keys`
+    );
+    return response.data.map((d) => {
+      return {
+        keyHash: d.data.key_hash,
+        keyString: d.data.key_string,
+        value: d.data.value,
+      };
+    });
   }
 
   async getStorage(contractAddress: string): Promise<MichelineNode> {
