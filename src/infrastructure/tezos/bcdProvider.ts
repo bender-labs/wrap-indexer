@@ -60,27 +60,6 @@ export class BcdProvider {
     };
   }
 
-  async getBigMapContent(bigMapId: string): Promise<Array<BigMapValue>> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await axios.get<Array<any>>(
-      `${BcdProvider.BCD_URL}/v1/bigmap/${this._tezosNetwork}/${bigMapId}/keys`
-    );
-    return response.data.map((d) => {
-      return {
-        keyHash: d.data.key_hash,
-        keyString: d.data.key_string,
-        value: d.data.value,
-      };
-    });
-  }
-
-  async getStorage(contractAddress: string): Promise<MichelineNode> {
-    const response = await axios.get<MichelineNode>(
-      `${BcdProvider.BCD_URL}/v1/contract/${this._tezosNetwork}/${contractAddress}/storage`
-    );
-    return response.data;
-  }
-
   private _tezosNetwork: string;
   private static readonly BCD_URL = 'https://api.better-call.dev';
 }

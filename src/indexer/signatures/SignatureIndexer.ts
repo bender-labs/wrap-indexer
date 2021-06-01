@@ -84,6 +84,7 @@ export class SignatureIndexer {
   private async _indexSignature(
     signer: TezosSigner,
     cid: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any,
     transaction: Knex.Transaction
   ): Promise<void> {
@@ -94,6 +95,7 @@ export class SignatureIndexer {
   }
 
   private async _processFailedEvent(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any,
     transaction: Knex.Transaction
   ): Promise<void> {
@@ -231,6 +233,7 @@ export class SignatureIndexer {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _parseFailedEvent(value: any): MintingFailedEvent {
     switch (value.type) {
       case 'Erc20MintingFailed':

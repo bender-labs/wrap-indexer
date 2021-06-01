@@ -17,6 +17,7 @@ export type TezosConfig = {
   stakingReserveContractAddress: string;
   confirmationsThreshold: number;
   rpc: string;
+  tzKtApiUrl: string;
 };
 
 export type Config = {
@@ -145,6 +146,10 @@ export function loadConfiguration(): Config {
             type: 'integer',
             default: 10,
           },
+          tzKtApiUrl: {
+            env: 'TEZOS_TZKT_API_URL',
+            default: 'https://api.florencenet.tzkt.io/v1',
+          },
           rpc: {
             env: 'TEZOS_RPC',
             default: 'https://florencenet.smartpy.io/',
@@ -163,6 +168,10 @@ export function loadConfiguration(): Config {
           confirmationsThreshold: {
             env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
             type: 'integer',
+          },
+          tzKtApiUrl: {
+            env: 'TEZOS_TZKT_API_URL',
+            default: 'https://api.tzkt.io/v1',
           },
           rpc: {
             env: 'TEZOS_RPC',

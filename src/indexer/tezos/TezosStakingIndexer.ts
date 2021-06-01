@@ -1,24 +1,23 @@
 import { Logger } from 'tslog';
 import { TezosConfig } from '../../configuration';
-import * as _ from 'lodash';
 import Knex from 'knex';
 import { Dependencies } from '../../bootstrap';
 import { TezosToolkit } from '@taquito/taquito';
-import { BcdProvider } from '../../infrastructure/tezos/bcdProvider';
 import { TezosStakingContractsRepository } from '../../repository/TezosStakingContractsRepository';
+import { TzktProvider } from '../../infrastructure/tezos/tzktProvider';
 
 export class TezosStakingIndexer {
   constructor({
     logger,
     tezosConfiguration,
     tezosToolkit,
-    bcd,
+    tzkt,
     dbClient,
   }: Dependencies) {
     this._logger = logger;
     this._tezosConfiguration = tezosConfiguration;
     this._tezosToolkit = tezosToolkit;
-    this._bcd = bcd;
+    this._tzkt = tzkt;
     this._dbClient = dbClient;
   }
 
@@ -31,11 +30,11 @@ export class TezosStakingIndexer {
       );
       const storage = await reserveContract.storage();
       const farmsBigMapId = storage['farms'].id.toString(10);
-      const bigMapValues = await this._bcd.getBigMapContent(farmsBigMapId);
+      const bigMapValues = await this._tzkt.getBigMapContent(farmsBigMapId);
       const contracts = bigMapValues.map((v) => ({
         contract: v.keyString,
-        token: _.find(v.value.children, (c) => c.type === 'address').value,
-        tokenId: _.find(v.value.children, (c) => c.type === 'nat').value,
+        token: v.value.address,
+        tokenId: v.value.nat,
       }));
       transaction = await this._dbClient.transaction();
       await new TezosStakingContractsRepository(this._dbClient).saveAll(
@@ -55,5 +54,5 @@ export class TezosStakingIndexer {
   private _tezosConfiguration: TezosConfig;
   private _dbClient: Knex;
   private _tezosToolkit: TezosToolkit;
-  private _bcd: BcdProvider;
+  private _tzkt: TzktProvider;
 }
