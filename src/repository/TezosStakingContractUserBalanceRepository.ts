@@ -43,5 +43,17 @@ export class TezosStakingContractUserBalanceRepository {
       .where({ tezosAddress });
   }
 
+  async getTotalBalancesPerContract(): Promise<
+    Array<{ sum: string; contract: string }>
+  > {
+    return this._dbClient
+      .table<TezosStakingContractUserBalance>(
+        'tezos_staking_contracts_user_balances'
+      )
+      .select('contract')
+      .sum(this._dbClient.raw('balance::bigint'))
+      .groupBy('contract');
+  }
+
   private _dbClient: Knex;
 }

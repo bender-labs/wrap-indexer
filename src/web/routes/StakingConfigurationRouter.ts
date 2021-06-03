@@ -3,12 +3,14 @@ import { Dependencies } from '../../bootstrap';
 import { TezosStakingContractsRepository } from '../../repository/TezosStakingContractsRepository';
 import { TezosStakingContractRewardsRepository } from '../../repository/TezosStakingContractRewardsRepository';
 import { TezosStakingContractRewards } from '../../domain/TezosStakingContractRewards';
+import { TezosStakingContractUserBalanceRepository } from '../../repository/TezosStakingContractUserBalanceRepository';
 
 interface StakingConfiguration {
   contracts: Array<{
     contract: string;
     token: string;
     tokenId: number;
+    totalStaked?: string;
     rewards?: TezosStakingContractRewards;
   }>;
 }
@@ -22,16 +24,18 @@ async function buildConfiguration({
   const rewards = await new TezosStakingContractRewardsRepository(
     dbClient
   ).getRewards();
+  const balances = await new TezosStakingContractUserBalanceRepository(
+    dbClient
+  ).getTotalBalancesPerContract();
   return {
     contracts: stakingContracts.map((s) => {
+      const balance = balances.find((b) => b.contract === s.contract);
       const reward = rewards.find((r) => r.contract === s.contract);
-      if (reward) {
-        return {
-          rewards: reward,
-          ...s,
-        };
-      }
-      return s;
+      return {
+        rewards: reward,
+        totalStaked: balance ? balance.sum : undefined,
+        ...s,
+      };
     }),
   };
 }
