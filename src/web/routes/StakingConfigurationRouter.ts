@@ -1,10 +1,16 @@
 import { Request, Response, Router } from 'express';
 import { Dependencies } from '../../bootstrap';
 import { TezosStakingContractsRepository } from '../../repository/TezosStakingContractsRepository';
-import { TezosStakingContract } from '../../domain/TezosStakingContract';
+import { TezosStakingContractRewardsRepository } from '../../repository/TezosStakingContractRewardsRepository';
 
 interface StakingConfiguration {
-  contracts: Array<TezosStakingContract>;
+  contracts: Array<{
+    contract: string;
+    token: string;
+    tokenId: number;
+    totalRewards?: string;
+    startLevel?: number;
+  }>;
 }
 
 async function buildConfiguration({
@@ -13,8 +19,21 @@ async function buildConfiguration({
   const stakingContracts = await new TezosStakingContractsRepository(
     dbClient
   ).getStakingContracts();
+  const rewards = await new TezosStakingContractRewardsRepository(
+    dbClient
+  ).getRewards();
   return {
-    contracts: stakingContracts,
+    contracts: stakingContracts.map((s) => {
+      const reward = rewards.find((r) => r.contract === s.contract);
+      if (reward) {
+        return {
+          totalRewards: reward.totalRewards,
+          startLevel: reward.startLevel,
+          ...s,
+        };
+      }
+      return s;
+    }),
   };
 }
 

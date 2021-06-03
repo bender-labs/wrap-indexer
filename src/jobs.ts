@@ -10,7 +10,8 @@ import { TokensIndexer } from './indexer/tokens/TokensIndexer';
 import { TezosQuorumIndexer } from './indexer/tezos/TezosQuorumIndexer';
 import { TezosInitialUnwrapIndexer } from './indexer/tezos/TezosInitialUnwrapIndexer';
 import { FeesIndexer } from './indexer/fees/FeesIndexer';
-import { TezosStakingIndexer } from './indexer/tezos/TezosStakingIndexer';
+import { TezosStakingContractsIndexer } from './indexer/tezos/TezosStakingContractsIndexer';
+import { TezosStakingContractsRewardsIndexer } from './indexer/tezos/TezosStakingContractsRewardsIndexer';
 
 const everyMinute = '* * * * *';
 const every10Minutes = '*/10 * * * *';
@@ -51,8 +52,12 @@ export function scheduleJobs(dependencies: Dependencies): Crontab {
     every10Minutes
   );
   crontab.register(
-    () => new TezosStakingIndexer(dependencies).index(),
+    () => new TezosStakingContractsIndexer(dependencies).index(),
     every30Minutes
+  );
+  crontab.register(
+    () => new TezosStakingContractsRewardsIndexer(dependencies).index(),
+    every10Minutes
   );
   crontab.register(() => new FeesIndexer(dependencies).index(), every30Minutes);
   crontab.register(

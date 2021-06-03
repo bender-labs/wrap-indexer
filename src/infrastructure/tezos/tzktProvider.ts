@@ -28,6 +28,17 @@ export class TzktProvider {
       });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async getStorage<T = any>(
+    contractAddress: string,
+    level: number
+  ): Promise<T> {
+    const response = await axios.get<T>(
+      `${this._tzKtApiUrl}/contracts/${contractAddress}/storage?level=${level}`
+    );
+    return response.data;
+  }
+
   private _tzKtApiUrl: string;
 }
 

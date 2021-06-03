@@ -6,7 +6,7 @@ import { TezosToolkit } from '@taquito/taquito';
 import { TezosStakingContractsRepository } from '../../repository/TezosStakingContractsRepository';
 import { TzktProvider } from '../../infrastructure/tezos/tzktProvider';
 
-export class TezosStakingIndexer {
+export class TezosStakingContractsIndexer {
   constructor({
     logger,
     tezosConfiguration,
@@ -22,7 +22,7 @@ export class TezosStakingIndexer {
   }
 
   async index(): Promise<void> {
-    this._logger.debug(`Indexing staking reserve contracts`);
+    this._logger.debug(`Indexing staking contracts`);
     let transaction;
     try {
       const reserveContract = await this._tezosToolkit.contract.at(
