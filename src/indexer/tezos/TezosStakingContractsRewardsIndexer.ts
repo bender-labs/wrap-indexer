@@ -6,6 +6,7 @@ import { BcdProvider } from '../../infrastructure/tezos/bcdProvider';
 import { TzktProvider } from '../../infrastructure/tezos/tzktProvider';
 import BigNumber from 'bignumber.js';
 import { TezosStakingContractRewardsRepository } from '../../repository/TezosStakingContractRewardsRepository';
+import { TezosToolkit } from '@taquito/taquito';
 
 interface StakingContractStorage {
   reward: {
@@ -20,11 +21,12 @@ interface StakingContractStorage {
 }
 
 export class TezosStakingContractsRewardsIndexer {
-  constructor({ logger, bcd, tzkt, dbClient }: Dependencies) {
+  constructor({ logger, bcd, tzkt, dbClient, tezosToolkit }: Dependencies) {
     this._logger = logger;
     this._bcd = bcd;
     this._tzkt = tzkt;
     this._dbClient = dbClient;
+    this._tezosToolkit = tezosToolkit;
     this._rewardsRepository = new TezosStakingContractRewardsRepository(
       this._dbClient
     );
@@ -52,13 +54,18 @@ export class TezosStakingContractsRewardsIndexer {
           const totalRewards = new BigNumber(storage.reward.reward_per_block)
             .multipliedBy(new BigNumber(storage.settings.duration))
             .toString(10);
-          const startLevel =
-            +storage.reward.period_end - +storage.settings.duration;
+          const duration = +storage.settings.duration;
+          const startLevel = +storage.reward.period_end - duration;
+          const blockHeader = await this._tezosToolkit.rpc.getBlockHeader({
+            block: startLevel.toString(),
+          });
           await this._rewardsRepository.save(
             {
               contract: contract.contract,
               totalRewards,
               startLevel,
+              startTimestamp: blockHeader.timestamp,
+              duration: duration,
             },
             transaction
           );
@@ -79,5 +86,6 @@ export class TezosStakingContractsRewardsIndexer {
   private _dbClient: Knex;
   private _bcd: BcdProvider;
   private _tzkt: TzktProvider;
+  private _tezosToolkit: TezosToolkit;
   private _rewardsRepository: TezosStakingContractRewardsRepository;
 }

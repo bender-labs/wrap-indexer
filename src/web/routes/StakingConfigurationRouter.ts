@@ -2,14 +2,14 @@ import { Request, Response, Router } from 'express';
 import { Dependencies } from '../../bootstrap';
 import { TezosStakingContractsRepository } from '../../repository/TezosStakingContractsRepository';
 import { TezosStakingContractRewardsRepository } from '../../repository/TezosStakingContractRewardsRepository';
+import { TezosStakingContractRewards } from '../../domain/TezosStakingContractRewards';
 
 interface StakingConfiguration {
   contracts: Array<{
     contract: string;
     token: string;
     tokenId: number;
-    totalRewards?: string;
-    startLevel?: number;
+    rewards?: TezosStakingContractRewards;
   }>;
 }
 
@@ -27,8 +27,7 @@ async function buildConfiguration({
       const reward = rewards.find((r) => r.contract === s.contract);
       if (reward) {
         return {
-          totalRewards: reward.totalRewards,
-          startLevel: reward.startLevel,
+          rewards: reward,
           ...s,
         };
       }
