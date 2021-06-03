@@ -56,6 +56,24 @@ export class AppState {
     );
   }
 
+  async getStakingContractLevelProcessed(
+    contract: string
+  ): Promise<number | null> {
+    const item = await this._getValue(`${contract}_min_level_processed`);
+    return item ? +item.value : null;
+  }
+
+  async setStakingContractLevelProcessed(
+    contract: string,
+    lastId: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._setValue(
+      { key: `${contract}_min_level_processed`, value: lastId.toString() },
+      transaction
+    );
+  }
+
   async _getValue(key: string): Promise<AppStateItem | null> {
     return this._dbClient
       .table<AppStateItem>('app_state')

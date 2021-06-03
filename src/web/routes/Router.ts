@@ -4,6 +4,7 @@ import UnwrapsRouter from './UnwrapsRouter';
 import { Dependencies } from '../../bootstrap';
 import ConfigurationRouter from './ConfigurationRouter';
 import StakingConfigurationRouter from './StakingConfigurationRouter';
+import StakingBalancesRouter from './StakingBalancesRouter';
 
 function build(dependencies: Dependencies): Router {
   const router = Router();
@@ -14,6 +15,7 @@ function build(dependencies: Dependencies): Router {
     '/staking-configuration',
     StakingConfigurationRouter(dependencies)
   );
+  router.use('/staking-balances', StakingBalancesRouter(dependencies));
   return router;
 }
 
