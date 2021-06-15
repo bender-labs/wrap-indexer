@@ -10,6 +10,7 @@ import { TezosToolkit } from '@taquito/taquito';
 
 interface StakingContractStorage {
   reward: {
+    exponent?: string;
     period_end: string;
     reward_per_block: string;
     last_block_update: string;
@@ -51,21 +52,23 @@ export class TezosStakingContractsRewardsIndexer {
             contract.contract,
             lastUpdateLevel + 1
           );
-          const totalRewards = new BigNumber(storage.reward.reward_per_block)
-            .multipliedBy(new BigNumber(storage.settings.duration))
-            .toString(10);
+          let totalRewards = new BigNumber(storage.reward.reward_per_block)
+            .multipliedBy(new BigNumber(storage.settings.duration));
+          if (storage.reward.exponent) {
+            totalRewards = totalRewards.shiftedBy(-(24 - parseInt(storage.reward.exponent)));
+          }
           const duration = +storage.settings.duration;
           const startLevel = +storage.reward.period_end - duration;
           const blockHeader = await this._tezosToolkit.rpc.getBlockHeader({
-            block: startLevel.toString(),
+            block: startLevel.toString()
           });
           await this._rewardsRepository.save(
             {
               contract: contract.contract,
-              totalRewards,
+              totalRewards: totalRewards.toString(10),
               startLevel,
               startTimestamp: blockHeader.timestamp,
-              duration: duration,
+              duration: duration
             },
             transaction
           );
