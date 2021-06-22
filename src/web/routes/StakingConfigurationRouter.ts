@@ -4,15 +4,19 @@ import { TezosStakingContractsRepository } from '../../repository/TezosStakingCo
 import { TezosStakingContractRewardsRepository } from '../../repository/TezosStakingContractRewardsRepository';
 import { TezosStakingContractRewards } from '../../domain/TezosStakingContractRewards';
 import { TezosStakingContractUserBalanceRepository } from '../../repository/TezosStakingContractUserBalanceRepository';
+import {AppState} from "../../indexer/state/AppState";
+
+type ContractStakingConfiguration = {
+  contract: string;
+  token: string;
+  tokenId: number;
+  totalStaked?: string;
+  maxLevelProcessed: number;
+  rewards?: TezosStakingContractRewards;
+}
 
 interface StakingConfiguration {
-  contracts: Array<{
-    contract: string;
-    token: string;
-    tokenId: number;
-    totalStaked?: string;
-    rewards?: TezosStakingContractRewards;
-  }>;
+  contracts: ContractStakingConfiguration[]
 }
 
 async function buildConfiguration({
@@ -27,17 +31,21 @@ async function buildConfiguration({
   const balances = await new TezosStakingContractUserBalanceRepository(
     dbClient
   ).getTotalBalancesPerContract();
-  return {
-    contracts: stakingContracts.map((s) => {
-      const balance = balances.find((b) => b.contract === s.contract);
-      const reward = rewards.find((r) => r.contract === s.contract);
-      return {
-        rewards: reward,
-        totalStaked: balance ? balance.sum : undefined,
-        ...s,
-      };
-    }),
-  };
+  const appState = new AppState(dbClient);
+  const contracts: ContractStakingConfiguration[] = [];
+  for (const s of stakingContracts) {
+    const balance = balances.find((b) => b.contract === s.contract);
+    const reward = rewards.find((r) => r.contract === s.contract);
+    contracts.push({
+      rewards: reward,
+      totalStaked: balance ? balance.sum : undefined,
+      maxLevelProcessed: (await appState.getStakingContractLevelProcessed(
+        balance.contract
+      )),
+      ...s,
+    });
+  }
+  return {contracts};
 }
 
 function build(dependencies: Dependencies): Router {
