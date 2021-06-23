@@ -69,11 +69,17 @@ export class UnwrapsQuery {
         status: unwrap.status,
         operationHash: unwrap.operationHash,
         signatures: relatedSignatures,
-        confirmations:
-          currentLevel - unwrap.level < 0 ? 0 : currentLevel - unwrap.level,
+        confirmations: this._confirmationsNumber(unwrap, currentLevel),
         confirmationsThreshold: this._tezosConfiguration.confirmationsThreshold,
       };
     });
+  }
+
+  private _confirmationsNumber(unwrap: ERCUnwrap, currentLevel: number): number {
+    if (unwrap.id.startsWith('retry:')) {
+      return this._tezosConfiguration.confirmationsThreshold;
+    }
+    return currentLevel - unwrap.level < 0 ? 0 : currentLevel - unwrap.level;
   }
 
   private async _getNetworkLevel(): Promise<number> {

@@ -48,7 +48,7 @@ export class BcdProvider {
     const response = await axios.get<Operations>(
       `${BcdProvider.BCD_URL}/v1/contract/${
         this._tezosNetwork
-      }/${contractAddress}/operations\\?entrypoints\\=${entrypoints.join(',')}${
+      }/${contractAddress}/operations?entrypoints=${entrypoints.join(',')}${
         lastId ? '&last_id=' + lastId : ''
       }`
     );

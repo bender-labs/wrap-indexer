@@ -13,6 +13,7 @@ import { FeesIndexer } from './indexer/fees/FeesIndexer';
 import { TezosStakingContractsIndexer } from './indexer/tezos/TezosStakingContractsIndexer';
 import { TezosStakingContractsRewardsIndexer } from './indexer/tezos/TezosStakingContractsRewardsIndexer';
 import { TezosStakingContractsUserBalancesIndexer } from './indexer/tezos/TezosStakingContractsUserBalancesIndexer';
+import { EthereumFailedUnwrapIndexer } from './indexer/ethereum/EthereumFailedUnwrapIndexer';
 
 const everyMinute = '* * * * *';
 const every10Minutes = '*/10 * * * *';
@@ -69,5 +70,9 @@ export function scheduleJobs(dependencies: Dependencies): Crontab {
     () => new SignaturePinningService(dependencies).index(),
     every30Minutes
   );
+  crontab.register(
+    () => new EthereumFailedUnwrapIndexer(dependencies).index(),
+    every10Minutes
+  )
   return crontab;
 }

@@ -40,6 +40,21 @@ export class AppState {
     );
   }
 
+  async getErcFailedUnwrapLastIndexedBlock(): Promise<number | null> {
+    const item = await this._getValue('erc_failed_unwrap_last_indexed_block');
+    return item ? +item.value : null;
+  }
+
+  async setErcFailedUnwrapLastIndexedBlock(
+    block: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._setValue(
+      { key: 'erc_failed_unwrap_last_indexed_block', value: block.toString() },
+      transaction
+    );
+  }
+
   async getLastIndexedSignature(ipnsKey: string): Promise<string | null> {
     const item = await this._getValue(`${ipnsKey}_signature_last_indexed`);
     return item ? item.value : null;
