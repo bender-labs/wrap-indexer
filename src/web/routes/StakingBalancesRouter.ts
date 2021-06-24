@@ -29,17 +29,17 @@ function build({ dbClient }: Dependencies): Router {
     const balances = await new TezosStakingContractUserBalanceRepository(
       dbClient
     ).getBalances(tezosAddress);
-    const balancesOnRunningContracts = balances.filter(balance => runningStakingContracts.find(runningContract => runningContract.contract === balance.contract));
     const balancesWithLevel: TezosStakingContractUserBalanceWithMaxLevel[] = [];
-    for (const balance of balancesOnRunningContracts) {
-      const totalStaked = totalBalances.find((b) => b.contract === balance.contract);
+    for (const runningContract of runningStakingContracts) {
+      const totalStaked = totalBalances.find((b) => b.contract === runningContract.contract);
+      const userBalance = balances.find(b => b.contract === runningContract.contract);
       balancesWithLevel.push({
-        contract: balance.contract,
-        tezosAddress: balance.tezosAddress,
-        balance: balance.balance,
+        contract: runningContract.contract,
+        tezosAddress: tezosAddress,
+        balance: userBalance ? userBalance.balance : undefined,
         totalStaked: totalStaked ? totalStaked.sum : undefined,
         maxLevelProcessed: (await appState.getStakingContractLevelProcessed(
-          balance.contract
+          runningContract.contract
         ))
       });
     }
