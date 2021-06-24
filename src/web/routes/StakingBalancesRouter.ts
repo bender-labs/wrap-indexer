@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express';
 import { Dependencies } from '../../bootstrap';
 import { TezosStakingContractUserBalanceRepository } from '../../repository/TezosStakingContractUserBalanceRepository';
 import { AppState } from '../../indexer/state/AppState';
+import { TezosStakingContractsRepository } from '../../repository/TezosStakingContractsRepository';
 
 type TezosStakingContractUserBalanceWithMaxLevel = {
   contract: string;
@@ -19,14 +20,18 @@ function build({ dbClient }: Dependencies): Router {
       return res.status(400).json({ message: 'MISSING_ADDRESS' });
     }
     const appState = new AppState(dbClient);
-    const balances = await new TezosStakingContractUserBalanceRepository(
+    const runningStakingContracts = await new TezosStakingContractsRepository(
       dbClient
-    ).getBalances(tezosAddress);
+    ).getStakingContracts();
     const totalBalances = await new TezosStakingContractUserBalanceRepository(
       dbClient
     ).getTotalBalancesPerContract();
+    const balances = await new TezosStakingContractUserBalanceRepository(
+      dbClient
+    ).getBalances(tezosAddress);
+    const balancesOnRunningContracts = balances.filter(balance => runningStakingContracts.find(runningContract => runningContract.contract === balance.contract));
     const balancesWithLevel: TezosStakingContractUserBalanceWithMaxLevel[] = [];
-    for (const balance of balances) {
+    for (const balance of balancesOnRunningContracts) {
       const totalStaked = totalBalances.find((b) => b.contract === balance.contract);
       balancesWithLevel.push({
         contract: balance.contract,
