@@ -7,6 +7,7 @@ type TezosStakingContractUserBalanceWithMaxLevel = {
   contract: string;
   tezosAddress: string;
   balance: string;
+  totalStaked?: string;
   maxLevelProcessed: number;
 }
 
@@ -21,12 +22,17 @@ function build({ dbClient }: Dependencies): Router {
     const balances = await new TezosStakingContractUserBalanceRepository(
       dbClient
     ).getBalances(tezosAddress);
+    const totalBalances = await new TezosStakingContractUserBalanceRepository(
+      dbClient
+    ).getTotalBalancesPerContract();
     const balancesWithLevel: TezosStakingContractUserBalanceWithMaxLevel[] = [];
     for (const balance of balances) {
+      const totalStaked = totalBalances.find((b) => b.contract === balance.contract);
       balancesWithLevel.push({
         contract: balance.contract,
         tezosAddress: balance.tezosAddress,
         balance: balance.balance,
+        totalStaked: totalStaked ? totalStaked.sum : undefined,
         maxLevelProcessed: (await appState.getStakingContractLevelProcessed(
           balance.contract
         ))
