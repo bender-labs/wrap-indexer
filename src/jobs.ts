@@ -66,10 +66,12 @@ export function scheduleJobs(dependencies: Dependencies): Crontab {
     everyMinute
   );
   crontab.register(() => new FeesIndexer(dependencies).index(), every30Minutes);
-  crontab.register(
-    () => new SignaturePinningService(dependencies).index(),
-    every30Minutes
-  );
+  if (dependencies.configuration.ipfs.pinAll) {
+    crontab.register(
+      () => new SignaturePinningService(dependencies).index(),
+      every30Minutes
+    );
+  }
   crontab.register(
     () => new EthereumFailedUnwrapIndexer(dependencies).index(),
     every10Minutes

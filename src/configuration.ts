@@ -36,6 +36,7 @@ export type Config = {
   };
   ipfs: {
     nodeUrl: string;
+    pinAll: boolean;
   };
   log: {
     format: LogType;
@@ -195,6 +196,11 @@ export function loadConfiguration(): Config {
         env: 'IPFS_NODE',
         default: 'http://localhost:5001',
       },
+      pinAll: {
+        env: 'IPFS_PIN_ALL',
+        default: true,
+        type: 'boolean'
+      }
     },
     log: {
       format: {
