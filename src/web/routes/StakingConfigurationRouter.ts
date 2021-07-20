@@ -39,9 +39,9 @@ async function buildConfiguration({
     contracts.push({
       rewards: reward,
       totalStaked: balance ? balance.sum : undefined,
-      maxLevelProcessed: (await appState.getStakingContractLevelProcessed(
+      maxLevelProcessed: balance ? (await appState.getStakingContractLevelProcessed(
         balance.contract
-      )),
+      )) : 0,
       ...s,
     });
   }

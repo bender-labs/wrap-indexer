@@ -183,7 +183,7 @@ export function loadConfiguration(): Config {
           },
           stakingReserveContractAddress: {
             env: 'TEZOS_STAKING_RESERVE_CONTRACT',
-            default: 'KT1TfNHibGeNojBdWsC2pNcDfhfSmAH9pM7b'
+            default: 'KT1R3NNr59ekWwud5sFp9DNGDEpJTzrZEyGB'
           },
           vestingContractAddress: {
             env: 'TEZOS_VESTING_CONTRACT',
