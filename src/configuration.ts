@@ -172,6 +172,31 @@ export function loadConfiguration(): Config {
             default: 'https://florencenet.smartpy.io/',
           },
         },
+        granada: {
+          quorumContractAddress: {
+            env: 'TEZOS_QUORUM_CONTRACT',
+          },
+          minterContractAddress: {
+            env: 'TEZOS_MINTER_CONTRACT',
+          },
+          stakingReserveContractAddress: {
+            env: 'TEZOS_STAKING_RESERVE_CONTRACT',
+          },
+          vestingContractAddress: {
+            env: 'TEZOS_VESTING_CONTRACT',
+          },
+          confirmationsThreshold: {
+            env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
+            type: 'integer',
+          },
+          tzKtApiUrl: {
+            env: 'TEZOS_TZKT_API_URL',
+            default: 'https://api.granadanet.tzkt.io/v1',
+          },
+          rpc: {
+            env: 'TEZOS_RPC',
+          },
+        },
         mainnet: {
           quorumContractAddress: {
             env: 'TEZOS_QUORUM_CONTRACT',
