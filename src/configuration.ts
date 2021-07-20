@@ -79,12 +79,12 @@ export function loadConfiguration(): Config {
           },
           wrapContractAddress: {
             env: 'ETHEREUM_WRAP_CONTRACT_ADDRESS',
-            default: '0xEEeeB7783786155A6471B23e84EE7f343f3B1032',
+            default: '0xf89355bfe9C203FE089324bd82C28c37309a7A28',
           },
           firstBlockToIndex: {
             env: 'ETHEREUM_FIRST_BLOCK_TO_INDEX',
             type: 'integer',
-            default: 7997335,
+            default: 8969705,
           },
           wrapABI: {
             env: 'ETHEREUM_WRAP_ABI',
@@ -138,7 +138,7 @@ export function loadConfiguration(): Config {
     tezos: {
       currentNetwork: {
         env: 'TEZOS_NETWORK',
-        default: 'florencenet',
+        default: 'granadanet',
       },
       networks: {
         florencenet: {
@@ -175,19 +175,24 @@ export function loadConfiguration(): Config {
         granadanet: {
           quorumContractAddress: {
             env: 'TEZOS_QUORUM_CONTRACT',
+            default: 'KT1KA3nzoa7s5jCnDCNsM622qUG8eqZvE2ZF'
           },
           minterContractAddress: {
             env: 'TEZOS_MINTER_CONTRACT',
+            default: 'KT1FUtLaAh1w4XDeYc8LmZypb7BgBq9HeH48'
           },
           stakingReserveContractAddress: {
             env: 'TEZOS_STAKING_RESERVE_CONTRACT',
+            default: 'KT1TfNHibGeNojBdWsC2pNcDfhfSmAH9pM7b'
           },
           vestingContractAddress: {
             env: 'TEZOS_VESTING_CONTRACT',
+            default: 'KT1FJYfpkTkAidppbreH8WgG1FhHii4Xatut'
           },
           confirmationsThreshold: {
             env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
             type: 'integer',
+            default: 10
           },
           tzKtApiUrl: {
             env: 'TEZOS_TZKT_API_URL',
@@ -195,6 +200,7 @@ export function loadConfiguration(): Config {
           },
           rpc: {
             env: 'TEZOS_RPC',
+            default: 'https://granadanet.smartpy.io/',
           },
         },
         mainnet: {
