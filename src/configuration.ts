@@ -172,7 +172,7 @@ export function loadConfiguration(): Config {
             default: 'https://florencenet.smartpy.io/',
           },
         },
-        granada: {
+        granadanet: {
           quorumContractAddress: {
             env: 'TEZOS_QUORUM_CONTRACT',
           },
