@@ -14,7 +14,11 @@ interface Configuration {
   ethereumWrapContract: string;
   tezosMinterContract: string;
   tezosQuorumContract: string;
-  tezosVestingContract: string;
+  vesting: {
+    vestingContract: string;
+    wrapTokenContract: string;
+    wrapTokenTokenId: number;
+  },
   wrapRequiredSignatures: number;
   unwrapRequiredSignatures: number;
   tokens: Token[];
@@ -42,7 +46,11 @@ async function buildConfiguration({
     tezosNetwork: configuration.tezos.currentNetwork,
     tezosMinterContract: tezosConfiguration.minterContractAddress,
     tezosQuorumContract: tezosConfiguration.quorumContractAddress,
-    tezosVestingContract: tezosConfiguration.vestingContractAddress,
+    vesting: {
+      vestingContract: tezosConfiguration.vestingContractAddress,
+      wrapTokenContract: tezosConfiguration.wrapTokenContractAddress,
+      wrapTokenTokenId: tezosConfiguration.wrapTokenTokenId,
+    },
     wrapRequiredSignatures: tezosThreashold,
     unwrapRequiredSignatures: ethereumThreshold,
     tokens,

@@ -16,6 +16,8 @@ export type TezosConfig = {
   quorumContractAddress: string;
   minterContractAddress: string;
   stakingReserveContractAddress: string;
+  wrapTokenContractAddress: string;
+  wrapTokenTokenId: number;
   vestingContractAddress: string;
   confirmationsThreshold: number;
   rpc: string;
@@ -154,6 +156,15 @@ export function loadConfiguration(): Config {
             env: 'TEZOS_STAKING_RESERVE_CONTRACT',
             default: 'KT1TfNHibGeNojBdWsC2pNcDfhfSmAH9pM7b',
           },
+          wrapTokenContractAddress: {
+            env: 'TEZOS_WRAP_TOKEN_CONTRACT',
+            default: 'KT1L1xYJit22TmuhDXaeng4AZDhRqZwcacNj',
+          },
+          wrapTokenTokenId: {
+            env: 'TEZOS_WRAP_TOKEN_TOKEN_ID',
+            type: 'integer',
+            default: 0,
+          },
           vestingContractAddress: {
             env: 'TEZOS_VESTING_CONTRACT',
             default: 'KT1FJYfpkTkAidppbreH8WgG1FhHii4Xatut',
@@ -182,9 +193,15 @@ export function loadConfiguration(): Config {
           stakingReserveContractAddress: {
             env: 'TEZOS_STAKING_RESERVE_CONTRACT',
           },
+          wrapTokenContractAddress: {
+            env: 'TEZOS_WRAP_TOKEN_CONTRACT',
+          },
+          wrapTokenTokenId: {
+            env: 'TEZOS_WRAP_TOKEN_TOKEN_ID',
+            type: 'integer',
+          },
           vestingContractAddress: {
             env: 'TEZOS_VESTING_CONTRACT',
-            default: '',
           },
           confirmationsThreshold: {
             env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
