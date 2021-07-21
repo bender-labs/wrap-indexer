@@ -16,7 +16,7 @@ export type TezosConfig = {
   quorumContractAddress: string;
   minterContractAddress: string;
   stakingReserveContractAddress: string;
-  vestingContractAddress: string;
+  stackingContractAddress: string;
   confirmationsThreshold: number;
   rpc: string;
   tzKtApiUrl: string;
@@ -154,8 +154,8 @@ export function loadConfiguration(): Config {
             env: 'TEZOS_STAKING_RESERVE_CONTRACT',
             default: 'KT1TfNHibGeNojBdWsC2pNcDfhfSmAH9pM7b',
           },
-          vestingContractAddress: {
-            env: 'TEZOS_VESTING_CONTRACT',
+          stackingContractAddress: {
+            env: 'TEZOS_STACKING_CONTRACT',
             default: 'KT1FJYfpkTkAidppbreH8WgG1FhHii4Xatut',
           },
           confirmationsThreshold: {
@@ -185,8 +185,8 @@ export function loadConfiguration(): Config {
             env: 'TEZOS_STAKING_RESERVE_CONTRACT',
             default: 'KT1R3NNr59ekWwud5sFp9DNGDEpJTzrZEyGB'
           },
-          vestingContractAddress: {
-            env: 'TEZOS_VESTING_CONTRACT',
+          stackingContractAddress: {
+            env: 'TEZOS_STACKING_CONTRACT',
             default: 'KT1FJYfpkTkAidppbreH8WgG1FhHii4Xatut'
           },
           confirmationsThreshold: {
@@ -213,8 +213,8 @@ export function loadConfiguration(): Config {
           stakingReserveContractAddress: {
             env: 'TEZOS_STAKING_RESERVE_CONTRACT',
           },
-          vestingContractAddress: {
-            env: 'TEZOS_VESTING_CONTRACT',
+          stackingContractAddress: {
+            env: 'TEZOS_STACKING_CONTRACT',
           },
           confirmationsThreshold: {
             env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
