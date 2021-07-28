@@ -51,7 +51,7 @@ export class TezosFinalizedWrapIndexer {
         block_hash: blockHash.replace('0x', ''),
         log_index: logIndex.toString(),
       });
-      return value !== undefined;
+      return (typeof(value) === 'symbol');
     } catch (e) {
       this._logger.error(`Can't get mints big map key ${e.message}`);
       return null;
