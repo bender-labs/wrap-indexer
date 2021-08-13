@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import { Dependencies } from '../../bootstrap';
 import { UnwrapsQuery } from '../../query/UnwrapsQuery';
-import { WrapStatus } from '../../domain/ERCWrap';
+import { ERCType, WrapStatus } from '../../domain/ERCWrap';
 
 function build({
   dbClient,
@@ -14,6 +14,7 @@ function build({
     const tezosAddress = req.query.tezosAddress as string;
     const ethereumAddress = req.query.ethereumAddress as string;
     const status = req.query.status as WrapStatus;
+    const type = req.query.type as ERCType;
     const operationHash = req.query.hash as string;
     if (!tezosAddress && !ethereumAddress && !operationHash) {
       return res.status(400).json({ message: 'MISSING_ADDRESS_OR_HASH' });
@@ -22,6 +23,7 @@ function build({
       tezosAddress,
       ethereumAddress,
       status,
+      type,
       operationHash
     );
     return res.json({ result: unwraps });

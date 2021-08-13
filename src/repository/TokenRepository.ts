@@ -19,5 +19,9 @@ export class TokenRepository {
     return this._dbClient.table('tokens');
   }
 
+  async allByType(type: 'ERC20' | 'ERC721'): Promise<Token[]> {
+    return this._dbClient.table('tokens').where({type});
+  }
+
   private _dbClient: Knex;
 }

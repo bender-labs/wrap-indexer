@@ -39,6 +39,7 @@ export class UnwrapsQuery {
     tezosAddress: string,
     ethereumAddress: string,
     status: WrapStatus,
+    type: ERCType,
     operationHash: string
   ): Promise<UnwrapWithSignatures[]> {
     const currentLevel = await this._getNetworkLevel();
@@ -46,6 +47,7 @@ export class UnwrapsQuery {
       tezosAddress,
       ethereumAddress,
       status,
+      type,
       operationHash
     );
     const signatures: UnwrapSignature[] = await this._getSignatures(
@@ -96,6 +98,7 @@ export class UnwrapsQuery {
     tezosAddress: string,
     ethereumAddress: string,
     status: WrapStatus,
+    type: ERCType,
     operationHash: string
   ): Promise<ERCUnwrap[]> {
     return this._dbClient
@@ -111,6 +114,9 @@ export class UnwrapsQuery {
       .andWhere(function () {
         if (status) {
           this.where({ status });
+        }
+        if (type) {
+          this.where({ type });
         }
         if (operationHash) {
           this.where({ operationHash });

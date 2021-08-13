@@ -1,5 +1,4 @@
 import Knex from 'knex';
-import * as _ from 'lodash';
 import { ethers } from 'ethers';
 import { id } from 'ethers/lib/utils';
 import { EthereumConfig } from '../../configuration';

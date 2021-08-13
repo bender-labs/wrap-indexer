@@ -38,6 +38,7 @@ export class WrapsQuery {
     tezosAddress: string,
     ethereumAddress: string,
     status: WrapStatus,
+    type: ERCType,
     transactionHash: string
   ): Promise<WrapWithSignatures[]> {
     const currentBlock = await this._getBlockNumber();
@@ -45,6 +46,7 @@ export class WrapsQuery {
       tezosAddress,
       ethereumAddress,
       status,
+      type,
       transactionHash
     );
     const signatures: WrapSignature[] = await this._getSignatures(
@@ -90,6 +92,7 @@ export class WrapsQuery {
     tezosAddress: string,
     ethereumAddress: string,
     status: WrapStatus,
+    type: ERCType,
     transactionHash: string
   ): Promise<ERCWrap[]> {
     return this._dbClient
@@ -106,8 +109,9 @@ export class WrapsQuery {
         if (status) {
           this.where({ status });
         }
-      })
-      .andWhere(function () {
+        if (type) {
+          this.where({ type });
+        }
         if (transactionHash) {
           this.where({ transactionHash });
         }
