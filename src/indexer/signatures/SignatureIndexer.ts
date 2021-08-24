@@ -251,16 +251,16 @@ export class SignatureIndexer {
         };
       case 'Erc721MintingFailed':
         return {
-          wrapId: `${value.payload.parameters.blockHash}:${value.payload.parameters.logIndex}`,
+          wrapId: `${value.payload.payload.blockHash}:${value.payload.payload.logIndex}`,
           type: value.type,
-          owner: value.payload.parameters.owner,
+          owner: value.payload.payload.owner,
           level: value.payload.level,
-          reason: value.reason,
-          erc: value.payload.parameters.erc721,
-          tokenId: value.payload.parameters.tokenId,
+          reason: value.payload.reason,
+          erc: value.payload.payload.erc721,
+          tokenId: value.payload.payload.tokenId,
           transactionHash: value.payload.transactionHash,
-          blockHash: value.payload.parameters.blockHash,
-          logIndex: value.payload.parameters.logIndex,
+          blockHash: value.payload.payload.blockHash,
+          logIndex: value.payload.payload.logIndex,
         };
       default:
         return null;
