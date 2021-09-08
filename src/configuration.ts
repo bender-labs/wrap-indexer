@@ -15,7 +15,8 @@ export type EthereumConfig = {
 export type TezosConfig = {
   quorumContractAddress: string;
   minterContractAddress: string;
-  stakingReserveContractAddress: string;
+  stakingOldReserveContractAddress: string;
+  stakingNewReserveContractAddress: string;
   stackingContractAddress: string;
   confirmationsThreshold: number;
   rpc: string;
@@ -141,37 +142,6 @@ export function loadConfiguration(): Config {
         default: 'granadanet',
       },
       networks: {
-        florencenet: {
-          quorumContractAddress: {
-            env: 'TEZOS_QUORUM_CONTRACT',
-            default: 'KT1Qjq1Yp27QUT8s8ECRbra48pbDmfWa1u2K',
-          },
-          minterContractAddress: {
-            env: 'TEZOS_MINTER_CONTRACT',
-            default: 'KT1KwYvgkaFDRroKqWf9C8dcDeyK1hUWt7se',
-          },
-          stakingReserveContractAddress: {
-            env: 'TEZOS_STAKING_RESERVE_CONTRACT',
-            default: 'KT1TfNHibGeNojBdWsC2pNcDfhfSmAH9pM7b',
-          },
-          stackingContractAddress: {
-            env: 'TEZOS_STACKING_CONTRACT',
-            default: 'KT1FJYfpkTkAidppbreH8WgG1FhHii4Xatut',
-          },
-          confirmationsThreshold: {
-            env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
-            type: 'integer',
-            default: 10,
-          },
-          tzKtApiUrl: {
-            env: 'TEZOS_TZKT_API_URL',
-            default: 'https://api.florencenet.tzkt.io/v1',
-          },
-          rpc: {
-            env: 'TEZOS_RPC',
-            default: 'https://florencenet.smartpy.io/',
-          },
-        },
         granadanet: {
           quorumContractAddress: {
             env: 'TEZOS_QUORUM_CONTRACT',
@@ -181,9 +151,13 @@ export function loadConfiguration(): Config {
             env: 'TEZOS_MINTER_CONTRACT',
             default: 'KT1FUtLaAh1w4XDeYc8LmZypb7BgBq9HeH48'
           },
-          stakingReserveContractAddress: {
-            env: 'TEZOS_STAKING_RESERVE_CONTRACT',
+          stakingOldReserveContractAddress: {
+            env: 'TEZOS_STAKING_OLD_RESERVE_CONTRACT',
             default: 'KT1R3NNr59ekWwud5sFp9DNGDEpJTzrZEyGB'
+          },
+          stakingNewReserveContractAddress: {
+            env: 'TEZOS_STAKING_NEW_RESERVE_CONTRACT',
+            default: 'KT1TrQMBv4gNfp2D2HHPVLVEM2JJnvfioMAw'
           },
           stackingContractAddress: {
             env: 'TEZOS_STACKING_CONTRACT',
@@ -210,8 +184,11 @@ export function loadConfiguration(): Config {
           minterContractAddress: {
             env: 'TEZOS_MINTER_CONTRACT',
           },
-          stakingReserveContractAddress: {
-            env: 'TEZOS_STAKING_RESERVE_CONTRACT',
+          stakingOldReserveContractAddress: {
+            env: 'TEZOS_STAKING_OLD_RESERVE_CONTRACT',
+          },
+          stakingNewReserveContractAddress: {
+            env: 'TEZOS_STAKING_NEW_RESERVE_CONTRACT',
           },
           stackingContractAddress: {
             env: 'TEZOS_STACKING_CONTRACT',

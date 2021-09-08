@@ -5,6 +5,7 @@ import { Dependencies } from '../../bootstrap';
 import { TezosToolkit } from '@taquito/taquito';
 import { TezosStakingContractsRepository } from '../../repository/TezosStakingContractsRepository';
 import { TzktProvider } from '../../infrastructure/tezos/tzktProvider';
+import { TezosStakingContract } from '../../domain/TezosStakingContract';
 
 export class TezosStakingContractsIndexer {
   constructor({
@@ -21,24 +22,30 @@ export class TezosStakingContractsIndexer {
     this._dbClient = dbClient;
   }
 
+  private async getContracts(reserveAddress: string, old: boolean): Promise<TezosStakingContract[]> {
+    const reserveContract = await this._tezosToolkit.contract.at(
+      reserveAddress
+    );
+    const storage = await reserveContract.storage();
+    const farmsBigMapId = storage['farms'].id.toString(10);
+    const bigMapValues = await this._tzkt.getBigMapContent(farmsBigMapId);
+    return bigMapValues.map((v) => ({
+      contract: v.keyString,
+      token: v.value.address,
+      tokenId: v.value.nat,
+      old
+    }));
+  }
+
   async index(): Promise<void> {
     this._logger.debug(`Indexing staking contracts`);
     let transaction;
     try {
-      const reserveContract = await this._tezosToolkit.contract.at(
-        this._tezosConfiguration.stakingReserveContractAddress
-      );
-      const storage = await reserveContract.storage();
-      const farmsBigMapId = storage['farms'].id.toString(10);
-      const bigMapValues = await this._tzkt.getBigMapContent(farmsBigMapId);
-      const contracts = bigMapValues.map((v) => ({
-        contract: v.keyString,
-        token: v.value.address,
-        tokenId: v.value.nat,
-      }));
+      const oldContracts = await this.getContracts(this._tezosConfiguration.stakingOldReserveContractAddress, true);
+      const newContracts = await this.getContracts(this._tezosConfiguration.stakingNewReserveContractAddress, false);
       transaction = await this._dbClient.transaction();
       await new TezosStakingContractsRepository(this._dbClient).saveAll(
-        contracts,
+        oldContracts.concat(newContracts),
         transaction
       );
       await transaction.commit();
