@@ -40,6 +40,9 @@ export type Config = {
     nodeUrl: string;
     pinAll: boolean;
   };
+  nfts: {
+    whitelistedMetadataUrls: string;
+  };
   log: {
     format: LogType;
     level: 'info' | 'warn' | 'error';
@@ -216,6 +219,12 @@ export function loadConfiguration(): Config {
         env: 'IPFS_PIN_ALL',
         default: true,
         type: 'boolean'
+      }
+    },
+    nfts: {
+      whitelistedMetadataUrls: {
+        env: 'NFTS_WHITELISTED_URLS',
+        default: 'https://nfts-api.testnet.tzwrap.com,https://api.sorare.com,https://meebits.larvalabs.com,https://boredapeyachtclub.com,https://ipfs.pixura.io'
       }
     },
     log: {

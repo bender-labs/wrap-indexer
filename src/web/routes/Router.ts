@@ -6,12 +6,14 @@ import ConfigurationRouter from './ConfigurationRouter';
 import StakingConfigurationRouter from './StakingConfigurationRouter';
 import StakingBalancesRouter from './StakingBalancesRouter';
 import TezosNFTsRouter from './TezosNFTsRouter';
+import NFTProxyMetadataRouter from './NFTProxyMetadataRouter';
 
 function build(dependencies: Dependencies): Router {
   const router = Router();
   router.use('/wraps', WrapsRouter(dependencies));
   router.use('/unwraps', UnwrapsRouter(dependencies));
   router.use('/tezos-nfts', TezosNFTsRouter(dependencies));
+  router.use('/nfts/metadata-proxy', NFTProxyMetadataRouter(dependencies));
   router.use('/configuration', ConfigurationRouter(dependencies));
   router.use(
     '/staking-configuration',
