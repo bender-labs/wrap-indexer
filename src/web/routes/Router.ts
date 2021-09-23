@@ -4,6 +4,7 @@ import UnwrapsRouter from './UnwrapsRouter';
 import { Dependencies } from '../../bootstrap';
 import ConfigurationRouter from './ConfigurationRouter';
 import StakingConfigurationRouter from './StakingConfigurationRouter';
+import StackingConfigurationRouter from './StackingConfigurationRouter';
 import StakingBalancesRouter from './StakingBalancesRouter';
 import TezosNFTsRouter from './TezosNFTsRouter';
 import NFTProxyMetadataRouter from './NFTProxyMetadataRouter';
@@ -18,6 +19,10 @@ function build(dependencies: Dependencies): Router {
   router.use(
     '/staking-configuration',
     StakingConfigurationRouter(dependencies)
+  );
+  router.use(
+    '/stacking-configuration',
+    StackingConfigurationRouter(dependencies)
   );
   router.use('/staking-balances', StakingBalancesRouter(dependencies));
   return router;

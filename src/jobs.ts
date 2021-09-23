@@ -15,6 +15,7 @@ import { TezosStakingContractsRewardsIndexer } from './indexer/tezos/TezosStakin
 import { TezosStakingContractsUserBalancesIndexer } from './indexer/tezos/TezosStakingContractsUserBalancesIndexer';
 import { EthereumFailedUnwrapIndexer } from './indexer/ethereum/EthereumFailedUnwrapIndexer';
 import { TezosNFTsIndexer } from './indexer/tezos/TezosNFTsIndexer';
+import { TezosStackingContractsIndexer } from './indexer/tezos/TezosStackingContractsIndexer';
 
 const everyMinute = '* * * * *';
 const every10Minutes = '*/10 * * * *';
@@ -65,6 +66,10 @@ export function scheduleJobs(dependencies: Dependencies): Crontab {
   crontab.register(
     () => new TezosStakingContractsUserBalancesIndexer(dependencies).index(),
     everyMinute
+  );
+  crontab.register(
+    () => new TezosStackingContractsIndexer(dependencies).index(),
+    every10Minutes
   );
   crontab.register(() => new FeesIndexer(dependencies).index(), every30Minutes);
   if (dependencies.configuration.ipfs.pinAll) {

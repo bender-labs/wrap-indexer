@@ -164,7 +164,7 @@ export function loadConfiguration(): Config {
           },
           stackingContractAddress: {
             env: 'TEZOS_STACKING_CONTRACT',
-            default: 'KT1FJYfpkTkAidppbreH8WgG1FhHii4Xatut'
+            default: 'KT1HM6KycpPoeL6nCmqv9dZeaoX61tSEjcFK'
           },
           confirmationsThreshold: {
             env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
