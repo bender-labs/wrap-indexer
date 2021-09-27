@@ -73,12 +73,12 @@ export class TezosStackingContractsIndexer {
       let startLevel = 0;
       let blockHeader = { timestamp: '' };
       if (!rewardsPerBlock.isZero()) {
-        let totalRewards = rewardsPerBlock
+        totalRewards = rewardsPerBlock
           .multipliedBy(new BigNumber(storage.settings.duration));
         if (storage.reward.exponent) {
           totalRewards = totalRewards.shiftedBy(-(24 - parseInt(storage.reward.exponent)));
         }
-        const startLevel = +storage.reward.period_end - duration;
+        startLevel = +storage.reward.period_end - duration;
         blockHeader = await this._tezosToolkit.rpc.getBlockHeader({
           block: startLevel.toString()
         });
