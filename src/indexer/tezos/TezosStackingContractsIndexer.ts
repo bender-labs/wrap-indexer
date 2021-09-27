@@ -30,11 +30,11 @@ type StackingContractStorage = {
 
 export class TezosStackingContractsIndexer {
   constructor({
-    logger,
-    tezosConfiguration,
-    tezosToolkit,
-    dbClient,
-  }: Dependencies) {
+                logger,
+                tezosConfiguration,
+                tezosToolkit,
+                dbClient
+              }: Dependencies) {
     this._logger = logger;
     this._tezosConfiguration = tezosConfiguration;
     this._tezosToolkit = tezosToolkit;
@@ -45,7 +45,11 @@ export class TezosStackingContractsIndexer {
     let lastLevel = undefined;
     const result: TezosStackingFee[] = [];
     for (const feesPerCycle of storage.fees.fees_per_cycles.entries()) {
-      const level = {cycle: +feesPerCycle[0].toString(10), ratio: +feesPerCycle[1].toString(10), blocksCount: +feesPerCycle[0].toString(10) * storage.fees.blocks_per_cycle.valueOf()};
+      const level = {
+        cycle: +feesPerCycle[0].toString(10),
+        ratio: +feesPerCycle[1].toString(10),
+        blocksCount: +feesPerCycle[0].toString(10) * storage.fees.blocks_per_cycle.valueOf()
+      };
       if (lastLevel && (lastLevel.ratio !== level.ratio)) {
         result.push(lastLevel);
       }
@@ -63,26 +67,32 @@ export class TezosStackingContractsIndexer {
         this._tezosConfiguration.stackingContractAddress
       );
       const storage = await stackingContract.storage<StackingContractStorage>();
-      let totalRewards = new BigNumber(storage.reward.reward_per_block)
-        .multipliedBy(new BigNumber(storage.settings.duration));
-      if (storage.reward.exponent) {
-        totalRewards = totalRewards.shiftedBy(-(24 - parseInt(storage.reward.exponent)));
-      }
+      const rewardsPerBlock = new BigNumber(storage.reward.reward_per_block);
       const duration = +storage.settings.duration;
-      const startLevel = +storage.reward.period_end - duration;
-      const blockHeader = await this._tezosToolkit.rpc.getBlockHeader({
-        block: startLevel.toString()
-      });
+      let totalRewards = new BigNumber(0);
+      let startLevel = 0;
+      let blockHeader = { timestamp: '' };
+      if (!rewardsPerBlock.isZero()) {
+        let totalRewards = rewardsPerBlock
+          .multipliedBy(new BigNumber(storage.settings.duration));
+        if (storage.reward.exponent) {
+          totalRewards = totalRewards.shiftedBy(-(24 - parseInt(storage.reward.exponent)));
+        }
+        const startLevel = +storage.reward.period_end - duration;
+        blockHeader = await this._tezosToolkit.rpc.getBlockHeader({
+          block: startLevel.toString()
+        });
+      }
       transaction = await this._dbClient.transaction();
       await new TezosStackingContractsRepository(this._dbClient).saveAll(
         [{
           contract: this._tezosConfiguration.stackingContractAddress,
           totalStaked: storage.ledger.total_supply.toString(10),
-          fees: {levels: this._feesLevels(storage), default: storage.fees.default_fees.toString(10)},
+          fees: { levels: this._feesLevels(storage), default: storage.fees.default_fees.toString(10) },
+          duration,
           totalRewards: totalRewards.toString(10),
           startLevel,
-          startTimestamp: blockHeader.timestamp,
-          duration: duration
+          startTimestamp: blockHeader.timestamp
         }],
         transaction
       );
