@@ -46,16 +46,12 @@ export class TezosStackingContractsIndexer {
     const result: TezosStackingFee[] = [];
     for (const feesPerCycle of storage.fees.fees_per_cycles.entries()) {
       const level = {cycle: +feesPerCycle[0].toString(10), ratio: +feesPerCycle[1].toString(10), blocksCount: +feesPerCycle[0].toString(10) * storage.fees.blocks_per_cycle.valueOf()};
-      if (!lastLevel) {
-        result.push(level);
-      } else if (lastLevel.ratio !== level.ratio) {
-        result.push(level);
+      if (lastLevel && (lastLevel.ratio !== level.ratio)) {
+        result.push(lastLevel);
       }
       lastLevel = level;
     }
-    result.push({
-      cycle: lastLevel.cycle + 1, ratio: +storage.fees.default_fees.toString(10), blocksCount: (lastLevel.cycle + 1) * storage.fees.blocks_per_cycle.valueOf()
-    });
+    result.push(lastLevel);
     return result;
   }
 
@@ -82,7 +78,7 @@ export class TezosStackingContractsIndexer {
         [{
           contract: this._tezosConfiguration.stackingContractAddress,
           totalStaked: storage.ledger.total_supply.toString(10),
-          fees: {levels: this._feesLevels(storage)},
+          fees: {levels: this._feesLevels(storage), default: storage.fees.default_fees.toString(10)},
           totalRewards: totalRewards.toString(10),
           startLevel,
           startTimestamp: blockHeader.timestamp,

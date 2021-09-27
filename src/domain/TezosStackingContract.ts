@@ -12,6 +12,7 @@ export interface TezosStackingContract {
   totalRewards: string;
   duration: number;
   fees: {
-    levels: Array<TezosStackingFee>
+    levels: Array<TezosStackingFee>,
+    default: string
   };
 }
