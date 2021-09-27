@@ -1,6 +1,6 @@
 {
   "name": "wrap-indexer",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "license": "MIT",
   "description": "Wrap protocol indexer",
   "repository": "github:bender-labs/wrap-indexer",
