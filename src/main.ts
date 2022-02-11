@@ -4,14 +4,10 @@ import { bootstrap } from './bootstrap';
 import { scheduleJobs } from './jobs';
 
 const configuration = loadConfiguration();
-const ethereumConfiguration =
-  configuration.ethereum.networks[configuration.ethereum.currentNetwork];
-const tezosConfiguration =
-  configuration.tezos.networks[configuration.tezos.currentNetwork];
 const dependencies = bootstrap(
   configuration,
-  ethereumConfiguration,
-  tezosConfiguration
+  configuration.ethereum,
+  configuration.tezos
 );
 
 const crontab = scheduleJobs(dependencies);
