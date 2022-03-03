@@ -81,13 +81,14 @@ export class TezosInitialUnwrapIndexer {
     operationsToProcess: Operation[],
     transaction: Knex.Transaction
   ): Promise<void> {
-    const unwraps = operationsToProcess.map((operation) => {
-      let operationId = `${operation.hash}/${operation.counter}`;
-      if (operation.internal) {
-        // TODO get nonce of internal operation
-        operationId += `/${0}`;
-      }
-      return this._parseERCUnwrap(operation, operationId);
+    const unwraps = operationsToProcess.filter((operation) => operation.parameters[0].children.length > 1)
+      .map((operation) => {
+        let operationId = `${operation.hash}/${operation.counter}`;
+        if (operation.internal) {
+          // TODO get nonce of internal operation
+          operationId += `/${0}`;
+        }
+        return this._parseERCUnwrap(operation, operationId);
     });
     await this._ensureExistingUnwrapsAreOnTheRightChain(unwraps, transaction);
     for (const unwrap of unwraps) {
