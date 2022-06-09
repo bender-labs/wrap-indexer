@@ -23,10 +23,12 @@ const every30Minutes = '*/30 * * * *';
 
 export function scheduleJobs(dependencies: Dependencies): Crontab {
   const crontab = new Crontab(dependencies);
-  crontab.register(
-    () => new EthereumInitialWrapIndexer(dependencies).index(),
-    everyMinute
-  );
+  if (dependencies.configuration.ethereum.rpc !== "") {
+    crontab.register(
+      () => new EthereumInitialWrapIndexer(dependencies).index(),
+      everyMinute
+    );
+  }
   crontab.register(
     () => new TezosInitialUnwrapIndexer(dependencies).index(),
     everyMinute
@@ -35,10 +37,12 @@ export function scheduleJobs(dependencies: Dependencies): Crontab {
     () => new SignatureIndexer(dependencies).index(),
     everyMinute
   );
-  crontab.register(
-    () => new EthereumFinalizedUnwrapIndexer(dependencies).index(),
-    everyMinute
-  );
+  if (dependencies.configuration.ethereum.rpc !== "") {
+    crontab.register(
+      () => new EthereumFinalizedUnwrapIndexer(dependencies).index(),
+      everyMinute
+    );
+  }
   crontab.register(
     () => new TezosFinalizedWrapIndexer(dependencies).index(),
     everyMinute
@@ -47,10 +51,12 @@ export function scheduleJobs(dependencies: Dependencies): Crontab {
     () => new TezosQuorumIndexer(dependencies).index(),
     every10Minutes
   );
-  crontab.register(
-    () => new EthereumQuorumIndexer(dependencies).index(),
-    every10Minutes
-  );
+  if (dependencies.configuration.ethereum.rpc !== "") {
+    crontab.register(
+      () => new EthereumQuorumIndexer(dependencies).index(),
+      every10Minutes
+    );
+  }
   crontab.register(
     () => new TokensIndexer(dependencies).index(),
     every10Minutes
@@ -78,10 +84,12 @@ export function scheduleJobs(dependencies: Dependencies): Crontab {
       every30Minutes
     );
   }
-  crontab.register(
-    () => new EthereumFailedUnwrapIndexer(dependencies).index(),
-    every10Minutes
-  )
+  if (dependencies.configuration.ethereum.rpc !== "") {
+    crontab.register(
+      () => new EthereumFailedUnwrapIndexer(dependencies).index(),
+      every10Minutes
+    )
+  }
   crontab.register(() => new TezosNFTsIndexer(dependencies).index(),
     everyMinute
   );
