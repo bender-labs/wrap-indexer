@@ -19,5 +19,8 @@ export interface IpfsClient {
 }
 
 export function createIpfsClient(configuration: Config): IpfsClient {
-  return IPFS({ url: configuration.ipfs.nodeUrl });
+  if (configuration.ipfs.nodeUrl !== "") {
+    return IPFS({ url: configuration.ipfs.nodeUrl });
+  }
+  return IPFS();
 }

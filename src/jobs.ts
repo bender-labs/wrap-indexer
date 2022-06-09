@@ -33,10 +33,12 @@ export function scheduleJobs(dependencies: Dependencies): Crontab {
     () => new TezosInitialUnwrapIndexer(dependencies).index(),
     everyMinute
   );
-  crontab.register(
-    () => new SignatureIndexer(dependencies).index(),
-    everyMinute
-  );
+  if (dependencies.configuration.ipfs.nodeUrl !== "") {
+    crontab.register(
+      () => new SignatureIndexer(dependencies).index(),
+      everyMinute
+    );
+  }
   if (dependencies.configuration.ethereum.rpc !== "") {
     crontab.register(
       () => new EthereumFinalizedUnwrapIndexer(dependencies).index(),
@@ -78,7 +80,7 @@ export function scheduleJobs(dependencies: Dependencies): Crontab {
     every10Minutes
   );
   crontab.register(() => new FeesIndexer(dependencies).index(), every30Minutes);
-  if (dependencies.configuration.ipfs.pinAll) {
+  if (dependencies.configuration.ipfs.nodeUrl !== "" && dependencies.configuration.ipfs.pinAll) {
     crontab.register(
       () => new SignaturePinningService(dependencies).index(),
       every30Minutes
